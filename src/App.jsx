@@ -19,7 +19,7 @@ const initialForm = {
 
 export default function App() {
   const [formValues, setFormValues] = useState(initialForm);
-  const { status, plan: generatedPlan, error, generate } = useGenerate();
+  const { status, plan: generatedPlan, error, generate, cancel } = useGenerate();
   const { plan, dispatch, canUndo } = useItinerary(generatedPlan);
 
   function handleSubmit(event) {
@@ -51,7 +51,20 @@ export default function App() {
         </aside>
 
         <section className="results-panel" aria-live="polite">
-          {status === "loading" && <Skeleton />}
+          {status === "loading" && (
+            <div className="loading-view">
+              <div className="loading-actions">
+                <button
+                  type="button"
+                  className="button button-secondary cancel-button"
+                  onClick={cancel}
+                >
+                  Cancel
+                </button>
+              </div>
+              <Skeleton />
+            </div>
+          )}
           {status === "error" && (
             <ErrorState
               message={error}

@@ -14,16 +14,41 @@ export function useGenerate() {
   const [error, setError] = useState(null);
   const [droppedItems, setDroppedItems] = useState(0);
   const controllerRef = useRef(null);
+  const timeoutRef = useRef(null);
   const latestId = useRef(0);
+  const planRef = useRef(null);
+
+  const cancel = useCallback(() => {
+    latestId.current += 1;
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+    controllerRef.current?.abort();
+    controllerRef.current = null;
+    setStatus(planRef.current ? "success" : "idle");
+    setError(null);
+  }, []);
 
   const generate = useCallback(async (tripDetails) => {
     controllerRef.current?.abort();
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+
     const controller = new AbortController();
     controllerRef.current = controller;
     const requestId = ++latestId.current;
 
+    let timedOut = false;
+    const timer = setTimeout(() => {
+      timedOut = true;
+      controller.abort();
+    }, 30_000);
+    timeoutRef.current = timer;
+
     setStatus("loading");
-    setPlan(null);
     setError(null);
     setDroppedItems(0);
 
@@ -40,9 +65,6 @@ export function useGenerate() {
             signal: controller.signal,
           });
         } catch (requestError) {
-          if (controller.signal.aborted) {
-            return;
-          }
           throw requestError;
         }
 
@@ -68,6 +90,8 @@ export function useGenerate() {
           return;
         }
         if (!responseText.trim()) {
+          planRef.current = null;
+          setPlan(null);
           setStatus("empty");
           return;
         }
@@ -102,6 +126,7 @@ export function useGenerate() {
         throw new InvalidPlanError("The AI did not return a valid itinerary.");
       }
 
+      planRef.current = parsedPlan;
       setPlan(parsedPlan);
       setDroppedItems(parsedPlan.droppedItems);
       setStatus(
@@ -111,7 +136,15 @@ export function useGenerate() {
           : "empty",
       );
     } catch (requestError) {
-      if (controller.signal.aborted || requestId !== latestId.current) {
+      if (requestId !== latestId.current) {
+        return;
+      }
+
+      if (controller.signal.aborted) {
+        if (timedOut) {
+          setError("This is taking too long. Please try again.");
+          setStatus("error");
+        }
         return;
       }
 
@@ -122,6 +155,10 @@ export function useGenerate() {
       );
       setStatus("error");
     } finally {
+      clearTimeout(timer);
+      if (timeoutRef.current === timer) {
+        timeoutRef.current = null;
+      }
       if (requestId === latestId.current) {
         controllerRef.current = null;
       }
@@ -131,11 +168,15 @@ export function useGenerate() {
   useEffect(
     () => () => {
       latestId.current += 1;
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
       controllerRef.current?.abort();
       controllerRef.current = null;
     },
     [],
   );
 
-  return { status, plan, error, droppedItems, generate };
+  return { status, plan, error, droppedItems, generate, cancel };
 }

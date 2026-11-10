@@ -318,6 +318,16 @@ textarea:focus-visible {
   line-height: 1.5;
 }
 
+.loading-view {
+  display: grid;
+  gap: 12px;
+}
+
+.loading-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
 .skeleton-panel {
   display: grid;
   gap: 16px;
