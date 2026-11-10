@@ -16,7 +16,12 @@ export default defineConfig(({ mode }) => {
     },
     test: {
       environment: "jsdom",
-      include: ["src/**/*.test.{js,jsx}", "server/**/*.test.js", "shared/**/*.test.js"],
+      include: [
+        "src/**/*.test.{js,jsx}",
+        "server/**/*.test.js",
+        "shared/**/*.test.js",
+        "scripts/**/*.test.js",
+      ],
     },
   };
 });

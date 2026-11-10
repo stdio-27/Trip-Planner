@@ -41,3 +41,10 @@ Shared Zod schemas now reject unknown keys, numeric coercion, out-of-range dates
 Numeric controls keep raw edits, block exponent/sign input, clamp on blur and show accessible field errors.
 Core/server checkJs now passes; the remaining UI typing categories are listed separately for later work.
 The app still uses illustrative demo hubs; Phase 2 waits for real source files instead of inventing geographic data.
+
+## v2 Phase 2 — reproducible data layer
+The build downloads and fingerprints public source files automatically, so no manual raw-file placement is required.
+LGD state and district totals are compared to the source, and large railway schedules are streamed twice.
+Station state inference, junction selection and compressed graph construction are documented with source limits.
+The server validates and indexes the committed processed datasets once, with no runtime downloads.
+The QA report lists every state, unresolved coverage and isolated junctions before any picker or journey UI is added.

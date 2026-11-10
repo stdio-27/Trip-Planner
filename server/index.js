@@ -1,5 +1,7 @@
 import "dotenv/config";
 import { createApp } from "./app.js";
+import { loadData } from "./data/index.js";
+loadData();
 const app = createApp();
 const port = Number(process.env.PORT) || 8787;
 const server = app.listen(port, () => {

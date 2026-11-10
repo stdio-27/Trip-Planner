@@ -1,0 +1,99 @@
+{
+  "sources": {
+    "stations.json": {
+      "url": "https://raw.githubusercontent.com/datameet/railways/e0c538a1e41ae5eace454d2818902e1065608e16/stations.json",
+      "license": "CC0",
+      "sourceDate": "2016-08-08",
+      "retrievedAt": "2026-11-10T21:44:11.348Z",
+      "sha256": "9bd5e1da3a859e5359a95f40b6009aa468efb177da4faac57ffdcd7daeb4df18",
+      "bytes": 1864683
+    },
+    "trains.json": {
+      "url": "https://raw.githubusercontent.com/datameet/railways/e0c538a1e41ae5eace454d2818902e1065608e16/trains.json",
+      "license": "CC0",
+      "sourceDate": "2016-08-08",
+      "retrievedAt": "2026-11-10T21:44:15.948Z",
+      "sha256": "e434d9c56016ccdf2291ccd446586ef87a7fab101084efa5f68871ab27800167",
+      "bytes": 14768598
+    },
+    "schedules.json": {
+      "url": "https://raw.githubusercontent.com/datameet/railways/e0c538a1e41ae5eace454d2818902e1065608e16/schedules.json",
+      "license": "CC0",
+      "sourceDate": "2016-08-08",
+      "retrievedAt": "2026-11-10T21:44:35.562Z",
+      "sha256": "105d63816acb177eac30a7d156eb2d312625a42ddebd273edee810d2989878ec",
+      "bytes": 82174280
+    },
+    "airports.csv": {
+      "url": "https://raw.githubusercontent.com/davidmegginson/ourairports-data/main/airports.csv",
+      "license": "Public domain",
+      "sourceDate": null,
+      "retrievedAt": "2026-11-10T21:44:43.612Z",
+      "sha256": "b311ab030775908769395b6814840f01732b27a5176b85f1a9ed3b5d98ff052b",
+      "bytes": 12758651
+    },
+    "airports.dat": {
+      "url": "https://raw.githubusercontent.com/jpatokal/openflights/master/data/airports.dat",
+      "license": "ODbL 1.0; individual contents DbCL 1.0",
+      "sourceDate": null,
+      "retrievedAt": "2026-11-10T21:44:44.389Z",
+      "sha256": "9387cdb38df5bd664da823f8ccb69fdd9b33a1888f5b7cca09c34a3cd9ff59f9",
+      "bytes": 1127225
+    },
+    "routes.dat": {
+      "url": "https://raw.githubusercontent.com/jpatokal/openflights/master/data/routes.dat",
+      "license": "ODbL 1.0; individual contents DbCL 1.0",
+      "sourceDate": "2014-06",
+      "retrievedAt": "2026-11-10T21:44:45.217Z",
+      "sha256": "bd373706238134f619c624c606dccc74c05c2582a977c489c81de501735f2390",
+      "bytes": 2377148
+    },
+    "states.7z": {
+      "url": "https://github.com/ramSeraph/opendata/releases/download/lgd-latest/states.10Nov2026.csv.7z",
+      "license": "GODL-India (LGD data; community mirror)",
+      "sourceDate": "2026-11-09",
+      "retrievedAt": "2026-11-10T21:44:47.938Z",
+      "sha256": "2125810e10a4c76ffdd26c754727e844396cfedcf71afcbe1f51011b46ced106",
+      "bytes": 1074
+    },
+    "lgd-states.csv": {
+      "url": "https://github.com/ramSeraph/opendata/releases/download/lgd-latest/states.10Nov2026.csv.7z",
+      "license": "GODL-India (LGD data; community mirror)",
+      "sourceDate": "2026-11-09",
+      "retrievedAt": "2026-11-10T21:44:47.938Z",
+      "sha256": "17c44a8e083f767f729887efe42388dd9aebfbca7152a0dc33eee7ac1aa0ddaa",
+      "bytes": 1624,
+      "archiveSha256": "2125810e10a4c76ffdd26c754727e844396cfedcf71afcbe1f51011b46ced106"
+    },
+    "districts.7z": {
+      "url": "https://github.com/ramSeraph/opendata/releases/download/lgd-latest/districts.10Nov2026.csv.7z",
+      "license": "GODL-India (LGD data; community mirror)",
+      "sourceDate": "2026-11-09",
+      "retrievedAt": "2026-11-10T21:44:48.942Z",
+      "sha256": "50b969b44f8c4a52afd5735ed0e40fcfe1d165245f4453bf9f7aee548bcc9ba7",
+      "bytes": 8780
+    },
+    "lgd-districts.csv": {
+      "url": "https://github.com/ramSeraph/opendata/releases/download/lgd-latest/districts.10Nov2026.csv.7z",
+      "license": "GODL-India (LGD data; community mirror)",
+      "sourceDate": "2026-11-09",
+      "retrievedAt": "2026-11-10T21:44:48.942Z",
+      "sha256": "08ac67303317c0cd9b84becefadebca73209eefbf6f7e87a9876daff5dcb5f10",
+      "bytes": 30348,
+      "archiveSha256": "50b969b44f8c4a52afd5735ed0e40fcfe1d165245f4453bf9f7aee548bcc9ba7"
+    },
+    "regions.csv": {
+      "url": "https://raw.githubusercontent.com/davidmegginson/ourairports-data/main/regions.csv",
+      "license": "Public domain",
+      "sourceDate": null,
+      "retrievedAt": "2026-11-10T21:46:45.999Z",
+      "sha256": "9220d6582b804cfdec8432e5bb21456699c9df8969bf5d8886beb62ff0b1318b",
+      "bytes": 485265
+    }
+  },
+  "notes": [
+    "Rail data is a 2016 snapshot. Source-state labels may predate Telangana/Ladakh or merged UT boundaries.",
+    "Graph edges are directional. Times use schedule day plus arrival/departure; distances are straight-line estimates, not rail-route distances.",
+    "OpenFlights routes are a June 2014 snapshot, never availability."
+  ]
+}

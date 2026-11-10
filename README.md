@@ -213,3 +213,11 @@ The shared Zod setup schema rejects unknown fields and numeric API strings. Limi
 Run `npm run typecheck` for the current shared/server/cost checkJs scope. The remaining UI typing work is recorded in `docs/TYPECHECK.md`; field decisions and removal evidence are in `docs/INPUT_AUDIT.md`.
 
 Geographic datasets and geocoding are not installed or used yet. `docs/DATA_SOURCES.md` records that status honestly; no attribution is claimed for an unused source. The India-only dataset-backed picker release requires the Phase 2 source files and a separately approved states/districts source.
+
+## v2 Phase 2 data layer
+
+- `npm run data:fetch` downloads source snapshots into ignored `data/raw/`; `npm run data:fetch -- --refresh` refreshes the cache.
+- `npm run data:build` fetches missing sources, streams the railway schedules, and rebuilds and checks `server/data/`.
+- `npm run data:check` validates the committed data, prints source and output counts, and reports state coverage and isolated junctions without network access.
+
+Attribution: LGD, Ministry of Panchayati Raj (GODL-India, via the ramSeraph report mirror); datameet/railways (CC0); OurAirports (public domain); OpenFlights (ODbL/DbCL). See [data sources and licenses](docs/DATA_SOURCES.md) and the [data QA report](docs/DATA_QA.md). Historical 2016 rail and 2014 flight evidence cannot establish live schedules or seat availability. The server starts using committed outputs; raw files and downloads are build-time only.

@@ -6,3 +6,6 @@ dist/
 
 # Local verification reports, screenshots and clean-install snapshots
 artifacts/
+
+# Source datasets are local inputs; commit processed server/data outputs only.
+data/raw/
