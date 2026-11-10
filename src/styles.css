@@ -564,6 +564,8 @@ textarea:focus-visible {
 .stop-heading h4 {
   margin: 6px 0 2px;
   font-size: 0.93rem;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .category-tag {
@@ -670,6 +672,7 @@ textarea:focus-visible {
   color: var(--muted);
   font-size: 0.8rem;
   line-height: 1.5;
+  overflow-wrap: break-word;
 }
 
 .stop-details p {
