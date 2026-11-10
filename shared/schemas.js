@@ -1,3 +1,4 @@
+import { journeySummarySchema, timeBucketSchema } from "./journeyTiming.js";
 import { originSchema, destinationSchema } from "./places.js";
 import { z } from "zod";
 import { optionSchemas } from "./optionsSchema.js";
@@ -48,6 +49,8 @@ function createSetupFields(today = dateBounds().min) {
           "Choose a real date between today and 365 days from today.",
         )
         .default(""),
+      departurePreference: timeBucketSchema.default("morning"),
+      returnPreference: timeBucketSchema.default("evening"),
       pace: z.enum(PACES).default("balanced"),
       foodPreference: z.enum(FOOD_PREFERENCES).default("no preference"),
       foodOther: optionalText(50),
@@ -85,6 +88,7 @@ export function requestSchema(today, picked = false) {
   return (
     picked ? createPickedTripSchema(today) : createTripSetupSchema(today)
   ).safeExtend({
+    journey: journeySummarySchema.optional(),
     selections: z
       .object({
         stayOptions: optionSchemas.stayOptions,

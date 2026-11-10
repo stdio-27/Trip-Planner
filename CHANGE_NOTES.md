@@ -76,3 +76,10 @@ Travelers can change the fare tier, edit leg prices and choose a one-way or retu
 The travel total uses passenger fares or one vehicle per four travelers, with a breakdown by leg.
 Fare retries keep the selected journey and edited fares, and changed trip inputs reset the selection.
 Stay, local transport and food estimates remain available alongside the travel breakdown.
+
+## v2 Phase 7 — journey timing and itinerary generation
+The trip form accepts morning, afternoon, evening or night departure preferences.
+Journey timing shows an approximate arrival day and time, and a leave-by time for returns.
+The server rebuilds the selected journey, verifies its hubs and computes the timing itself.
+The itinerary prompt uses that timing, the selected local transport and the costs already budgeted.
+Tests cover the timing instructions, invalid selections and itinerary lengths of one, three, seven and fourteen days.

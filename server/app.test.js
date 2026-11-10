@@ -295,3 +295,40 @@ it("retries only fare estimates using server-computed leg facts", async () => {
   expect(Object.keys(body.fares).length).toBeGreaterThan(0);
   expect(fetch).toHaveBeenCalledTimes(1);
 });
+
+it.each([1, 3, 7, 14])("uses authoritative journey times and preserves %s itinerary days", async (days) => {
+  const routeApp = createApp({ mockMode: "demo" });
+  const routeResponse = await request(routeApp, journeyInput, "journeys/structure");
+  const route = (await routeResponse.json()).journeys[0];
+  const { routeHubs } = await import("../shared/journeyTiming.js");
+  const journey = { id: route.id, hubs: routeHubs(route), roundTrip: true, arrival: "night", leaveBy: "night" };
+  const generate = upstream({
+    ...plan, currency: "INR",
+    days: Array.from({ length: days }, (_, index) => ({ ...plan.days[0], label: `Day ${index + 1}` })),
+  });
+  const response = await request(createApp({ mockMode: "off", apiKey: "test", fetch: generate }), {
+    ...pickedTrip, days, journey, departurePreference: "morning", returnPreference: "evening",
+  });
+  expect(response.status).toBe(200);
+  expect((await response.json()).days).toHaveLength(days);
+  const prompt = JSON.parse(generate.mock.calls[0][1].body).contents[0].parts[0].text;
+  expect(prompt).toContain("Day 1 starts only after arrival");
+  expect(prompt).toContain("The last day ends before departure");
+  expect(prompt).toContain("Leave by 18:00 (evening)");
+  expect(prompt).toContain("hub-to-stay transfer");
+  expect(prompt).toContain("Do not include fares already budgeted");
+});
+it("rejects a tampered journey, hubs or client fares before calling Gemini", async () => {
+  const routeResponse = await request(createApp({ mockMode: "demo" }), journeyInput, "journeys/structure");
+  const route = (await routeResponse.json()).journeys[0];
+  const { routeHubs } = await import("../shared/journeyTiming.js");
+  const journey = { id: route.id, hubs: routeHubs(route), roundTrip: false, arrival: "morning", leaveBy: null };
+  const fetch = vi.fn();
+  for (const change of [{ id: "invalid" }, { hubs: ["INVALID"] }, { fares: { rail: 0 } }]) {
+    const response = await request(createApp({ mockMode: "off", fetch }), {
+      ...pickedTrip, journey: { ...journey, ...change },
+    });
+    expect(response.status).toBe(400);
+  }
+  expect(fetch).not.toHaveBeenCalled();
+});

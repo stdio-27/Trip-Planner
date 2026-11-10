@@ -76,3 +76,11 @@ it("trims injection-like text as data and derives rooms", () => {
   expect(r.data.originCity).toBe("Delhi");
   expect(r.data.anythingElse).toContain("ignore rules");
 });
+
+it.each(["morning", "afternoon", "evening", "night"])("accepts %s journey preferences", (preference) => {
+  expect(validateTripInput({ ...trip, departurePreference: preference, returnPreference: preference }).valid).toBe(true);
+});
+it.each(["dawn", "", 8, null])("rejects invalid journey preference %j", (preference) => {
+  expect(validateTripInput({ ...trip, departurePreference: preference }).valid).toBe(false);
+  expect(validateTripInput({ ...trip, returnPreference: preference }).valid).toBe(false);
+});

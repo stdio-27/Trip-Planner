@@ -1,3 +1,6 @@
+import { loadData } from "./data/index.js";
+import { buildJourneys } from "./journeys/engine.js";
+import { clockTime, journeyTiming, routeHubs } from "../shared/journeyTiming.js";
 import "dotenv/config";
 import { createJourneyRouter } from "./journeys/routes.js";
 import { resolveTripPlaces } from "./tripPlaces.js";
@@ -44,7 +47,12 @@ export function createApp(options = {}) {
       currency: tripDetails.currency,
       days: Array.from({ length: tripDetails.days }, (_, index) => ({
         label: `Day ${index + 1}`,
-        stops: [
+        stops: tripDetails.journey &&
+          (index + 1 < tripDetails.journey.arrivalDay ||
+            (index + 1 === tripDetails.days && index + 1 === tripDetails.journey.arrivalDay &&
+              tripDetails.journey.leaveByMinute !== null && tripDetails.journey.arrivalMinute >= tripDetails.journey.leaveByMinute))
+          ? [{ title: "Travel day", category: "transport", estCost: 0, location: destination }]
+          : [
           {
             title: "Explore the city",
             category: "sight",
@@ -52,7 +60,9 @@ export function createApp(options = {}) {
             description:
               "Visit a well-known local landmark and nearby neighborhood.",
             location: destination,
-            time: "09:00",
+            time: clockTime(index + 1 === tripDetails.journey?.arrivalDay
+              ? tripDetails.journey.arrivalMinute
+              : Math.min(540, index + 1 === tripDetails.days ? tripDetails.journey?.leaveByMinute ?? 540 : 540)),
           },
         ],
       })),
@@ -155,8 +165,27 @@ export function createApp(options = {}) {
       res.status(400).json({ errors: resolved.errors, error: Object.values(resolved.errors)[0] });
       return;
     }
-    const tripDetails = resolved.data;
+    const { journey: requestedJourney, ...tripDetails } = resolved.data;
     const isOptions = req.path === "/api/options";
+    if (requestedJourney) {
+      const selected = !isOptions && "origin" in validation.data &&
+        buildJourneys({ origin: validation.data.origin, destination: validation.data.destination }, loadData()).find((item) => item.id === requestedJourney.id);
+      if (!selected || JSON.stringify(routeHubs(selected)) !== JSON.stringify(requestedJourney.hubs)) {
+        res.status(400).json({ error: "The selected journey or hubs changed. Choose a journey again." });
+        return;
+      }
+      const timing = journeyTiming(selected, tripDetails.departurePreference, tripDetails.returnPreference, requestedJourney.roundTrip);
+      const arrivalHub = selected.legs.map((leg) => leg.to).filter((point) => point.kind !== "place").at(-1);
+      tripDetails["journey"] = {
+        id: selected.id,
+        hubs: routeHubs(selected),
+        roundTrip: requestedJourney.roundTrip,
+        durationMinutes: selected.totalDurationMin,
+        arrivalHub: arrivalHub?.name ?? null,
+        legs: selected.legs.map(({ mode, from, to }) => ({ mode, from: from.name, to: to.name })),
+        ...timing,
+      };
+    }
 
     if (await handleMock(req, res, tripDetails)) {
       return;
@@ -239,7 +268,7 @@ export function createApp(options = {}) {
                         ? buildOptionsPrompt(tripDetails)
                         : buildTripPrompt(tripDetails)) +
                       (attempt
-                        ? (isOptions ? "\nCorrection: return the complete valid options object in the requested currency, with all four option groups." : `\nCorrection: you returned ${returnedDays} days; return exactly ${tripDetails.days} day objects.`)
+                        ? (isOptions ? "\nCorrection: return the complete valid options object in the requested currency, with all three option groups." : `\nCorrection: you returned ${returnedDays} days; return exactly ${tripDetails.days} day objects.`)
                         : ""),
                   },
                 ],

@@ -1,3 +1,4 @@
+import { clockTime, journeyTiming, routeHubs } from "../shared/journeyTiming.js";
 import { useEffect, useState, useRef } from "react";
 import { BuzzIntro, BuzzOutro } from "./components/BuzzLanding.jsx";
 import { EmptyHint, EmptyState } from "./components/EmptyStates.jsx";
@@ -25,6 +26,8 @@ const initialForm = {
   children: 0,
   rooms: "",
   startDate: "",
+  departurePreference: "morning",
+  returnPreference: "evening",
   pace: "balanced",
   foodPreference: "no preference",
   foodOther: "",
@@ -85,6 +88,7 @@ export default function App() {
   const route = journeys.status === "success"
     ? journeys.plan?.journeys.find((item) => item.id === choice.id)
     : null;
+  const timing = route && journeyTiming(route, trip.departurePreference, trip.returnPreference, choice.roundTrip);
   const fareData = fares.status === "success" ? fares.plan?.fares : null;
   useEffect(() => {
     if (generatedPlan?.days.some((d) => d.stops.length))
@@ -105,6 +109,8 @@ export default function App() {
       "currency",
       "startDate",
       "rooms",
+      "departurePreference",
+      "returnPreference",
       "pace",
       "foodPreference",
       "foodOther",
@@ -121,6 +127,13 @@ export default function App() {
     setStep(3);
     generate({
       ...trip,
+      journey: {
+        id: route.id,
+        hubs: routeHubs(route),
+        roundTrip: choice.roundTrip,
+        arrival: timing.arrival,
+        leaveBy: timing.leaveBy,
+      },
       selections: Object.fromEntries(
         groups.map((key) => [
           key,
@@ -221,6 +234,15 @@ export default function App() {
               onChangeHubs={() => setStep(1)}
               retryRoutes={() => journeys.generate(journeyInput.current)}
               retryFares={() => fares.generate(journeyInput.current)}
+              renderTiming={() => timing && (
+                <p role="status">
+                  Approximate arrival: Day {timing.arrivalDay}, {timing.arrival} ({clockTime(timing.arrivalMinute)}).
+                  {timing.leaveBy && ` Leave by Day ${trip.days}, ${timing.leaveBy} (${clockTime(timing.leaveByMinute)}).`}
+                  {(timing.arrivalDay > trip.days ||
+                    (timing.leaveBy && timing.arrivalDay === trip.days && timing.arrivalMinute >= timing.leaveByMinute))
+                    && " The selected timing leaves no activity time at the destination."}
+                </p>
+              )}
             />
             <OptionsPicker
               options={options}

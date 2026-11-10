@@ -1,3 +1,4 @@
+import { timeBuckets } from "../../shared/journeyTiming.js";
 import { TripPlaceFields } from "./TripPlaceFields.jsx";
 import { useState, useRef, useEffect } from "react";
 import {
@@ -160,6 +161,8 @@ export function TripForm({
       )}
       <small>{Math.max(Number(values.days) - 1, 0)} nights</small>
       {input("startDate", "Start date (optional)", "date")}
+      {picked && select("departurePreference", "Preferred outbound departure", timeBuckets)}
+      {picked && select("returnPreference", "Preferred return departure", timeBuckets)}
       {input("adults", "Adults (1–9)", "number")}
       {input("children", "Children (0–9)", "number")}
       {input("rooms", "Rooms (optional)", "number")}
