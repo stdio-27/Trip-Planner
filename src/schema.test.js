@@ -240,6 +240,27 @@ describe("parsePlan", () => {
     }
   });
 
+  it("assigns unique UUIDs to each packing list item", () => {
+    const result = parsePlan(
+      validPlan({
+        packingList: ["Sunscreen", "Passport", "Power bank"],
+      }),
+    );
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.packingList).toHaveLength(3);
+      expect(result.data.packingList[0]).toMatchObject({ text: "Sunscreen" });
+      expect(result.data.packingList[1]).toMatchObject({ text: "Passport" });
+      expect(result.data.packingList[2]).toMatchObject({ text: "Power bank" });
+
+      const ids = result.data.packingList.map((item) => item.id);
+      expect(typeof ids[0]).toBe("string");
+      expect(ids[0].length).toBeGreaterThan(0);
+      expect(new Set(ids).size).toBe(3);
+    }
+  });
+
   it("handles 15+ days and 50+ stops performantly", () => {
     const days = [];
     for (let d = 1; d <= 15; d++) {

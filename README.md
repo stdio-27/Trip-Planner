@@ -30,15 +30,18 @@ the `.env` file.
 Start the Vite client and Express API together:
 
 ```sh
-npm run dev
+npm start
 ```
 
-Vite runs on `http://localhost:5173` and proxies `/api` requests to Express on
-`http://localhost:8787`. To run either process by itself, use `npm run
-dev:client` or `npm run dev:server`.
+Or run dev mode with `npm run dev`. Vite runs on `http://localhost:5173` and proxies `/api` requests to Express on `http://localhost:8787`.
 
-Build the client with `npm run build`. Run the unit tests with `npm test`; use
-`npm run test:watch` while developing.
+To run production mode (build client and serve static assets via Express):
+
+```sh
+npm run start:prod
+```
+
+To run either process by itself, use `npm run client` or `npm run server`. Build the client with `npm run build`. Run unit and integration tests with `npm test`; use `npm run test:watch` while developing.
 
 ## Architecture
 
@@ -53,10 +56,11 @@ React hook -> Zod validation and normalization -> itinerary UI
   `itineraryReducer` manage edits and undo.
 - **Vite proxy:** `vite.config.js` forwards `/api` to the local Express server,
   so the browser uses a same-origin API URL.
-- **Express:** `server/index.js` exposes `POST /api/plan`, builds the model
-  request using `server/prompt.js`, and calls Gemini with a 25-second timeout.
-  The server extracts the first `{` through the last `}` from the model text,
-  which tolerates JSON wrapped in markdown fences.
+- **Express:** `server/index.js` exposes `POST /api/plan` with a 10 req/min rate
+  limiter, a 10KB payload cap, and input validation via `server/validator.js`.
+  It calls Gemini with a 25-second timeout and Gemini `responseSchema`. The
+  server parses response text with a balanced-brace scanner (`server/extractJson.js`),
+  which safely extracts JSON from markdown fences or surrounding commentary.
 - **Zod:** `src/schema.js` validates the model response in the browser,
   normalizes categories and estimated costs, and adds client-generated UUIDs.
   Invalid individual stops are dropped while valid stops are retained.
@@ -127,7 +131,7 @@ The expected itinerary shape is:
    after changing environment variables. Any unrecognized or unset `MOCK`
    value uses Gemini.
 
-## Known limitations
+## Known limitations and boundaries
 
 - The app has no user accounts, database, or server-side itinerary persistence;
   edited plans and packing checklist state live in the current browser session.
@@ -135,25 +139,30 @@ The expected itinerary shape is:
   include costs omitted by the model.
 - The client retries invalid successful response bodies once, but it does not
   automatically retry network failures or non-2xx API responses.
-- The client does not have a request timeout. The server's Gemini request has
-  a 25-second timeout, while the `slow` mock waits 40 seconds and does not
-  enforce that timeout.
+- The client enforces a 30-second request timeout; requests that exceed 30
+  seconds abort with a retry option ("This is taking too long. Please try again.").
+  Users can also cancel an in-flight request at any time using the Cancel button.
+- Rate limiting enforces a maximum of 10 requests per minute per IP address on
+  `POST /api/plan`.
+- Input limits: Destination is required (1–1,000 characters); Interests is optional
+  (max 500 characters); Trip length is bounded between 1 and 30 days.
 - Day tabs and stop controls are accessible, but drag-and-drop behavior can
   vary by browser and assistive technology; the keyboard reorder buttons are
   also available.
-- The Vite proxy is for local development. Production deployments need an
-  equivalent `/api` route to the Express service.
+- The Vite proxy is for local development; in production, Express serves the
+  built static assets from `dist/` directly via `npm run start:prod`.
 
 ## AI usage note
 
-AI assistance was used to help implement and document this project. Gemini
-generates itinerary suggestions; its output can be inaccurate, incomplete, or
-unsuitable for your situation. Verify opening hours, routes, accessibility,
-visa and safety requirements, and all prices before relying on the plan.
-Estimated costs are suggestions, not quotes or reservations. Do not send
-sensitive personal information in trip details, and review generated code
-before relying on it.
+AI assistance was used to help implement, review, and document this project.
+Specifically, Google Antigravity was used for code review, QA auditing, and
+engineering fixes. Gemini (`gemini-2.0-flash`) generates itinerary suggestions;
+its output can be inaccurate, incomplete, or unsuitable for your situation.
+Verify opening hours, routes, accessibility, visa and safety requirements, and
+all prices before relying on the plan. Estimated costs are suggestions, not
+quotes or reservations. Do not send sensitive personal information in trip
+details, and review generated code before relying on it.
 
 ## Time spent
 
-Placeholder: **[enter time spent]**
+Time spent: **[enter time spent, e.g. 4.5 hours]**

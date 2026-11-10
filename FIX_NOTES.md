@@ -26,3 +26,8 @@
 - Installed and applied `express-rate-limit` on `POST /api/plan` limiting each IP to 10 requests per minute with standard headers and returning a user-friendly 429 JSON response ("Too many trip planning requests. Please wait a minute before trying again.").
 - Verified that 429 errors are caught by `useGenerate` and properly presented to the user via the existing error banner with a retry action.
 - Deliberately refrained from adding `cors` or `helmet`: because the Vite dev server proxies `/api` to Express and the production server serves `dist/` directly, the app operates as a same-origin system. If the frontend and backend were decoupled onto separate origins (e.g. Vercel and Cloud Run), `cors` would be essential to allow browser API access and `helmet` would provide security header hardening.
+
+## Task 6: Packing List UUIDs and Documentation Corrections
+- Updated `src/schema.js` so `parsePlan` generates and assigns a cryptographically unique UUID (`id`) to each packing list item, and updated `PackingList.jsx` to rely exclusively on these stable IDs for React keys and checkbox tracking.
+- Corrected `README.md` to document the 30s client timeout, the Cancel action, input bounds (1-1000 chars), rate limiting, mock modes, and the new `start` / `start:prod` scripts.
+- Honestly updated the AI usage note to explicitly mention Google Antigravity for code review, QA auditing, and engineering fixes, and placed a clear placeholder line for interview time spent.

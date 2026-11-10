@@ -87,9 +87,24 @@ export const tripSchema = z
     currency: z.string().trim().min(1),
     days: z.array(daySchema),
     packingList: z
-      .array(z.string().trim().min(1))
+      .array(z.unknown())
       .nullish()
-      .transform((val) => val ?? []),
+      .transform((rawList) => {
+        if (!Array.isArray(rawList)) return [];
+        const items = [];
+        for (const candidate of rawList) {
+          const text =
+            typeof candidate === "string"
+              ? candidate.trim()
+              : candidate && typeof candidate.text === "string"
+                ? candidate.text.trim()
+                : "";
+          if (text) {
+            items.push({ id: createId(), text });
+          }
+        }
+        return items;
+      }),
   })
   .transform((trip) => {
     let droppedItems = 0;

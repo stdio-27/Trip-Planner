@@ -1,14 +1,20 @@
 import { useEffect, useState } from "react";
 
-export function PackingList({ items }) {
+export function PackingList({ items = [] }) {
   const [checked, setChecked] = useState(() => new Set());
   const [customItems, setCustomItems] = useState([]);
   const [newItem, setNewItem] = useState("");
 
-  const planItems = items.map((text, index) => ({
-    id: `plan-${index}-${encodeURIComponent(text)}`,
-    text,
-  }));
+  const planItems = (items || []).map((item, index) => {
+    if (item && typeof item === "object" && item.id && item.text) {
+      return item;
+    }
+    const text = typeof item === "string" ? item : String(item?.text || "");
+    return {
+      id: `plan-${index}-${encodeURIComponent(text)}`,
+      text,
+    };
+  });
   const allItems = [...planItems, ...customItems];
 
   useEffect(() => {
@@ -33,7 +39,10 @@ export function PackingList({ items }) {
     event.preventDefault();
     const item = newItem.trim();
     if (!item) return;
-    const customId = `custom-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+    const customId =
+      typeof crypto !== "undefined" && crypto.randomUUID
+        ? crypto.randomUUID()
+        : `custom-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
     setCustomItems((current) => [...current, { id: customId, text: item }]);
     setNewItem("");
   }
