@@ -1160,3 +1160,12 @@ h1, h2, h3, h4 { font-family: "Plus Jakarta Sans", sans-serif; font-weight: 800;
   .cost-panel { position: fixed; left: 16px; right: 16px; bottom: 8px; width: auto; }
   .options-flow { padding-bottom: calc(38vh + 80px); }
 }
+
+.place-field { display: grid; gap: 6px; min-width: 0; }
+.place-results { padding: 0; margin: 0; list-style: none; max-height: 240px; overflow-y: auto; border: 2px solid var(--border); background: white; }
+.place-results li, .hub-choices label { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 8px; overflow-wrap: anywhere; }
+.place-results li { cursor: pointer; }
+.place-results li[aria-selected="true"] { background: var(--orange); }
+.hub-choices { min-width: 0; }
+.hub-choices input[type="radio"] { width: auto; min-height: auto; flex: 0 0 auto; }
+.hub-choices button, .place-field button { min-height: 44px; }

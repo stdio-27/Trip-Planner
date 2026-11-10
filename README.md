@@ -231,3 +231,11 @@ Attribution: LGD, Ministry of Panchayati Raj (GODL-India, via the ramSeraph repo
 - MOCK=geo-down and MOCK=geo-slow return GEOCODER_UNAVAILABLE. MOCK=geo-empty returns an empty results list.
 
 Place search uses [Open-Meteo Geocoding](https://open-meteo.com/en/docs/geocoding-api) with location data from GeoNames. Successful responses are cached for 24 hours with a 500-query limit. The five places endpoints share the existing API rate limiter. Bundled hub metadata carries the source coverage limits described in the data QA report.
+
+## v2 Phase 4 place pickers
+
+Choose an origin state and district, then select a destination from place search. If the district lookup finds no matching administrative label, choose a nearby town in the same state. Each end supports nearby hub selection and search across the bundled airport and major-station lists. New destination selections default to the closest returned airport and station. Hub selections and explicit opt-outs persist when returning to setup.
+
+During a geocoder outage, origin hub search can supply approximate district coordinates. An arrival hub with a known state can serve as the destination. This fallback uses hub coordinates for the search center. A station without a known state can still be chosen as a hub for an already selected destination.
+
+Both generation endpoints accept structured origin and destination objects. The server checks the district/state relationship, coordinate bounds, and hub IDs against the bundled datasets and resolves the hub display names. Existing clients can still submit the earlier text payload. The browser setup uses structured selections.

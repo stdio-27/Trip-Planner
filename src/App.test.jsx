@@ -33,7 +33,7 @@ const plan = {
   ],
   packingList: ["Shoes"],
 };
-function setup(
+async function setup(
   fetchPlan = async () => ({
     ok: true,
     text: async () => JSON.stringify(plan),
@@ -44,14 +44,60 @@ function setup(
       ? Promise.resolve({ ok: true, text: async () => JSON.stringify(raw) })
       : fetchPlan(url, init),
   );
-  vi.stubGlobal("fetch", fetchMock);
+  const delhi = {
+    id: 1,
+    name: "Delhi",
+    district: "New Delhi",
+    state: "Delhi",
+    stateCode: "7",
+    lat: 28.61,
+    lon: 77.2,
+  };
+  const guwahati = {
+    id: 2,
+    name: "Guwahati",
+    district: "Kamrup Metropolitan",
+    state: "Assam",
+    stateCode: "18",
+    lat: 26.18,
+    lon: 91.75,
+  };
+  vi.stubGlobal("fetch", async (url, init) => {
+    if (init?.method === "POST") return fetchMock(url, init);
+    const data =
+      url === "/api/geo/states"
+        ? {
+            states: [
+              { code: "7", name: "Delhi" },
+              { code: "18", name: "Assam" },
+            ],
+          }
+        : url.startsWith("/api/geo/districts")
+          ? { districts: ["New Delhi"] }
+          : url.startsWith("/api/hubs/nearby")
+            ? { airports: [], stations: [], notes: [] }
+            : { results: [url.includes("state=7") ? delhi : guwahati] };
+    return { ok: true, json: async () => data };
+  });
   render(<App />);
-  fireEvent.change(screen.getByLabelText("Origin city"), {
-    target: { value: "Delhi" },
+  await screen.findByRole("option", { name: "Delhi" });
+  fireEvent.change(screen.getByLabelText("Origin state"), {
+    target: { value: "7" },
   });
-  fireEvent.change(screen.getByLabelText("Destination"), {
-    target: { value: "Kyoto" },
+  await screen.findByRole("option", { name: "New Delhi" });
+  fireEvent.change(screen.getByLabelText("Origin district"), {
+    target: { value: "New Delhi" },
   });
+  const destination = screen.getByLabelText("Destination");
+  fireEvent.change(destination, { target: { value: "Guw" } });
+  await screen.findByRole("option", { name: "Guwahati · Assam" });
+  fireEvent.keyDown(destination, { key: "ArrowDown" });
+  fireEvent.keyDown(destination, { key: "Enter" });
+  await waitFor(() =>
+    expect(
+      screen.getByRole("button", { name: "Explore options" }).disabled,
+    ).toBe(false),
+  );
   return fetchMock;
 }
 async function options() {
@@ -65,7 +111,7 @@ async function build() {
 it.each([1, 2, 3, 5, 7, 14])(
   "sends %s days and preserves details on Back",
   async (days) => {
-    const fetchMock = setup();
+    const fetchMock = await setup();
     fireEvent.change(screen.getByLabelText("Trip length"), {
       target: { value: String(days) },
     });
@@ -75,11 +121,16 @@ it.each([1, 2, 3, 5, 7, 14])(
       screen.getByRole("button", { name: "Back to trip details" }),
     );
     expect(screen.getByLabelText("Trip length").value).toBe(String(days));
-    expect(screen.getByLabelText("Origin city").value).toBe("Delhi");
+    await screen.findByRole("option", { name: "New Delhi" });
+    expect(screen.getByLabelText("Origin district").value).toBe("New Delhi");
+    expect(screen.getByLabelText("Destination").value).toBe("Guwahati");
+    expect(
+      JSON.parse(fetchMock.mock.calls[0][1].body).destination,
+    ).toMatchObject({ placeName: "Guwahati", stateCode: "18" });
   },
 );
 it("updates totals for choices, editable estimates and presets without an AI call", async () => {
-  const fetchMock = setup();
+  const fetchMock = await setup();
   await options();
   const summary = screen.getByRole("region", { name: "Trip cost summary" });
   const before = summary.textContent;
@@ -97,7 +148,7 @@ it("updates totals for choices, editable estimates and presets without an AI cal
 });
 it("retains packing through cancellation and supports remove and undo", async () => {
   let calls = 0;
-  setup(async () => {
+  await setup(async () => {
     calls++;
     return calls === 1
       ? { ok: true, text: async () => JSON.stringify(plan) }
@@ -121,19 +172,22 @@ it("retains packing through cancellation and supports remove and undo", async ()
   expect(screen.getByLabelText("Shoes").checked).toBe(true);
   expect(screen.getByLabelText("Camera")).toBeTruthy();
 });
-it("blocks an invalid origin before calling the API", () => {
-  const fetchMock = setup();
-  fireEvent.change(screen.getByLabelText("Origin city"), {
-    target: { value: " " },
+it("clears the district and selected origin when the state changes", async () => {
+  const fetchMock = await setup();
+  fireEvent.change(screen.getByLabelText("Origin state"), {
+    target: { value: "18" },
   });
-  fireEvent.blur(screen.getByLabelText("Origin city"));
-  expect(screen.getByRole("alert")).toBeTruthy();
+  expect(screen.getByLabelText("Origin district").value).toBe("");
+  expect(screen.queryByText("Origin airport")).toBeNull();
+  expect(screen.getByRole("button", { name: "Explore options" }).disabled).toBe(
+    true,
+  );
   expect(fetchMock).not.toHaveBeenCalled();
 });
 it.each(["bad-shape", "empty", "fail"])(
   "shows options %s state safely",
   async (mode) => {
-    const fetchMock = setup();
+    const fetchMock = await setup();
     fetchMock.mockImplementation(async () =>
       mode === "fail"
         ? {
@@ -157,8 +211,33 @@ it.each(["bad-shape", "empty", "fail"])(
   },
 );
 it("shows server field errors inline on the setup form", async () => {
- const fetchMock=setup();fetchMock.mockResolvedValue({ok:false,status:400,json:async()=>({errors:{originCity:"Choose a supported origin city."}})});
- fireEvent.click(screen.getByRole("button",{name:"Explore options"}));
- await waitFor(()=>expect(screen.getByLabelText("Origin city").getAttribute("aria-invalid")).toBe("true"));
- expect(screen.getByLabelText("Origin city").getAttribute("aria-describedby")).toBe("originCity-error");
+  const fetchMock = await setup();
+  fetchMock.mockResolvedValue({
+    ok: false,
+    status: 400,
+    json: async () => ({
+      errors: { origin: "Choose a supported origin city." },
+    }),
+  });
+  fireEvent.click(screen.getByRole("button", { name: "Explore options" }));
+  await waitFor(() =>
+    expect(
+      screen.getByLabelText("Origin state").getAttribute("aria-invalid"),
+    ).toBe("true"),
+  );
+  expect(
+    screen.getByLabelText("Origin state").getAttribute("aria-describedby"),
+  ).toBe("origin-error");
+});
+
+it("requires selecting a replacement after editing a destination", async () => {
+  const fetchMock = await setup();
+  const destination = screen.getByRole("combobox", { name: "Destination" });
+  fireEvent.change(destination, { target: { value: "Unselected city" } });
+  fireEvent.keyDown(destination, { key: "Escape" });
+  expect(screen.getByRole("button", { name: "Explore options" }).disabled).toBe(
+    true,
+  );
+  expect(screen.getByText("Choose a place from the list.")).toBeTruthy();
+  expect(fetchMock).not.toHaveBeenCalled();
 });

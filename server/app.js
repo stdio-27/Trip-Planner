@@ -1,4 +1,5 @@
 import "dotenv/config";
+import { resolveTripPlaces } from "./tripPlaces.js";
 import { createPlacesRouter } from "./geo/routes.js";
 import fs from "node:fs";
 import path from "node:path";
@@ -141,7 +142,12 @@ export function createApp(options = {}) {
       return;
     }
 
-    const tripDetails = validation.data;
+    const resolved = resolveTripPlaces(validation.data);
+    if (resolved.errors) {
+      res.status(400).json({ errors: resolved.errors, error: Object.values(resolved.errors)[0] });
+      return;
+    }
+    const tripDetails = resolved.data;
     const isOptions = req.path === "/api/options";
 
     if (await handleMock(req, res, tripDetails)) {

@@ -26,8 +26,8 @@ export function demoOptions(trip) {
     },
     destination: {
       city: trip.destination,
-      arrivalAirport: hub(`${trip.destination} airport (assumed)`),
-      arrivalStation: hub(`${trip.destination} station (assumed)`),
+      arrivalAirport: hub(trip.arrivalAirport || `${trip.destination} airport (assumed)`),
+      arrivalStation: hub(trip.arrivalStation || `${trip.destination} station (assumed)`),
     },
     travelOptions: ["basic", "standard", "premium"].map((comfort, i) => ({
       label: ["Train", "Flight", "Premium flight"][i],

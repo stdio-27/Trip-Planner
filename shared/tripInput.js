@@ -2,7 +2,10 @@ import { requestSchema } from "./schemas.js";
 import { groups, priceFields } from "./optionsSchema.js";
 /** @param {unknown} body @param {string} [today] */
 export function validateTripInput(body, today) {
-  const result = requestSchema(today).safeParse(body);
+  const result = requestSchema(
+    today,
+    !!body && typeof body === "object" && "origin" in body,
+  ).safeParse(body);
   if (!result.success) {
     const errors = {};
     for (const issue of result.error.issues) {

@@ -1,3 +1,4 @@
+import { originSchema, destinationSchema } from "./places.js";
 import { z } from "zod";
 import { optionSchemas } from "./optionsSchema.js";
 import { CURRENCIES, PACES, FOOD_PREFERENCES, INTERESTS } from "./choices.js";
@@ -17,7 +18,7 @@ export function dateBounds(
   date.setUTCDate(date.getUTCDate() + 365);
   return { min: today, max: date.toISOString().slice(0, 10) };
 }
-export function createTripSetupSchema(today = dateBounds().min) {
+function createSetupFields(today = dateBounds().min) {
   const bounds = dateBounds(today);
   return z
     .object({
@@ -53,20 +54,37 @@ export function createTripSetupSchema(today = dateBounds().min) {
       interests: z.array(z.enum(INTERESTS)).max(INTERESTS.length).default([]),
       anythingElse: optionalText(300),
     })
-    .strict()
-    .superRefine((data, ctx) => {
-      if (data.foodPreference === "other" && !data.foodOther)
-        ctx.addIssue({
-          code: "custom",
-          path: ["foodOther"],
-          message: "Describe the other food preference.",
-        });
+    .strict();
+}
+function checkFood(data, ctx) {
+  if (data.foodPreference === "other" && !data.foodOther)
+    ctx.addIssue({
+      code: "custom",
+      path: ["foodOther"],
+      message: "Describe the other food preference.",
     });
 }
+export function createTripSetupSchema(today) {
+  return createSetupFields(today).superRefine(checkFood);
+}
+export function createPickedTripSchema(today) {
+  return createSetupFields(today)
+    .omit({
+      destination: true,
+      originCity: true,
+      nearestAirport: true,
+      nearestStation: true,
+    })
+    .safeExtend({ origin: originSchema, destination: destinationSchema })
+    .superRefine(checkFood);
+}
 export const tripSetupSchema = createTripSetupSchema();
+export const pickedTripSchema = createPickedTripSchema();
 /** @typedef {z.output<typeof tripSetupSchema>} TripSetup */
-export function requestSchema(today) {
-  return createTripSetupSchema(today).safeExtend({
+export function requestSchema(today, picked = false) {
+  return (
+    picked ? createPickedTripSchema(today) : createTripSetupSchema(today)
+  ).safeExtend({
     selections: z
       .object({
         travelOptions: optionSchemas.travelOptions,

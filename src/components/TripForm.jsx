@@ -1,6 +1,8 @@
+import { TripPlaceFields } from "./TripPlaceFields.jsx";
 import { useState, useRef, useEffect } from "react";
 import {
   tripSetupSchema,
+  pickedTripSchema,
   formPayload,
   dateBounds,
   CURRENCIES,
@@ -31,7 +33,10 @@ export function TripForm({
   const bounds = dateBounds();
   const update = (key, value) =>
     onChange((current) => ({ ...current, [key]: value }));
-  const valid = tripSetupSchema.safeParse(formPayload(values)).success;
+  const picked = "origin" in values;
+  const valid = (picked ? pickedTripSchema : tripSetupSchema).safeParse(
+    formPayload(values),
+  ).success;
   function validate(next = values) {
     const r = validateTripInput(formPayload(next));
     setErrors(r.valid ? {} : r.errors);
@@ -133,10 +138,21 @@ export function TripForm({
   }
   return (
     <form className="trip-form" ref={form} onSubmit={submit} noValidate>
-      {input("destination", "Destination")}
-      {input("originCity", "Origin city")}
-      {input("nearestAirport", "Nearest airport (optional)")}
-      {input("nearestStation", "Nearest railway station (optional)")}
+      {picked ? (
+        <TripPlaceFields
+          origin={values.origin}
+          destination={values.destination}
+          onChange={update}
+          errors={errors}
+        />
+      ) : (
+        <>
+          {input("destination", "Destination")}
+          {input("originCity", "Origin city")}
+          {input("nearestAirport", "Nearest airport (optional)")}
+          {input("nearestStation", "Nearest railway station (optional)")}
+        </>
+      )}
       {select(
         "days",
         "Trip length",

@@ -214,3 +214,32 @@ it("sends validated selected modes to the provider", async () => {
   expect(r.status).toBe(200);
   expect(generate.mock.calls[0][1].body).toContain("Public transport");
 });
+
+const pickedTrip = {
+  days: 2, currency: "INR",
+  origin: { stateCode: "7", district: "New Delhi", lat: 28.61, lon: 77.2, airportId: "DEL", stationCode: "NDLS" },
+  destination: { stateCode: "18", placeName: "Guwahati", lat: 26.18, lon: 91.75, airportId: "GAU", stationCode: "GHY" },
+};
+it("accepts selected places and resolves hub labels from the bundled data", async () => {
+  const options = await request(createApp({ mockMode: "demo" }), pickedTrip, "options");
+  expect(options.status).toBe(200);
+  const body = await options.json();
+  expect(body.origin.nearestAirport.name).toContain("(DEL)");
+  expect(body.destination.arrivalStation.name).toContain("(GHY)");
+  const plan = await request(createApp({ mockMode: "demo" }), pickedTrip);
+  expect(plan.status).toBe(200);
+  expect((await plan.json()).days).toHaveLength(2);
+});
+it.each([
+  { origin: { ...pickedTrip.origin, district: "Kamrup Metropolitan" } },
+  { origin: { ...pickedTrip.origin, airportId: "ZZZ" } },
+  { destination: { ...pickedTrip.destination, stationCode: "SCL" } },
+  { destination: { ...pickedTrip.destination, lat: 90 } },
+  { destination: { ...pickedTrip.destination, stateCode: "999" } },
+])("rejects invalid selected geography before generation", async change => {
+  const fetch = vi.fn();
+  const response = await request(createApp({ mockMode: "off", fetch }), { ...pickedTrip, ...change });
+  expect(response.status).toBe(400);
+  expect(Object.keys((await response.json()).errors)).toContain(Object.keys(change)[0]);
+  expect(fetch).not.toHaveBeenCalled();
+});

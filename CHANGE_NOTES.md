@@ -55,3 +55,10 @@ Place search uses a replaceable Open-Meteo provider with a five-second deadline.
 A bounded cache reuses place lookups while each request applies its own state filter.
 Nearby hubs use straight-line distance and search ranks exact codes ahead of name matches.
 Validation, mock outages and upstream errors are covered by API regression tests.
+
+## v2 Phase 4 — place and hub pickers
+The form now selects origin state and district and commits a destination from the place list.
+The shared combobox supports keyboard navigation and ignores responses from superseded searches.
+Nearby hub lists and bundled search let users select or opt out of each mode.
+The server validates geographic references and resolves selected hub names from the snapshots.
+Tests cover keyboard selection, state resets, Back, outage fallback, stale results and request validation.

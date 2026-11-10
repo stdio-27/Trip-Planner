@@ -13,14 +13,12 @@ import { useGenerate, useApiCall } from "./hooks/useGenerate.js";
 import { useItinerary } from "./hooks/useItinerary.js";
 
 const initialForm = {
-  destination: "",
+  destination: null,
+  origin: null,
   days: 3,
   budget: "",
   currency: "INR",
   interests: [],
-  originCity: "",
-  nearestAirport: "",
-  nearestStation: "",
   adults: 1,
   children: 0,
   rooms: "",
@@ -71,13 +69,11 @@ export default function App() {
     trip &&
     [
       "destination",
-      "originCity",
+      "origin",
       "days",
       "adults",
       "children",
       "currency",
-      "nearestAirport",
-      "nearestStation",
       "startDate",
       "rooms",
       "pace",
@@ -88,7 +84,7 @@ export default function App() {
       "budget",
     ].some(
       (k) =>
-        String(formValues[k] ?? "") !== String(trip[k] ?? "") &&
+        JSON.stringify(formValues[k] ?? "") !== JSON.stringify(trip[k] ?? "") &&
         !(k === "rooms" && !formValues.rooms) &&
         !(k === "budget" && formValues.budget === "" && trip.budget == null),
     );
