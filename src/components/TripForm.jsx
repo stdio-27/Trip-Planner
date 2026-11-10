@@ -1,11 +1,38 @@
+import { useState } from "react";
+
 export function TripForm({ values, onChange, onSubmit, loading }) {
+  const [error, setError] = useState("");
+
   function update(field, value) {
+    if (field === "destination" && error) {
+      setError("");
+    }
     onChange((current) => ({ ...current, [field]: value }));
   }
 
+  function handleFormSubmit(event) {
+    event.preventDefault();
+    const cleanDestination = (values.destination || "").trim();
+    if (!cleanDestination) {
+      setError("Please enter a destination.");
+      return;
+    }
+    setError("");
+    const sanitized = {
+      ...values,
+      destination: cleanDestination,
+      interests: (values.interests || "").trim(),
+    };
+    onChange(sanitized);
+    onSubmit(sanitized);
+  }
+
   return (
-    <form className="trip-form" onSubmit={onSubmit}>
-      <label htmlFor="destination">Destination</label>
+    <form className="trip-form" onSubmit={handleFormSubmit} noValidate>
+      <div className="field-label-row">
+        <label htmlFor="destination">Destination</label>
+        <span className="char-counter">{(values.destination || "").length}/1000</span>
+      </div>
       <input
         id="destination"
         name="destination"
@@ -13,8 +40,14 @@ export function TripForm({ values, onChange, onSubmit, loading }) {
         onChange={(event) => update("destination", event.target.value)}
         placeholder="e.g. Kyoto, Japan"
         autoComplete="address-level2"
+        maxLength={1000}
         required
       />
+      {error && (
+        <p className="form-inline-error" role="alert">
+          {error}
+        </p>
+      )}
 
       <div className="form-row">
         <div>
@@ -55,17 +88,22 @@ export function TripForm({ values, onChange, onSubmit, loading }) {
         name="budget"
         type="number"
         min="0"
+        max="1000000000"
         step="1"
         value={values.budget}
         onChange={(event) => update("budget", event.target.value)}
         placeholder="e.g. 1500"
       />
 
-      <label htmlFor="interests">Interests (optional)</label>
+      <div className="field-label-row">
+        <label htmlFor="interests">Interests (optional)</label>
+        <span className="char-counter">{(values.interests || "").length}/500</span>
+      </div>
       <textarea
         id="interests"
         name="interests"
         rows="3"
+        maxLength={500}
         value={values.interests}
         onChange={(event) => update("interests", event.target.value)}
         placeholder="Food, museums, slow mornings..."

@@ -11,3 +11,8 @@
 - Added a `start:prod` script that builds the client and boots the Express server, and configured Express to serve `dist/` statically with an Express 5 compatible SPA fallback while returning 404 JSON for unknown `/api` routes.
 - Updated `.env.example` with complete configuration options including `GEMINI_API_KEY`, `GEMINI_MODEL`, `PORT`, and commented documentation for all supported `MOCK` modes.
 - Verified that running `npm start` starts both servers and successfully responds to both frontend and backend health checks.
+
+## Task 3: Input Validation and Prompt-Injection Hardening
+- Implemented client-side input constraints in `TripForm.jsx` including `maxLength` attributes, dynamic character counters, automatic trimming before submission, and inline validation warnings when required fields are empty.
+- Extracted and unit-tested a server-side input validator (`server/validator.js`) that verifies types, enforces bounds (1-1000 chars for destination, max 500 for interests, 1-30 integer days, 3-letter currency code), lowers Express JSON body limit to 10kb, and returns 400 JSON errors on violations.
+- Hardened `server/prompt.js` against prompt-injection attacks by enclosing user input in `<user_trip_details>` XML-like delimiters and directing Gemini to treat user text strictly as raw data and return an empty plan shape for non-trip or malicious queries.

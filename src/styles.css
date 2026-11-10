@@ -152,6 +152,24 @@ textarea:focus-visible {
   font-weight: 650;
 }
 
+.field-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.char-counter {
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.form-inline-error {
+  margin: 0;
+  color: var(--danger);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
 .trip-form input,
 .trip-form select,
 .trip-form textarea,

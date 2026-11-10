@@ -4,6 +4,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import express from "express";
 import { buildTripPrompt } from "./prompt.js";
+import { validateTripInput } from "./validator.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -15,7 +16,7 @@ const geminiTimeoutMs = 25_000;
 const mockMode = process.env.MOCK?.toLowerCase();
 const geminiModel = process.env.GEMINI_MODEL || "gemini-2.0-flash";
 
-app.use(express.json({ limit: "1mb" }));
+app.use(express.json({ limit: "10kb" }));
 app.use(express.static(distPath));
 
 function delay(milliseconds) {
@@ -50,15 +51,15 @@ function mockPlan(tripDetails) {
   };
 }
 
-async function handleMock(req, res) {
+async function handleMock(req, res, tripDetails) {
   switch (mockMode) {
     case "jitter":
       await delay(Math.floor(Math.random() * 5_000));
-      res.json(mockPlan(req.body));
+      res.json(mockPlan(tripDetails || req.body));
       return true;
     case "slow":
       await delay(40_000);
-      res.json(mockPlan(req.body));
+      res.json(mockPlan(tripDetails || req.body));
       return true;
     case "bad-json":
       res.status(200).type("application/json").send('{"invalid":');
@@ -78,12 +79,15 @@ async function handleMock(req, res) {
 }
 
 app.post("/api/plan", async (req, res) => {
-  if (!req.body || typeof req.body !== "object" || Array.isArray(req.body)) {
-    res.status(400).json({ error: "Request body must be a JSON object." });
+  const validation = validateTripInput(req.body);
+  if (!validation.valid) {
+    res.status(400).json({ error: validation.error });
     return;
   }
 
-  if (await handleMock(req, res)) {
+  const tripDetails = validation.data;
+
+  if (await handleMock(req, res, tripDetails)) {
     return;
   }
 
@@ -103,7 +107,7 @@ app.post("/api/plan", async (req, res) => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: buildTripPrompt(req.body) }] }],
+        contents: [{ parts: [{ text: buildTripPrompt(tripDetails) }] }],
         generationConfig: { responseMimeType: "application/json" },
       }),
       signal: AbortSignal.timeout(geminiTimeoutMs),

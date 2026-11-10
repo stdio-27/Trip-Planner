@@ -22,9 +22,13 @@ export default function App() {
   const { status, plan: generatedPlan, error, generate, cancel } = useGenerate();
   const { plan, dispatch, canUndo } = useItinerary(generatedPlan);
 
-  function handleSubmit(event) {
-    event.preventDefault();
-    generate(formValues);
+  function handleSubmit(submission) {
+    if (submission && typeof submission.preventDefault === "function") {
+      submission.preventDefault();
+      generate(formValues);
+    } else {
+      generate(submission || formValues);
+    }
   }
 
   return (
