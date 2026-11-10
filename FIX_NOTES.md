@@ -16,3 +16,8 @@
 - Implemented client-side input constraints in `TripForm.jsx` including `maxLength` attributes, dynamic character counters, automatic trimming before submission, and inline validation warnings when required fields are empty.
 - Extracted and unit-tested a server-side input validator (`server/validator.js`) that verifies types, enforces bounds (1-1000 chars for destination, max 500 for interests, 1-30 integer days, 3-letter currency code), lowers Express JSON body limit to 10kb, and returns 400 JSON errors on violations.
 - Hardened `server/prompt.js` against prompt-injection attacks by enclosing user input in `<user_trip_details>` XML-like delimiters and directing Gemini to treat user text strictly as raw data and return an empty plan shape for non-trip or malicious queries.
+
+## Task 4: Robust JSON Extraction and Gemini Structured Outputs
+- Created a dedicated balanced-brace scanner (`server/extractJson.js`) that tracks string quotation boundaries and escape sequences, ignoring non-JSON braces like `{A}` in surrounding commentary and extracting the first valid JSON object candidate.
+- Configured Gemini's native `responseSchema` on model calls to enforce structured JSON adherence directly at generation time, while preserving client-side Zod parsing as a strict safety net.
+- Wrote unit tests in `server/extractJson.test.js` validating markdown fences, commentary before and after, multiple JSON blocks, braces inside strings, and truncated text.

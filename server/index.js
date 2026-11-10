@@ -3,6 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import express from "express";
+import { extractJson } from "./extractJson.js";
 import { buildTripPrompt } from "./prompt.js";
 import { validateTripInput } from "./validator.js";
 
@@ -103,12 +104,56 @@ app.post("/api/plan", async (req, res) => {
     );
     url.searchParams.set("key", apiKey);
 
+    const planResponseSchema = {
+      type: "OBJECT",
+      properties: {
+        title: { type: "STRING" },
+        currency: { type: "STRING" },
+        days: {
+          type: "ARRAY",
+          items: {
+            type: "OBJECT",
+            properties: {
+              label: { type: "STRING" },
+              stops: {
+                type: "ARRAY",
+                items: {
+                  type: "OBJECT",
+                  properties: {
+                    title: { type: "STRING" },
+                    category: {
+                      type: "STRING",
+                      enum: ["food", "sight", "activity", "transport", "stay", "other"],
+                    },
+                    estCost: { type: "NUMBER" },
+                    description: { type: "STRING" },
+                    location: { type: "STRING" },
+                    time: { type: "STRING" },
+                  },
+                  required: ["title", "category", "estCost"],
+                },
+              },
+            },
+            required: ["label", "stops"],
+          },
+        },
+        packingList: {
+          type: "ARRAY",
+          items: { type: "STRING" },
+        },
+      },
+      required: ["title", "currency", "days", "packingList"],
+    };
+
     const response = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         contents: [{ parts: [{ text: buildTripPrompt(tripDetails) }] }],
-        generationConfig: { responseMimeType: "application/json" },
+        generationConfig: {
+          responseMimeType: "application/json",
+          responseSchema: planResponseSchema,
+        },
       }),
       signal: AbortSignal.timeout(geminiTimeoutMs),
     });
@@ -129,18 +174,9 @@ app.post("/api/plan", async (req, res) => {
       return;
     }
 
-    const firstBrace = generatedText.indexOf("{");
-    const lastBrace = generatedText.lastIndexOf("}");
-    if (firstBrace === -1 || lastBrace <= firstBrace) {
-      res.status(502).json({ error: "Gemini response did not contain a JSON object." });
-      return;
-    }
-
-    let plan;
-    try {
-      plan = JSON.parse(generatedText.slice(firstBrace, lastBrace + 1));
-    } catch {
-      res.status(502).json({ error: "Gemini returned invalid JSON." });
+    const plan = extractJson(generatedText);
+    if (!plan) {
+      res.status(502).json({ error: "Gemini response did not contain a valid JSON itinerary." });
       return;
     }
 
