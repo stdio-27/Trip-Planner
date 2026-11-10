@@ -32,6 +32,13 @@ export function useApiCall(endpoint, parser) {
     setFieldErrors(null);
   }, []);
 
+  const reset = useCallback(() => {
+    planRef.current = null;
+    cancel();
+    setPlan(null);
+    setDroppedItems(0);
+  }, [cancel]);
+
   const generate = useCallback(
     async (tripDetails) => {
       controllerRef.current?.abort();
@@ -205,7 +212,7 @@ export function useApiCall(endpoint, parser) {
     [],
   );
 
-  return { status, plan, error, fieldErrors, droppedItems, generate, cancel };
+  return { status, plan, error, fieldErrors, droppedItems, generate, cancel, reset };
 }
 
 export function useGenerate() {

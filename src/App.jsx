@@ -8,6 +8,8 @@ import { Skeleton } from "./components/Skeleton.jsx";
 import { TripForm } from "./components/TripForm.jsx";
 import { parseOptions, groups } from "../shared/optionsSchema.js";
 import { presetSelections } from "./costs.js";
+import { journeyRequest, parseJourneys, parseFares } from "../shared/journeys.js";
+import { JourneyPicker } from "./components/JourneyPicker.jsx";
 import { OptionsPicker, CostPanel } from "./components/OptionsPicker.jsx";
 import { useGenerate, useApiCall } from "./hooks/useGenerate.js";
 import { useItinerary } from "./hooks/useItinerary.js";
@@ -42,6 +44,11 @@ export default function App() {
     useItinerary(generatedPlan);
 
   const optionsCall = useApiCall("/api/options", parseOptions);
+  const journeys = useApiCall("/api/journeys/structure", parseJourneys);
+  const fares = useApiCall("/api/journeys/fares", parseFares);
+  const [choice, setChoice] = useState({ id: null, tier: "standard", roundTrip: true, edits: {} });
+  const [journeyNotice, setJourneyNotice] = useState("");
+  const journeyInput = useRef(null);
   const [step, setStep] = useState(1);
   const [options, setOptions] = useState(null);
   const [selected, setSelected] = useState({});
@@ -51,12 +58,34 @@ export default function App() {
   const pendingTrip = useRef(null);
   useEffect(() => {
     if (optionsCall.status === "success" && optionsCall.plan) {
-      setTrip(pendingTrip.current);
+      const submission = pendingTrip.current;
+      const input = journeyRequest(submission);
+      if (JSON.stringify(input) !== JSON.stringify(journeyInput.current)) {
+        setJourneyNotice(journeyInput.current
+          ? "Your previous journey selection was reset because the trip details changed."
+          : "");
+        journeyInput.current = input;
+        setChoice((current) => ({ ...current, id: null, edits: {} }));
+        fares.reset();
+        journeys.generate(input);
+      }
+      setTrip(submission);
       setOptions(optionsCall.plan);
       setSelected(presetSelections(optionsCall.plan));
       setStep(2);
     }
   }, [optionsCall.plan]);
+  useEffect(() => {
+    const routes = journeys.plan?.journeys;
+    if (routes?.length) {
+      setChoice((current) => ({ ...current, id: current.id ?? routes[0].id }));
+      fares.generate(journeyInput.current);
+    }
+  }, [journeys.plan]);
+  const route = journeys.status === "success"
+    ? journeys.plan?.journeys.find((item) => item.id === choice.id)
+    : null;
+  const fareData = fares.status === "success" ? fares.plan?.fares : null;
   useEffect(() => {
     if (generatedPlan?.days.some((d) => d.stops.length))
       setPlanTrip(pendingTrip.current);
@@ -182,6 +211,17 @@ export default function App() {
             {stale && (
               <p role="alert">Trip details changed. Regenerate options</p>
             )}
+            <JourneyPicker
+              trip={trip}
+              journeys={journeys.status === "loading" || journeys.status === "error" ? { ...journeys, plan: null } : journeys}
+              fares={fares.status !== "success" ? { ...fares, plan: null } : fares}
+              choice={choice}
+              setChoice={setChoice}
+              notice={journeyNotice}
+              onChangeHubs={() => setStep(1)}
+              retryRoutes={() => journeys.generate(journeyInput.current)}
+              retryFares={() => fares.generate(journeyInput.current)}
+            />
             <OptionsPicker
               options={options}
               setOptions={setOptions}
@@ -193,6 +233,7 @@ export default function App() {
               options={options}
               selected={selected}
               trip={trip}
+              journey={{ ...choice, route, fares: fareData }}
               activitiesTotal={
                 planTrip === trip && plan
                   ? plan.days
@@ -205,7 +246,7 @@ export default function App() {
             />
             <button
               className="button button-primary"
-              disabled={stale || status === "loading"}
+              disabled={stale || !route || status === "loading"}
               onClick={buildPlan}
             >
               Build my itinerary

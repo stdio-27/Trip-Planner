@@ -1,8 +1,6 @@
 import { z } from "zod";
 import {
   TIERS,
-  COMFORTS,
-  TRAVEL_MODES,
   STAY_TYPES,
   LOCAL_PRICINGS,
 } from "./choices.js";
@@ -16,15 +14,6 @@ const price = z
 const text = z.string().trim().max(1000);
 const base = { label: text.min(1), notes: text.default("") };
 export const optionSchemas = {
-  travelOptions: z.object({
-    ...base,
-    mode: z.enum(TRAVEL_MODES).catch("other"),
-    comfort: z.enum(COMFORTS).catch("standard"),
-    durationHours: price,
-    farePerPersonRoundTrip: price,
-    originTransferPerPersonRoundTrip: price,
-    destinationTransferPerPersonRoundTrip: price,
-  }),
   stayOptions: z.object({
     ...base,
     tier: z.enum(TIERS).catch("mid"),
@@ -43,7 +32,6 @@ export const optionSchemas = {
     dailyPerPerson: price,
   }),
 };
-/** @typedef {import("zod").output<typeof optionSchemas.travelOptions>} TravelOption */
 const hub = z.object({
   name: text.default(""),
   code: text.default(""),
@@ -67,11 +55,6 @@ const schema = z.object({
 });
 export const groups = Object.keys(optionSchemas);
 export const priceFields = {
-  travelOptions: [
-    "farePerPersonRoundTrip",
-    "originTransferPerPersonRoundTrip",
-    "destinationTransferPerPersonRoundTrip",
-  ],
   stayOptions: ["pricePerRoomPerNight"],
   localTransportOptions: ["pricePerDay"],
   foodOptions: ["dailyPerPerson"],
@@ -91,8 +74,6 @@ export function parseOptions(raw) {
           ...optionSchemas[key].parse({
             label: "Custom",
             notes: "Enter your own estimate.",
-            mode: "other",
-            comfort: "standard",
             tier: "mid",
             type: "other",
             area: "",

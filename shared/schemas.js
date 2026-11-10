@@ -87,7 +87,6 @@ export function requestSchema(today, picked = false) {
   ).safeExtend({
     selections: z
       .object({
-        travelOptions: optionSchemas.travelOptions,
         stayOptions: optionSchemas.stayOptions,
         localTransportOptions: optionSchemas.localTransportOptions,
         foodOptions: optionSchemas.foodOptions,

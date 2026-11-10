@@ -69,3 +69,10 @@ Each leg records its evidence, source year and planning buffer so the interface 
 Journey ranking balances duration, changes and a mode-based cost heuristic and limits the result to five candidates.
 Gemini receives leg facts for fares while failed estimates leave the route structure available for a fare-only retry.
 Fixture and HTTP tests cover rail changes, flight connections, historic evidence, fare validation and north-east coverage.
+
+## v2 Phase 6 — journey selection and travel costs
+Journey cards show the route, timing, changes and dated availability evidence before fares load.
+Travelers can change the fare tier, edit leg prices and choose a one-way or return journey.
+The travel total uses passenger fares or one vehicle per four travelers, with a breakdown by leg.
+Fare retries keep the selected journey and edited fares, and changed trip inputs reset the selection.
+Stay, local transport and food estimates remain available alongside the travel breakdown.

@@ -28,8 +28,8 @@ it("creates custom options for missing groups with independent UUIDs", () => {
   for (const k of groups) delete raw[k];
   const p = parseOptions(raw);
   expect(p.success).toBe(true);
-  expect(new Set(groups.map((k) => p.data[k][0].id)).size).toBe(4);
-  expect(p.data.travelOptions[0].label).toBe("Custom");
+  expect(new Set(groups.map((k) => p.data[k][0].id)).size).toBe(3);
+  expect(p.data.stayOptions[0].label).toBe("Custom");
 });
 it.each([null, {}, { currency: "INR" }])(
   "rejects unusable options envelopes",

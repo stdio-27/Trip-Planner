@@ -189,7 +189,7 @@ it.each([
   else if (mode === "demo") {
     const b = await r.json();
     expect(b.currency).toBe("JPY");
-    expect(b.travelOptions).toHaveLength(3);
+    expect(b.stayOptions).toHaveLength(3);
     expect(b.origin.city).toBe("Delhi");
   } else if (mode === "bad-json")
     expect(() => JSON.parse('{"invalid":')).toThrow();
@@ -200,7 +200,6 @@ it("sends validated selected modes to the provider", async () => {
   const choices = demoOptions(trip);
   const selections = Object.fromEntries(
     [
-      "travelOptions",
       "stayOptions",
       "localTransportOptions",
       "foodOptions",

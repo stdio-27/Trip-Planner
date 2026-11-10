@@ -1,12 +1,5 @@
-import { z } from "zod";
+import { fareSchema } from "../../shared/journeys.js";
 import { extractJson } from "../extractJson.js";
-
-const fareSchema = z.object({
-  basic: z.number().finite().positive(),
-  standard: z.number().finite().positive(),
-  premium: z.number().finite().positive(),
-  pricing: z.enum(["perPerson", "perVehicle"]),
-});
 
 export function normalizeFares(value, legIds) {
   const result = {};

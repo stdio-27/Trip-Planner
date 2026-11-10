@@ -38,7 +38,7 @@ export function createJourneyRouter({
   fetchImpl,
 }) {
   const router = Router();
-  router.post(["/journeys", "/journeys/fares"], limiter, async (req, res) => {
+  router.post(["/journeys", "/journeys/structure", "/journeys/fares"], limiter, async (req, res) => {
     const parsed = requestSchema.safeParse(req.body);
     if (!parsed.success) {
       res
@@ -64,6 +64,15 @@ export function createJourneyRouter({
     }
     const journeys =
       mockMode === "journeys-empty" ? [] : buildJourneys(input, loadData());
+    const emptyReason = journeys.length
+      ? null
+      : !input.origin.airportId && !input.origin.stationCode
+        ? "No origin transport hub was selected and no road route is in range."
+        : "No connection matched the selected hubs and the bundled route data.";
+    if (req.path === "/journeys/structure") {
+      res.json({ journeys, emptyReason });
+      return;
+    }
     const legs = uniqueLegs(journeys);
     let fares = null;
     let faresError = null;
@@ -90,9 +99,6 @@ export function createJourneyRouter({
           "Fare estimates are unavailable. You can retry the fare estimates.";
       }
     }
-    const emptyReason = journeys.length
-      ? null
-      : "No connection matched the selected hubs and the bundled route data.";
     res.json({
       ...(req.path === "/journeys" ? { journeys, emptyReason } : {}),
       currency: input.currency,

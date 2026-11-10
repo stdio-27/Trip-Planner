@@ -4,8 +4,8 @@ export function formatMoney(value, currency) {
     currency,
   }).format(value);
 }
-/** @typedef {{travelOptions?: Partial<import('../shared/optionsSchema.js').TravelOption>, stayOptions?: {pricePerRoomPerNight?:number}, localTransportOptions?: {pricePerDay?:number,pricing?:string}, foodOptions?: {dailyPerPerson?:number}}} CostSelections */
-/** @param {{selections?:CostSelections, travelers?:{adults:number,children:number},days?:number,rooms?:number,activitiesTotal?:number,contingencyOn?:boolean}} args */
+/** @typedef {{stayOptions?: {pricePerRoomPerNight?:number}, localTransportOptions?: {pricePerDay?:number,pricing?:string}, foodOptions?: {dailyPerPerson?:number}}} CostSelections */
+/** @param {{selections?:CostSelections, travelers?:{adults:number,children:number},days?:number,rooms?:number,activitiesTotal?:number,contingencyOn?:boolean,journey?:Parameters<typeof journeyLegCosts>[0]}} args */
 export function computeCostBreakdown({
   selections = {},
   travelers = { adults: 1, children: 0 },
@@ -13,18 +13,15 @@ export function computeCostBreakdown({
   rooms = 1,
   activitiesTotal = 0,
   contingencyOn = false,
+  journey,
 }) {
   const people = travelers.adults + travelers.children,
     nights = Math.max(days - 1, 0);
-  const t = selections.travelOptions || {},
-    s = selections.stayOptions || {},
+  const s = selections.stayOptions || {},
     l = selections.localTransportOptions || {},
     f = selections.foodOptions || {};
-  const travel =
-    ((t.farePerPersonRoundTrip || 0) +
-      (t.originTransferPerPersonRoundTrip || 0) +
-      (t.destinationTransferPerPersonRoundTrip || 0)) *
-    people;
+  const travelLegs = journeyLegCosts(journey, people);
+  const travel = travelLegs.reduce((sum, leg) => sum + leg.amount, 0);
   const stay = (s.pricePerRoomPerNight || 0) * nights * rooms;
   const local =
     (l.pricePerDay || 0) * days * (l.pricing === "perGroup" ? 1 : people);
@@ -35,6 +32,7 @@ export function computeCostBreakdown({
     total = subtotal + contingency;
   return {
     travel,
+    travelLegs,
     stay,
     local,
     food,
@@ -63,9 +61,28 @@ export function presetSelections(options, preset = "Balanced", context = {}) {
             : preset === "Comfort"
               ? sorted.at(-1)
               : list.find(
-                  (x) => x.comfort === "standard" || x.tier === "mid",
+                  (x) => x.tier === "mid",
                 ) || sorted[Math.floor(sorted.length / 2)];
         return [key, item.id];
       }),
   );
+}
+
+export function journeyLegCosts(journey, people) {
+  if (!journey?.route) return [];
+  const { route, fares, tier, roundTrip, edits } = journey;
+  return route.legs.map((leg) => {
+    const fare = fares?.[leg.id];
+    const edit = edits?.[leg.id + ":" + tier];
+    const value = edit != null && edit !== "" ? Number(edit) : fare?.[tier];
+    const pricing = fare?.pricing ?? (leg.mode === "cab" ? "perVehicle" : "perPerson");
+    const units = pricing === "perVehicle" ? Math.ceil(people / 4) : people;
+    const missing = !Number.isFinite(value) || value < 0;
+    return {
+      id: leg.id,
+      label: leg.from.name + " → " + leg.to.name,
+      missing,
+      amount: missing ? 0 : value * units * (roundTrip ? 2 : 1),
+    };
+  });
 }

@@ -1169,3 +1169,25 @@ h1, h2, h3, h4 { font-family: "Plus Jakarta Sans", sans-serif; font-weight: 800;
 .hub-choices { min-width: 0; }
 .hub-choices input[type="radio"] { width: auto; min-height: auto; flex: 0 0 auto; }
 .hub-choices button, .place-field button { min-height: 44px; }
+
+.journey-picker { min-width: 0; }
+.journey-picker fieldset { min-width: 0; }
+.journey-controls, .journey-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .75rem;
+}
+.journey-controls { align-items: center; margin-block: 1rem; }
+.journey-controls label { display: inline-flex; align-items: center; gap: .5rem; min-height: 44px; }
+.journey-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+  gap: 1rem;
+}
+.journey-choice { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; min-height: 44px; }
+.journey-choice span { flex-basis: 100%; overflow-wrap: anywhere; }
+.journey-badges span { border: 1px solid currentColor; border-radius: 1rem; padding: .2rem .65rem; font-size: .85rem; }
+.journey-legs { padding-inline-start: 1.2rem; overflow-wrap: anywhere; }
+.journey-legs li + li { margin-top: 1rem; }
+.journey-picker summary { cursor: pointer; padding-block: .65rem; }
+.fare-loading { border-radius: .5rem; padding: .5rem; background: #f5a62329; }

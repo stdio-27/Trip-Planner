@@ -20,6 +20,20 @@ const trip = {
   currency: "INR",
 };
 const raw = demoOptions(trip);
+const leg = {
+  id: "rail", mode: "train", from: { kind: "station", id: "NDLS", name: "New Delhi" },
+  to: { kind: "station", id: "GHY", name: "Guwahati" },
+  distanceKm: 1600, durationMin: 1200, bufferMin: 0, note: "Rail timetable",
+  availability: { level: "scheduled", dataYear: 2016, checkUrl: "https://www.irctc.co.in/nget/train-search" },
+};
+const routes = { journeys: [
+  { id: "rail-option", label: "Train", legs: [leg], totalDurationMin: 1200, changes: 0, modes: ["train"] },
+  { id: "cab-option", label: "Cab", legs: [{ ...leg, id: "cab", mode: "cab" }], totalDurationMin: 1200, changes: 0, modes: ["cab"] },
+], emptyReason: null };
+const fares = { fares: {
+  rail: { basic: 30, standard: 50, premium: 100, pricing: "perPerson" },
+  cab: { basic: 50, standard: 100, premium: 200, pricing: "perVehicle" },
+}, faresError: null };
 const plan = {
   title: "Kyoto",
   currency: "INR",
@@ -38,6 +52,7 @@ async function setup(
     ok: true,
     text: async () => JSON.stringify(plan),
   }),
+  journeyOverrides = {},
 ) {
   const fetchMock = vi.fn((url, init) =>
     url === "/api/options"
@@ -63,6 +78,8 @@ async function setup(
     lon: 91.75,
   };
   vi.stubGlobal("fetch", async (url, init) => {
+    if (url === "/api/journeys/structure") return Response.json(journeyOverrides.routes ?? routes);
+    if (url === "/api/journeys/fares") return Response.json(journeyOverrides.fares?.() ?? fares);
     if (init?.method === "POST") return fetchMock(url, init);
     const data =
       url === "/api/geo/states"
@@ -105,6 +122,7 @@ async function options() {
   await screen.findByRole("heading", { name: "Make it your kind of trip" });
 }
 async function build() {
+  await screen.findByRole("radio", { name: /Train New Delhi/ });
   fireEvent.click(screen.getByRole("button", { name: "Build my itinerary" }));
   await screen.findByRole("heading", { name: "Kyoto", exact: true });
 }
@@ -240,4 +258,36 @@ it("requires selecting a replacement after editing a destination", async () => {
   );
   expect(screen.getByText("Choose a place from the list.")).toBeTruthy();
   expect(fetchMock).not.toHaveBeenCalled();
+});
+
+it("selects a journey, updates fare totals and resets after a traveler change", async () => {
+  await setup();
+  await options();
+  await screen.findByText(/^₹100\.00 per traveler/);
+  const cab = screen.getByRole("radio", { name: /Cab New Delhi/ });
+  cab.focus();
+  fireEvent.click(cab);
+  expect(cab.checked).toBe(true);
+  fireEvent.click(screen.getByLabelText("Return the same way"));
+  fireEvent.change(screen.getByLabelText("Fare tier"), { target: { value: "premium" } });
+  expect(screen.getByRole("list", { name: "Travel costs by leg" }).textContent).toMatch(/200\.00/);
+  fireEvent.click(screen.getByRole("button", { name: "Back to trip details" }));
+  fireEvent.change(screen.getByLabelText(/^Adults/), { target: { value: "2" } });
+  await options();
+  await screen.findByText(/previous journey selection was reset/);
+  expect((await screen.findByRole("radio", { name: /Train New Delhi/ })).checked).toBe(true);
+});
+it("retries fares only and keeps the selected journey", async () => {
+  const failedOnce = vi.fn()
+    .mockReturnValueOnce({ fares: null, faresError: "Unavailable" })
+    .mockReturnValue(fares);
+  const optionsFetch = await setup(undefined, { fares: failedOnce });
+  await options();
+  const retry = await screen.findByRole("button", { name: "Estimate prices again" });
+  fireEvent.click(screen.getByRole("radio", { name: /Cab New Delhi/ }));
+  fireEvent.click(retry);
+  await screen.findByText(/200\.00 per traveler/);
+  expect(screen.getByRole("radio", { name: /Cab New Delhi/ }).checked).toBe(true);
+  expect(optionsFetch).toHaveBeenCalledTimes(1);
+  expect(failedOnce).toHaveBeenCalledTimes(2);
 });
