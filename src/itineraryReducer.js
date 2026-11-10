@@ -1,3 +1,5 @@
+export const MAX_UNDO_HISTORY = 20;
+
 export const initialItineraryState = {
   present: null,
   past: [],
@@ -80,7 +82,7 @@ export function itineraryReducer(state = initialItineraryState, action) {
 
       return {
         present,
-        past: [...state.past, state.present],
+        past: [...state.past, state.present].slice(-MAX_UNDO_HISTORY),
       };
     }
 
@@ -97,7 +99,7 @@ export function itineraryReducer(state = initialItineraryState, action) {
 
       return {
         present,
-        past: [...state.past, state.present],
+        past: [...state.past, state.present].slice(-MAX_UNDO_HISTORY),
       };
     }
 
