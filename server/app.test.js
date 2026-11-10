@@ -243,3 +243,56 @@ it.each([
   expect(Object.keys((await response.json()).errors)).toContain(Object.keys(change)[0]);
   expect(fetch).not.toHaveBeenCalled();
 });
+
+const journeyInput = {
+  origin: pickedTrip.origin,
+  destination: pickedTrip.destination,
+  currency: "INR",
+  travelers: { adults: 2, children: 1 },
+};
+it.each(["demo", "fares-bad-json", "fares-fail", "journeys-empty"])("handles journey mock %s", async mockMode => {
+  const fetch = vi.fn();
+  const response = await request(createApp({ mockMode, fetch }), journeyInput, "journeys");
+  expect(response.status).toBe(200);
+  const body = await response.json();
+  expect(fetch).not.toHaveBeenCalled();
+  if (mockMode === "journeys-empty") {
+    expect(body.journeys).toEqual([]);
+    expect(body.emptyReason).toBeTruthy();
+  } else {
+    expect(body.journeys.length).toBeGreaterThan(0);
+  }
+  if (mockMode === "demo") {
+    for (const leg of body.journeys.flatMap(journey => journey.legs)) {
+      expect(body.fares[leg.id].basic).toBeGreaterThan(0);
+    }
+  } else {
+    expect(body.fares).toBeNull();
+    if (mockMode !== "journeys-empty") expect(body.faresError).toBeTruthy();
+  }
+});
+it("rejects unknown journey hub IDs and invalid dates", async () => {
+  const app = createApp({ mockMode: "demo" });
+  const unknown = await request(app, { ...journeyInput, origin: { ...journeyInput.origin, airportId: "ZZZ" } }, "journeys");
+  expect(unknown.status).toBe(400);
+  expect((await unknown.json()).code).toBe("INVALID_JOURNEY_PLACES");
+  const invalidDate = await request(app, { ...journeyInput, date: "2026-02-30" }, "journeys");
+  expect(invalidDate.status).toBe(400);
+  expect((await invalidDate.json()).code).toBe("INVALID_JOURNEY_REQUEST");
+});
+it("retries only fare estimates using server-computed leg facts", async () => {
+  const fetch = vi.fn(async (_url, init) => {
+    const prompt = JSON.parse(init.body).contents[0].parts[0].text;
+    const facts = JSON.parse(prompt.split("<leg_facts>\n")[1].split("\n</leg_facts>")[0]);
+    expect(facts.currency).toBe("INR");
+    expect(facts.legs.every(leg => leg.from && leg.to && leg.durationMin > 0)).toBe(true);
+    const fares = Object.fromEntries(facts.legs.map(leg => [leg.id, { basic: 100, standard: 200, premium: 300, pricing: "perPerson" }]));
+    return Response.json({ candidates: [{ content: { parts: [{ text: JSON.stringify({ fares }) }] } }] });
+  });
+  const response = await request(createApp({ mockMode: "off", apiKey: "test-only", fetch }), journeyInput, "journeys/fares");
+  expect(response.status).toBe(200);
+  const body = await response.json();
+  expect(body.journeys).toBeUndefined();
+  expect(Object.keys(body.fares).length).toBeGreaterThan(0);
+  expect(fetch).toHaveBeenCalledTimes(1);
+});

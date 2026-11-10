@@ -1,4 +1,5 @@
 import "dotenv/config";
+import { createJourneyRouter } from "./journeys/routes.js";
 import { resolveTripPlaces } from "./tripPlaces.js";
 import { createPlacesRouter } from "./geo/routes.js";
 import fs from "node:fs";
@@ -134,6 +135,13 @@ export function createApp(options = {}) {
   app.use("/api/geo", planLimiter);
   app.use("/api/hubs", planLimiter);
   app.use("/api", places);
+  app.use("/api", createJourneyRouter({
+    limiter: planLimiter,
+    mockMode,
+    apiKey: options.apiKey ?? process.env.GEMINI_API_KEY,
+    model: geminiModel,
+    fetchImpl: options.fetch,
+  }));
 
   app.post(["/api/plan", "/api/options"], planLimiter, async (req, res) => {
     const validation = validateTripInput(req.body);

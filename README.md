@@ -239,3 +239,13 @@ Choose an origin state and district, then select a destination from place search
 During a geocoder outage, origin hub search can supply approximate district coordinates. An arrival hub with a known state can serve as the destination. This fallback uses hub coordinates for the search center. A station without a known state can still be chosen as a hub for an already selected destination.
 
 Both generation endpoints accept structured origin and destination objects. The server checks the district/state relationship, coordinate bounds, and hub IDs against the bundled datasets and resolves the hub display names. Existing clients can still submit the earlier text payload. The browser setup uses structured selections.
+
+## v2 Phase 5 journey engine
+
+POST /api/journeys accepts the structured origin and destination objects, optional date, travelers with adults and children, and currency. It returns journeys, emptyReason, currency, fares and faresError. POST /api/journeys/fares accepts the same payload and returns only currency, fares and faresError. It reconstructs eligible leg IDs from the bundled data before requesting estimates.
+
+Rail paths use at most two trains. Each flight segment needs a directional historical route hint, including when connecting through a hub. Trips under 30 km offer road modes, and direct road candidates have a 500 km straight-line limit. First and last mile connections use the configured road factor and speeds. The ranking combines duration, a distance-weighted mode heuristic and number of changes. Fewer than three results can be returned when the data offers fewer distinct candidates.
+
+The train match refers to a 2016 timetable snapshot. The 2014 flight route hints and estimated road legs have separate evidence labels. Times include planning buffers, and connections use approximate transfer durations. Train and flight legs carry links to IRCTC and Google Flights. Road legs have no universal booking link.
+
+Gemini receives only server-computed leg facts, currency and optional travel date for one-way price estimates. All requested legs need valid fares. A provider failure preserves journeys with fares set to null. Demo returns deterministic illustrative amounts. The fares-bad-json, fares-fail and journeys-empty mocks exercise unavailable estimates and empty results.

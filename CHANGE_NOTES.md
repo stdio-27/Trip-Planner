@@ -62,3 +62,10 @@ The shared combobox supports keyboard navigation and ignores responses from supe
 Nearby hub lists and bundled search let users select or opt out of each mode.
 The server validates geographic references and resolves selected hub names from the snapshots.
 Tests cover keyboard selection, state resets, Back, outage fallback, stale results and request validation.
+
+## v2 Phase 5 — journey engine
+The server builds journeys from the bundled rail graph, flight hints and estimated road connections.
+Each leg records its evidence, source year and planning buffer so the interface can explain the estimate.
+Journey ranking balances duration, changes and a mode-based cost heuristic and limits the result to five candidates.
+Gemini receives leg facts for fares while failed estimates leave the route structure available for a fare-only retry.
+Fixture and HTTP tests cover rail changes, flight connections, historic evidence, fare validation and north-east coverage.
