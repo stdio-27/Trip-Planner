@@ -10,34 +10,50 @@ function createId() {
   return globalThis.crypto.randomUUID();
 }
 
-const categorySchema = z.unknown().transform((value) => {
-  if (typeof value !== "string") {
-    return "other";
-  }
+const categorySchema = z
+  .unknown()
+  .optional()
+  .transform((value) => {
+    if (typeof value !== "string") {
+      return "other";
+    }
 
-  const normalized = value.trim().toLowerCase();
-  return categories.includes(normalized) ? normalized : "other";
-});
+    const normalized = value.trim().toLowerCase();
+    return categories.includes(normalized) ? normalized : "other";
+  });
 
-const estimatedCostSchema = z.unknown().transform((value) => {
-  const cost =
-    typeof value === "number"
-      ? value
-      : typeof value === "string" && value.trim()
-        ? Number(value)
-        : Number.NaN;
+const estimatedCostSchema = z
+  .unknown()
+  .optional()
+  .transform((value) => {
+    const cost =
+      typeof value === "number"
+        ? value
+        : typeof value === "string" && value.trim()
+          ? Number(value)
+          : Number.NaN;
 
-  return Number.isFinite(cost) && cost >= 0 ? cost : 0;
-});
+    return Number.isFinite(cost) && cost >= 0 ? cost : 0;
+  });
+
+const optionalStringSchema = z
+  .unknown()
+  .optional()
+  .transform((value) => {
+    if (typeof value === "string" && value.trim()) {
+      return value.trim();
+    }
+    return undefined;
+  });
 
 const stopSchema = z
   .object({
     title: z.string().trim().min(1),
     category: categorySchema,
     estCost: estimatedCostSchema,
-    description: z.string().optional(),
-    location: z.string().optional(),
-    time: z.string().optional(),
+    description: optionalStringSchema,
+    location: optionalStringSchema,
+    time: optionalStringSchema,
   })
   .transform((stop) => ({ ...stop, id: createId() }));
 
@@ -70,7 +86,10 @@ export const tripSchema = z
     title: z.string().trim().min(1),
     currency: z.string().trim().min(1),
     days: z.array(daySchema),
-    packingList: z.array(z.string().trim().min(1)),
+    packingList: z
+      .array(z.string().trim().min(1))
+      .nullish()
+      .transform((val) => val ?? []),
   })
   .transform((trip) => {
     let droppedItems = 0;
