@@ -221,3 +221,13 @@ Geographic datasets and geocoding are not installed or used yet. `docs/DATA_SOUR
 - `npm run data:check` validates the committed data, prints source and output counts, and reports state coverage and isolated junctions without network access.
 
 Attribution: LGD, Ministry of Panchayati Raj (GODL-India, via the ramSeraph report mirror); datameet/railways (CC0); OurAirports (public domain); OpenFlights (ODbL/DbCL). See [data sources and licenses](docs/DATA_SOURCES.md) and the [data QA report](docs/DATA_QA.md). Historical 2016 rail and 2014 flight evidence cannot establish live schedules or seat availability. The server starts using committed outputs; raw files and downloads are build-time only.
+
+## v2 Phase 3 places API
+
+- GET /api/geo/states returns { states }. GET /api/geo/districts?state=CODE returns { districts }.
+- GET /api/geo/search?q=NAME&state=CODE returns { results }. State is optional and filters the ten candidates returned by the provider.
+- GET /api/hubs/nearby?lat=LAT&lon=LON returns { airports, stations, notes } with straight-line distances.
+- GET /api/hubs/search?type=airport|station&q=NAME returns { results }, with up to eight matches.
+- MOCK=geo-down and MOCK=geo-slow return GEOCODER_UNAVAILABLE. MOCK=geo-empty returns an empty results list.
+
+Place search uses [Open-Meteo Geocoding](https://open-meteo.com/en/docs/geocoding-api) with location data from GeoNames. Successful responses are cached for 24 hours with a 500-query limit. The five places endpoints share the existing API rate limiter. Bundled hub metadata carries the source coverage limits described in the data QA report.

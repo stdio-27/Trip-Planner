@@ -1,4 +1,5 @@
 import "dotenv/config";
+import { createPlacesRouter } from "./geo/routes.js";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -118,11 +119,20 @@ export function createApp(options = {}) {
     legacyHeaders: false,
     handler: (req, res) => {
       res.status(429).json({
+        code: "RATE_LIMITED",
         error:
           "Too many trip planning requests. Please wait a minute before trying again.",
       });
     },
   });
+
+  const places = createPlacesRouter({
+    provider: options.geoProvider,
+    mockMode,
+  });
+  app.use("/api/geo", planLimiter);
+  app.use("/api/hubs", planLimiter);
+  app.use("/api", places);
 
   app.post(["/api/plan", "/api/options"], planLimiter, async (req, res) => {
     const validation = validateTripInput(req.body);

@@ -24,3 +24,7 @@ The national junction rule is train count ≥ T, or name contains JN/JUNCTION/CE
 Graph edges are directional and require a common scheduled train that visits A before B. The elapsed duration uses source day and times, adjusts a departure crossing midnight, rejects nonpositive/outlier durations, and takes the median across distinct trains. Distances are straight-line distances between station coordinates, not rail track distances. The gzip graph is under 3 MiB; the runtime expands it once. No edge implies current operation, seats, or fares.
 
 See [DATA_QA.md](DATA_QA.md) for the measured counts and isolated junctions. Review the gaps before using the data to build regional route suggestions.
+
+## Phase 3 geocoding
+
+[Open-Meteo Geocoding](https://open-meteo.com/en/docs/geocoding-api) was checked on 11 November 2026. The hosted free endpoint is for non-commercial use. Location data comes from [GeoNames](https://www.geonames.org/export/), licensed CC BY 4.0. The server requests up to ten Indian matches, caches successful responses for up to 24 hours, and maps state names to bundled LGD codes. State filtering happens after the provider limit, so a local match can be absent from the returned candidates. District names come from provider admin2 labels and may differ from LGD spellings.

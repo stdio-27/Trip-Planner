@@ -48,3 +48,10 @@ LGD state and district totals are compared to the source, and large railway sche
 Station state inference, junction selection and compressed graph construction are documented with source limits.
 The server validates and indexes the committed processed datasets once, with no runtime downloads.
 The QA report lists every state, unresolved coverage and isolated junctions before any picker or journey UI is added.
+
+## v2 Phase 3 — places API
+The server serves states, districts, airports and major junctions from the bundled snapshots.
+Place search uses a replaceable Open-Meteo provider with a five-second deadline.
+A bounded cache reuses place lookups while each request applies its own state filter.
+Nearby hubs use straight-line distance and search ranks exact codes ahead of name matches.
+Validation, mock outages and upstream errors are covered by API regression tests.
