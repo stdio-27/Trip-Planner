@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { BuzzIntro, BuzzOutro } from "./components/BuzzLanding.jsx";
 import { BudgetSummary } from "./components/BudgetSummary.jsx";
 import { EmptyHint, EmptyState } from "./components/EmptyStates.jsx";
@@ -34,17 +34,19 @@ export default function App() {
   const [trip,setTrip] = useState(null);
   const [contingencyOn,setContingencyOn] = useState(false);
   const [planTrip,setPlanTrip] = useState(null);
+  const pendingTrip = useRef(null);
   useEffect(()=>{
     if (optionsCall.status === "success" && optionsCall.plan) {
-      setOptions(optionsCall.plan); setSelected(presetSelections(optionsCall.plan)); setStep(2);
+      setTrip(pendingTrip.current); setOptions(optionsCall.plan); setSelected(presetSelections(optionsCall.plan)); setStep(2);
     }
-  },[optionsCall.status,optionsCall.plan]);
+  },[optionsCall.plan]);
+  useEffect(()=>{if (generatedPlan?.days.some(d=>d.stops.length)) setPlanTrip(pendingTrip.current);},[generatedPlan]);
   function handleSubmit(submission) {
-    setTrip(submission); optionsCall.generate(submission);
+    pendingTrip.current=submission; optionsCall.generate(submission);
   }
   const stale = trip && ["destination","originCity","days","adults","children","currency","nearestAirport","nearestStation","startDate","rooms","pace","foodPreference","foodOther","interests","anythingElse","budget"].some(k=>String(formValues[k] ?? "") !== String(trip[k] ?? "") && !(k==="rooms" && !formValues.rooms) && !(k==="budget" && formValues.budget==="" && trip.budget==null));
   function buildPlan() {
-    setPlanTrip(trip); setStep(3);
+    setStep(3);
     generate({...trip,selections:Object.fromEntries(groups.map(key=>[key,options[key].find(x=>x.id===selected[key])]))});
   }
 
@@ -61,6 +63,7 @@ export default function App() {
       <BuzzIntro />
       <section id="planner" className="planner-layout options-flow" aria-label="Trip planner">
         <nav className="flow-progress" aria-label="Planning progress">{["Trip details","Choose options","Your itinerary"].map((label,i)=><span key={label} aria-current={step===i+1?"step":undefined}>{i+1}. {label}</span>)}</nav>
+        {step === 1 && stale && <p role="alert">Trip details changed. Regenerate options</p>}
         {step === 1 && <aside className="form-panel">
           <div className="section-eyebrow">YOUR NEXT ADVENTURE</div>
           <h2>Plan a trip</h2>
@@ -74,7 +77,7 @@ export default function App() {
           />
         </aside>}
         {optionsCall.status === "loading" && <div><button className="button" onClick={optionsCall.cancel}>Cancel</button><Skeleton /></div>}
-        {optionsCall.status === "error" && <ErrorState message={optionsCall.error} onRetry={()=>optionsCall.generate(trip)} />}
+        {optionsCall.status === "error" && <ErrorState message={optionsCall.error} onRetry={()=>optionsCall.generate(pendingTrip.current)} />}
         {optionsCall.status === "empty" && <EmptyState />}
         {step > 1 && options && <>
           <button className="button" onClick={()=>{cancel();setStep(1);}}>Back to trip details</button>

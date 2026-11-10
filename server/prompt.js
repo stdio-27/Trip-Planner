@@ -5,6 +5,7 @@ export function buildTripPrompt(tripDetails) {
     "Return a single JSON object only. Do not include markdown fences, code blocks, or commentary.",
     "The structured days field is authoritative and overrides durations in the description. Return exactly that many days for a trip and use the requested currency. An unrelated request may return zero days.",
     `Return EXACTLY ${tripDetails.days} day objects, numbered Day 1..Day ${tripDetails.days}. At most 5 stops per day; descriptions must be short.`,
+    "Follow the selected travel mode, stay area/tier, local transport, food preference and pace. Stop estCost is PER PERSON, only extra activity entrance/ticket costs. Never include base travel, accommodation, daily local transport or ordinary food costs in stops: those are budgeted separately. Do not add taxi-heavy routes when public transport was selected.",
     "Use this exact shape:",
     JSON.stringify({
       title: "string",

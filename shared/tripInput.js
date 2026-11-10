@@ -1,3 +1,4 @@
+import {optionSchemas, groups} from "./optionsSchema.js";
 function validateBase(body) {
   if (!body || typeof body !== "object" || Array.isArray(body)) {
     return { valid: false, error: "Request body must be a JSON object." };
@@ -99,5 +100,14 @@ export function validateTripInput(body, today = new Date().toLocaleDateString("e
   if (data.foodPreference === "other" && !data.foodOther) return {valid:false,error:"Describe your food preference.",field:"foodOther"};
   data.startDate = body.startDate ?? "";
   if (data.startDate && (typeof data.startDate !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(data.startDate) || Number.isNaN(Date.parse(data.startDate)) || new Date(data.startDate).toISOString().slice(0,10) !== data.startDate || data.startDate < today)) return {valid:false,error:"Start date must be a real date today or later.",field:"startDate"};
+  if (body.selections !== undefined) {
+    if (!body.selections || typeof body.selections !== "object" || Array.isArray(body.selections)) return {valid:false,error:"Invalid selected combination."};
+    data.selections = {};
+    for (const key of groups) {
+      const parsed = optionSchemas[key].safeParse(body.selections[key]);
+      if (!parsed.success) return {valid:false,error:`Invalid selection for ${key}.`};
+      data.selections[key] = parsed.data;
+    }
+  }
   return {valid:true,data};
 }

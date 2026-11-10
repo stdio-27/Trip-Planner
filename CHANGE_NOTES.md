@@ -20,3 +20,10 @@ The new options endpoint estimates travel, stays, local transport and food befor
 Four radio groups support independent choices, presets and editable prices, including custom empty-group fallbacks.
 The screen shows inferred hubs, assumptions and an immediately updating estimate summary.
 Demo options work without an API key, and Back preserves the entered form values.
+
+## Phase 4
+A pure cost function computes round-trip travel, room nights, local transport, food and per-person activities.
+Children count as full-price travelers, rooms default from adult count, and contingency adds ten percent.
+The selected combination is validated and sent to the model so itinerary routes reflect those choices.
+Stops exclude separately budgeted categories, and removing or restoring stops updates the activity estimate.
+Changing setup requires new options; successful replacement results reset selections while cancellation preserves the existing plan.

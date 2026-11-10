@@ -179,3 +179,19 @@ details, and review generated code before relying on it.
 ## Time spent
 
 Time spent: **[enter time spent, e.g. 4.5 hours]**
+
+## Three-step planning and estimate model
+
+1. Enter destination, origin hubs, 1–14 days, dates, travelers, rooms and preferences.
+2. `POST /api/options` returns independent travel, accommodation, local transport and food estimates. Select or edit any combination; Back preserves inputs.
+3. Build the itinerary with `POST /api/plan`. Selected modes, stay area and pace are sent to the model. After generation, changing option selections only recalculates costs; rebuild the itinerary if routes should reflect those changes.
+
+Travel is round-trip fare plus both origin/destination transfers per traveler.
+Stay is price per room per night × max(days − 1, 0) × rooms.
+Local transport is per day, multiplied by travelers only for per-person pricing.
+Food is daily per-person food × days × travelers.
+Activity stop costs are per person and multiplied by travelers. Base transport, stay and ordinary meals are excluded from stop costs to avoid double counting.
+Children are charged as adults; the app does not know child discounts. Rooms default to ceil(adults / 2); children may require a manual room override.
+Optional contingency adds 10% to the subtotal. There is no currency conversion.
+JPY uses the currency's normal zero-decimal format. Distances and prices are approximate AI estimates with no live availability or booking links.
+Changing setup requires regenerating options. Prices are not live prices; verify before booking.

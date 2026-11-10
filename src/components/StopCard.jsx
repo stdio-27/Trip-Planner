@@ -7,7 +7,6 @@ function formatCost(value, currency) {
     return new Intl.NumberFormat(undefined, {
       style: "currency",
       currency,
-      maximumFractionDigits: 2,
     }).format(value);
   } catch {
     return `${currency} ${Number(value).toFixed(2)}`;
@@ -80,7 +79,7 @@ export function StopCard({
           <div className="stop-details">
             {stop.description && <p>{stop.description}</p>}
             {stop.location && <p><strong>Location:</strong> {stop.location}</p>}
-            <p><strong>Estimated cost:</strong> {formatCost(stop.estCost, currency)}</p>
+            <p><strong>Estimated activity cost per person:</strong> {formatCost(stop.estCost, currency)}</p>
           </div>
         )}
       </div>
