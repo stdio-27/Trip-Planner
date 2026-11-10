@@ -8,7 +8,7 @@ class InvalidPlanError extends Error {
   }
 }
 
-export function useGenerate() {
+export function useApiCall(endpoint, parser) {
   const [status, setStatus] = useState("idle");
   const [plan, setPlan] = useState(null);
   const [error, setError] = useState(null);
@@ -58,7 +58,7 @@ export function useGenerate() {
       for (let attempt = 0; attempt < 2; attempt += 1) {
         let response;
         try {
-          response = await fetch("/api/plan", {
+          response = await fetch(endpoint, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(tripDetails),
@@ -106,7 +106,7 @@ export function useGenerate() {
           throw new InvalidPlanError("The server returned invalid itinerary JSON.");
         }
 
-        const parsed = parsePlan(body);
+        const parsed = parser(body);
         if (!parsed.success) {
           if (attempt === 0) {
             continue;
@@ -130,8 +130,8 @@ export function useGenerate() {
       setPlan(parsedPlan);
       setDroppedItems(parsedPlan.droppedItems);
       setStatus(
-        parsedPlan.days.length > 0 &&
-          parsedPlan.days.some((day) => day.stops.length > 0)
+        (!parsedPlan.days || (parsedPlan.days.length > 0 &&
+          parsedPlan.days.some((day) => day.stops.length > 0)))
           ? "success"
           : "empty",
       );
@@ -163,7 +163,7 @@ export function useGenerate() {
         controllerRef.current = null;
       }
     }
-  }, []);
+  }, [endpoint, parser]);
 
   useEffect(
     () => () => {
@@ -180,3 +180,5 @@ export function useGenerate() {
 
   return { status, plan, error, droppedItems, generate, cancel };
 }
+
+export function useGenerate() { return useApiCall("/api/plan", parsePlan); }

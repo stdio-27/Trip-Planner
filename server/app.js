@@ -5,13 +5,15 @@ import { fileURLToPath } from "node:url";
 import express from "express";
 import rateLimit from "express-rate-limit";
 import { extractJson } from "./extractJson.js";
-import { buildTripPrompt } from "./prompt.js";
+import { buildTripPrompt, buildOptionsPrompt } from "./prompt.js";
 import { validateTripInput } from "./validator.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const distPath = path.resolve(__dirname, "../dist");
 
+import { parseOptions } from "../shared/optionsSchema.js";
+import { demoOptions } from "./demoOptions.js";
 import { validateGeneratedPlan } from "./planSchema.js";
 
 export function createApp(options = {}) {
@@ -56,6 +58,15 @@ export function createApp(options = {}) {
   }
 
   async function handleMock(req, res, tripDetails) {
+    if (req.path === "/api/options") {
+      if (mockMode === "options-bad-shape") { res.json({unexpected:true}); return true; }
+      if (mockMode === "options-empty") { res.status(200).end(); return true; }
+      if (["demo","jitter","slow","wrong-days"].includes(mockMode)) {
+        if (mockMode === "jitter") await delay(Math.random()*5000);
+        if (mockMode === "slow") await delay(40000);
+        res.json(demoOptions(tripDetails)); return true;
+      }
+    }
     switch (mockMode) {
       case "wrong-days":
         res.status(502).json({ error: "Gemini returned an invalid itinerary day count after one corrective retry." });
@@ -100,7 +111,7 @@ export function createApp(options = {}) {
     },
   });
 
-  app.post("/api/plan", planLimiter, async (req, res) => {
+  app.post(["/api/plan", "/api/options"], planLimiter, async (req, res) => {
     const validation = validateTripInput(req.body);
     if (!validation.valid) {
       res.status(400).json({ error: validation.error });
@@ -108,6 +119,7 @@ export function createApp(options = {}) {
     }
 
     const tripDetails = validation.data;
+    const isOptions = req.path === "/api/options";
 
     if (await handleMock(req, res, tripDetails)) {
       return;
@@ -171,11 +183,11 @@ export function createApp(options = {}) {
         method: "POST",
         headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: buildTripPrompt(tripDetails) + (attempt ? `\nCorrection: you returned ${returnedDays} days; return exactly ${tripDetails.days} day objects.` : "") }] }],
+          contents: [{ parts: [{ text: (isOptions ? buildOptionsPrompt(tripDetails) : buildTripPrompt(tripDetails)) + (attempt ? `\nCorrection: you returned ${returnedDays} days; return exactly ${tripDetails.days} day objects.` : "") }] }],
           generationConfig: {
             maxOutputTokens: 16384,
             responseMimeType: "application/json",
-            responseSchema: planResponseSchema,
+            ...(isOptions ? {} : {responseSchema: planResponseSchema}),
           },
         }),
         signal: AbortSignal.timeout(geminiTimeoutMs),
@@ -229,6 +241,12 @@ export function createApp(options = {}) {
         return;
       }
 
+      if (isOptions) {
+        const parsed = parseOptions(plan);
+        if ((!parsed.success || parsed.data.currency !== tripDetails.currency) && attempt === 0) continue;
+        if (!parsed.success || parsed.data.currency !== tripDetails.currency) { res.status(502).json({error:"Gemini returned invalid options."}); return; }
+        res.json(parsed.data); return;
+      }
       returnedDays = plan.days?.length;
       if (Array.isArray(plan.days) && plan.days.length > 0 && plan.days.length !== tripDetails.days && attempt === 0) continue;
       const validated = validateGeneratedPlan(plan, tripDetails);

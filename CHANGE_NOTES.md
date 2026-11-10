@@ -13,3 +13,10 @@ A shared pure validator applies the same rules in the browser and on the server.
 The day selector is always visible and displays the derived number of nights.
 Origin hubs can be left blank so the options step can show inferred assumptions.
 Currency defaults to INR and text is trimmed before it reaches the model.
+
+## Phase 3
+Both API endpoints now use the same cancellation, timeout and stale-response hook.
+The new options endpoint estimates travel, stays, local transport and food before an itinerary is built.
+Four radio groups support independent choices, presets and editable prices, including custom empty-group fallbacks.
+The screen shows inferred hubs, assumptions and an immediately updating estimate summary.
+Demo options work without an API key, and Back preserves the entered form values.
