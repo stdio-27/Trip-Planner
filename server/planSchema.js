@@ -20,6 +20,7 @@ const generatedPlanSchema = planEnvelopeSchema.extend({
 export function validateGeneratedPlan(value, request) {
   const result = generatedPlanSchema.safeParse(value);
   if (!result.success) return result;
+  if (result.data.days.some((day, index) => day.label !== `Day ${index + 1}`)) return {success:false};
   if (result.data.currency !== request.currency ||
       (result.data.days.length !== 0 && result.data.days.length !== request.days)) {
     return { success: false };

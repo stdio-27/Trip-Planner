@@ -1148,3 +1148,15 @@ h1, h2, h3, h4 { font-family: "Plus Jakarta Sans", sans-serif; font-weight: 800;
 .cost-panel dd { margin:4px 0; font-weight:800; }
 .cost-panel p { font-size:.8rem; }
 @media(max-width:640px) { .cost-panel { position:static; } .option-card { padding:18px; } }
+.options-flow .results-panel { min-width:0; }
+@media(max-width:640px) {
+ .cost-panel { position:sticky; bottom:8px; max-height:38vh; overflow:auto; background:rgba(255,255,255,.97); }
+ .cost-panel dl { grid-template-columns:repeat(3,minmax(0,1fr)); font-size:.72rem; }
+ .cost-panel h3 { margin:0 0 8px; }
+ .flow-progress { font-size:.75rem; }
+}
+/* Keep the estimate visible while reading the generated itinerary on phones. */
+@media (max-width: 640px) {
+  .cost-panel { position: fixed; left: 16px; right: 16px; bottom: 8px; width: auto; }
+  .options-flow { padding-bottom: calc(38vh + 80px); }
+}

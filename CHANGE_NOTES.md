@@ -27,3 +27,10 @@ Children count as full-price travelers, rooms default from adult count, and cont
 The selected combination is validated and sent to the model so itinerary routes reflect those choices.
 Stops exclude separately budgeted categories, and removing or restoring stops updates the activity estimate.
 Changing setup requires new options; successful replacement results reset selections while cancellation preserves the existing plan.
+
+## Phase 5
+Regression tests cover explicit day counts, retries, both request lifecycles, option salvage, edits and cost arithmetic.
+A seven-day demo completed the browser flow, including keyboard activation and 360px, 390px and 768px overflow checks.
+The audit reports zero advisories and the built bundle contains neither the API key variable nor the configured key.
+Automated endpoint and hook checks cover failure modes; not every failure mode or OS color scheme was manually exercised.
+Optional localStorage persistence is deliberately omitted so this release keeps session data in memory.

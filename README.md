@@ -6,7 +6,7 @@ while developing.
 
 ## Requirements
 
-- Node.js 20 or newer
+- Node.js 22.22.2 or newer (or Node 24.15+)
 - npm
 - A Gemini API key to generate real itineraries
 
@@ -157,8 +157,8 @@ length and budget before sending a request.
   Users can also cancel an in-flight request at any time using the Cancel button.
 - Rate limiting enforces a maximum of 10 requests per minute per IP address on
   `POST /api/plan`.
-- Input limits: Destination is required (1–1,000 characters); Interests is optional
-  (max 500 characters); Trip length is bounded between 1 and 30 days.
+- Input limits: Destination is required (1–100 characters); Interests is optional
+  (max 500 characters); Trip length is bounded between 1 and 14 days.
 - Day tabs and stop controls are accessible, but drag-and-drop behavior can
   vary by browser and assistive technology; the keyboard reorder buttons are
   also available.
@@ -168,7 +168,7 @@ length and budget before sending a request.
 ## AI usage note
 
 AI assistance was used to help implement, review, and document this project.
-Specifically, Google Antigravity was used for code review, QA auditing, and
+Specifically, Codex implemented the three-step setup/options/itinerary feature work. Google Antigravity was used for code review, QA auditing, and
 engineering fixes. Gemini (`gemini-flash-lite-latest`) generates itinerary suggestions;
 its output can be inaccurate, incomplete, or unsuitable for your situation.
 Verify opening hours, routes, accessibility, visa and safety requirements, and
@@ -195,3 +195,13 @@ Children are charged as adults; the app does not know child discounts. Rooms def
 Optional contingency adds 10% to the subtotal. There is no currency conversion.
 JPY uses the currency's normal zero-decimal format. Distances and prices are approximate AI estimates with no live availability or booking links.
 Changing setup requires regenerating options. Prices are not live prices; verify before booking.
+
+### Additional mock modes
+`MOCK=demo` runs all three steps without an API key and respects requested days/currency. Demo amounts are illustrative, not destination-specific market estimates.
+`wrong-days` deliberately returns the wrong count: the browser retries once, then shows an error.
+`options-bad-shape` returns invalid options and `options-empty` returns an empty options body.
+Existing bad-json, bad-shape, empty, fail, slow and jitter modes apply to both endpoints.
+The shared request hook aborts after 30 seconds total, including its retry. A server corrective retry shares that overall browser deadline.
+Setup dates use the Asia/Kolkata calendar date for server validation. This may differ from a traveler's local date near midnight.
+The cream sketch theme is intentionally the same in light and dark OS modes.
+Custom options start at zero: enter realistic estimates before relying on totals.
