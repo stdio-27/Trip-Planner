@@ -21,3 +21,8 @@
 - Created a dedicated balanced-brace scanner (`server/extractJson.js`) that tracks string quotation boundaries and escape sequences, ignoring non-JSON braces like `{A}` in surrounding commentary and extracting the first valid JSON object candidate.
 - Configured Gemini's native `responseSchema` on model calls to enforce structured JSON adherence directly at generation time, while preserving client-side Zod parsing as a strict safety net.
 - Wrote unit tests in `server/extractJson.test.js` validating markdown fences, commentary before and after, multiple JSON blocks, braces inside strings, and truncated text.
+
+## Task 5: Endpoint Rate Limiting and Architecture Notes
+- Installed and applied `express-rate-limit` on `POST /api/plan` limiting each IP to 10 requests per minute with standard headers and returning a user-friendly 429 JSON response ("Too many trip planning requests. Please wait a minute before trying again.").
+- Verified that 429 errors are caught by `useGenerate` and properly presented to the user via the existing error banner with a retry action.
+- Deliberately refrained from adding `cors` or `helmet`: because the Vite dev server proxies `/api` to Express and the production server serves `dist/` directly, the app operates as a same-origin system. If the frontend and backend were decoupled onto separate origins (e.g. Vercel and Cloud Run), `cors` would be essential to allow browser API access and `helmet` would provide security header hardening.

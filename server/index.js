@@ -3,6 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import express from "express";
+import rateLimit from "express-rate-limit";
 import { extractJson } from "./extractJson.js";
 import { buildTripPrompt } from "./prompt.js";
 import { validateTripInput } from "./validator.js";
@@ -79,7 +80,19 @@ async function handleMock(req, res, tripDetails) {
   }
 }
 
-app.post("/api/plan", async (req, res) => {
+const planLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res) => {
+    res.status(429).json({
+      error: "Too many trip planning requests. Please wait a minute before trying again.",
+    });
+  },
+});
+
+app.post("/api/plan", planLimiter, async (req, res) => {
   const validation = validateTripInput(req.body);
   if (!validation.valid) {
     res.status(400).json({ error: validation.error });
