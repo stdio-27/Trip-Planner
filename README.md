@@ -1,7 +1,7 @@
 # Trip Planner
 
 A React itinerary planner powered by a small Express API and the Gemini
-`gemini-2.0-flash` model. The client can be run with mock API response modes
+`gemini-flash-lite-latest` model. The client can be run with mock API response modes
 while developing.
 
 ## Requirements
@@ -52,15 +52,21 @@ React hook -> Zod validation and normalization -> itinerary UI
 ```
 
 - **React UI:** `src/App.jsx` coordinates the trip form, generation states, and
-  itinerary presentation. `useGenerate` manages requests; `useItinerary` and
+  itinerary presentation. Existing results remain visible during replacement
+  requests and after errors or empty responses. `useItinerary` owns packing
+  checklist edits, resetting them only when a new usable plan arrives.
+  `useGenerate` manages requests; `useItinerary` and
   `itineraryReducer` manage edits and undo.
 - **Vite proxy:** `vite.config.js` forwards `/api` to the local Express server,
   so the browser uses a same-origin API URL.
-- **Express:** `server/index.js` exposes `POST /api/plan` with a 10 req/min rate
+- **Express:** `server/index.js` starts the app factory in `server/app.js`, which exposes `POST /api/plan` with a 10 req/min rate
   limiter, a 10KB payload cap, and input validation via `server/validator.js`.
   It calls Gemini with a 25-second timeout and Gemini `responseSchema`. The
   server parses response text with a balanced-brace scanner (`server/extractJson.js`),
-  which safely extracts JSON from markdown fences or surrounding commentary.
+  which extracts JSON from markdown fences or surrounding commentary. Live model
+  responses are limited to 1 MB and validated on the server for bounded fields,
+  non-negative costs, requested currency, and requested day count (or zero days
+  for an empty result). The shared transport schema lives in `shared/planSchema.js`.
 - **Zod:** `src/schema.js` validates the model response in the browser,
   normalizes categories and estimated costs, and adds client-generated UUIDs.
   Invalid individual stops are dropped while valid stops are retained.
@@ -91,6 +97,13 @@ The expected itinerary shape is:
   "packingList": ["Comfortable walking shoes"]
 }
 ```
+
+## Trip duration
+
+Example chips populate both the description and trip length. The Trip length
+preference is authoritative when it conflicts with a duration in the description;
+changing that preference overrides the example duration. The form validates trip
+length and budget before sending a request.
 
 ## Handling invalid or unusual AI output
 
@@ -156,7 +169,7 @@ The expected itinerary shape is:
 
 AI assistance was used to help implement, review, and document this project.
 Specifically, Google Antigravity was used for code review, QA auditing, and
-engineering fixes. Gemini (`gemini-2.0-flash`) generates itinerary suggestions;
+engineering fixes. Gemini (`gemini-flash-lite-latest`) generates itinerary suggestions;
 its output can be inaccurate, incomplete, or unsuitable for your situation.
 Verify opening hours, routes, accessibility, visa and safety requirements, and
 all prices before relying on the plan. Estimated costs are suggestions, not

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { BuzzIntro, BuzzOutro } from "./components/BuzzLanding.jsx";
 import { BudgetSummary } from "./components/BudgetSummary.jsx";
 import { EmptyHint, EmptyState } from "./components/EmptyStates.jsx";
 import { ErrorState } from "./components/ErrorState.jsx";
@@ -21,7 +22,7 @@ const initialForm = {
 export default function App() {
   const [formValues, setFormValues] = useState(initialForm);
   const { status, plan: generatedPlan, error, generate, cancel } = useGenerate();
-  const { plan, dispatch, canUndo } = useItinerary(generatedPlan);
+  const { plan, dispatch, canUndo, packing, setPacking } = useItinerary(generatedPlan);
 
   function handleSubmit(submission) {
     if (submission && typeof submission.preventDefault === "function") {
@@ -36,16 +37,17 @@ export default function App() {
     <main className="app-shell">
       <header className="site-header">
         <a className="brand" href="/" aria-label="Trip Planner home">
-          <span className="brand-mark" aria-hidden="true">T</span>
+          <span className="brand-mark" aria-hidden="true">✳</span>
           <span>Trip Planner</span>
         </a>
-        <p>Thoughtful trips, made simple.</p>
+        <a className="header-link" href="#planner">Find your buzz <span aria-hidden="true">↗</span></a>
       </header>
 
-      <section className="planner-layout" aria-label="Trip planner">
+      <BuzzIntro />
+      <section id="planner" className="planner-layout" aria-label="Trip planner">
         <aside className="form-panel">
           <div className="section-eyebrow">YOUR NEXT ADVENTURE</div>
-          <h1>Plan a trip</h1>
+          <h2>Plan a trip</h2>
           <p className="muted-copy">Tell us a little about where you want to go.</p>
           <TripForm
             values={formValues}
@@ -79,7 +81,7 @@ export default function App() {
           )}
           {status === "empty" && <EmptyState />}
           {status === "idle" && !plan && <EmptyHint />}
-          {status === "success" && plan && (
+          {plan && (
             <>
               <div className="results-heading">
                 <div>
@@ -98,7 +100,7 @@ export default function App() {
               </div>
               <BudgetSummary plan={plan} />
               <ItineraryView plan={plan} dispatch={dispatch} />
-              <PackingList items={plan.packingList} />
+              <PackingList items={plan.packingList} packing={packing} onChange={setPacking} />
               {plan.droppedItems > 0 && (
                 <p className="dropped-note" role="status">
                   {plan.droppedItems} invalid {plan.droppedItems === 1 ? "stop was" : "stops were"} skipped.
@@ -108,6 +110,7 @@ export default function App() {
           )}
         </section>
       </section>
+      <BuzzOutro />
     </main>
   );
 }

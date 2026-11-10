@@ -47,13 +47,13 @@ describe("validateTripInput", () => {
     expect(validateTripInput({ destination: "Paris", interests: 123 }).valid).toBe(false);
   });
 
-  it("validates trip days bounds (1 to 30) and rejects non-integers", () => {
+  it("validates trip days bounds (1 to 14) and rejects non-integers", () => {
     expect(validateTripInput({ destination: "Rome", days: 0 }).valid).toBe(false);
     expect(validateTripInput({ destination: "Rome", days: 31 }).valid).toBe(false);
     expect(validateTripInput({ destination: "Rome", days: 3.5 }).valid).toBe(false);
     expect(validateTripInput({ destination: "Rome", days: "five" }).valid).toBe(false);
     expect(validateTripInput({ destination: "Rome", days: 1 }).valid).toBe(true);
-    expect(validateTripInput({ destination: "Rome", days: 30 }).valid).toBe(true);
+    expect(validateTripInput({ destination: "Rome", days: 14 }).valid).toBe(true);
   });
 
   it("validates currency codes and rejects invalid formats", () => {

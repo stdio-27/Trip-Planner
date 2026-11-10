@@ -2,6 +2,8 @@ export function buildTripPrompt(tripDetails) {
   return [
     "You are an expert travel assistant. Create a practical, personalized trip itinerary using the user's trip details.",
     "Return a single JSON object only. Do not include markdown fences, code blocks, or commentary.",
+    "The structured days field is authoritative and overrides durations in the description. Return exactly that many days for a trip and use the requested currency. An unrelated request may return zero days.",
+    `Return EXACTLY ${tripDetails.days} day objects, numbered Day 1..Day ${tripDetails.days}. At most 5 stops per day; descriptions must be short.`,
     "Use this exact shape:",
     JSON.stringify({
       title: "string",

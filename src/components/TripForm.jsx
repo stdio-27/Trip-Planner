@@ -1,10 +1,10 @@
 import { useState } from "react";
 
 const EXAMPLE_CHIPS = [
-  "Weekend food tour in Tokyo",
-  "3 days exploring temples in Kyoto",
-  "5-day cultural trip to Paris",
-  "4 days hiking in Vancouver",
+  { text: "Weekend food tour in Tokyo", days: 2 },
+  { text: "3 days exploring temples in Kyoto", days: 3 },
+  { text: "5-day cultural trip to Paris", days: 5 },
+  { text: "4 days hiking in Vancouver", days: 4 },
 ];
 
 export function TripForm({ values, onChange, onSubmit, loading }) {
@@ -26,9 +26,20 @@ export function TripForm({ values, onChange, onSubmit, loading }) {
       setError("Please describe the trip you'd like to plan.");
       return;
     }
+    const days = Number(values.days);
+    const budget = values.budget;
+    if (!Number.isInteger(days) || days < 1 || days > 14) {
+      setError("Trip length must be a whole number between 1 and 14 days.");
+      return;
+    }
+    if (budget !== "" && (!Number.isFinite(Number(budget)) || Number(budget) < 0 || Number(budget) > 1_000_000_000)) {
+      setError("Budget must be a non-negative number up to 1,000,000,000.");
+      return;
+    }
     setError("");
     const sanitized = {
       ...values,
+      days,
       description: primaryText,
       destination: primaryText,
       interests: (values.interests || "").trim(),
@@ -37,9 +48,9 @@ export function TripForm({ values, onChange, onSubmit, loading }) {
     onSubmit(sanitized);
   }
 
-  function handleChipClick(chipText) {
-    update("description", chipText);
-    update("destination", chipText);
+  function handleChipClick(chip) {
+    setError("");
+    onChange((current) => ({ ...current, description: chip.text, destination: chip.text, days: chip.days }));
   }
 
   return (
@@ -71,12 +82,12 @@ export function TripForm({ values, onChange, onSubmit, loading }) {
         <span className="chips-label">Ideas:</span>
         {EXAMPLE_CHIPS.map((chip) => (
           <button
-            key={chip}
+            key={chip.text}
             type="button"
             className="chip-button"
             onClick={() => handleChipClick(chip)}
           >
-            {chip}
+            {chip.text}
           </button>
         ))}
       </div>
@@ -90,12 +101,14 @@ export function TripForm({ values, onChange, onSubmit, loading }) {
           <div className="form-row">
             <div>
               <label htmlFor="trip-days">Trip length</label>
+              <small id="days-help">This value overrides any duration in your description.</small>
               <input
                 id="trip-days"
+                aria-describedby="days-help"
                 name="days"
                 type="number"
                 min="1"
-                max="30"
+                max="14"
                 value={values.days ?? 3}
                 onChange={(event) =>
                   update("days", event.target.value ? Number(event.target.value) : "")

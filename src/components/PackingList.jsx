@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
-export function PackingList({ items = [] }) {
-  const [checked, setChecked] = useState(() => new Set());
-  const [customItems, setCustomItems] = useState([]);
+export function PackingList({ items = [], packing, onChange }) {
+  const checked = new Set(packing.checked);
+  const customItems = packing.customItems;
   const [newItem, setNewItem] = useState("");
 
   const planItems = (items || []).map((item, index) => {
@@ -17,22 +17,13 @@ export function PackingList({ items = [] }) {
   });
   const allItems = [...planItems, ...customItems];
 
-  useEffect(() => {
-    setChecked(new Set());
-    setCustomItems([]);
-    setNewItem("");
-  }, [items]);
-
   function toggle(itemId) {
-    setChecked((current) => {
-      const next = new Set(current);
-      if (next.has(itemId)) {
-        next.delete(itemId);
-      } else {
-        next.add(itemId);
-      }
-      return next;
-    });
+    onChange((current) => ({
+      ...current,
+      checked: current.checked.includes(itemId)
+        ? current.checked.filter((id) => id !== itemId)
+        : [...current.checked, itemId],
+    }));
   }
 
   function addItem(event) {
@@ -43,7 +34,7 @@ export function PackingList({ items = [] }) {
       typeof crypto !== "undefined" && crypto.randomUUID
         ? crypto.randomUUID()
         : `custom-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
-    setCustomItems((current) => [...current, { id: customId, text: item }]);
+    onChange((current) => ({ ...current, customItems: [...current.customItems, { id: customId, text: item }] }));
     setNewItem("");
   }
 

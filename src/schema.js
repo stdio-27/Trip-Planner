@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { planEnvelopeSchema } from "../shared/planSchema.js";
 
 const categories = ["food", "sight", "activity", "transport", "stay", "other"];
 
@@ -121,7 +122,9 @@ export const tripSchema = z
   });
 
 export function parsePlan(value) {
-  const result = tripSchema.safeParse(value);
+  const envelope = planEnvelopeSchema.safeParse(value);
+  if (!envelope.success) return { success: false, error: envelope.error };
+  const result = tripSchema.safeParse(envelope.data);
   if (!result.success) {
     return { success: false, error: result.error };
   }

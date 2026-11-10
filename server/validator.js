@@ -3,6 +3,14 @@ export function validateTripInput(body) {
     return { valid: false, error: "Request body must be a JSON object." };
   }
 
+  for (const field of ["destination", "description"]) {
+    if (body[field] !== undefined && typeof body[field] !== "string") {
+      return { valid: false, error: `${field} must be a text string.` };
+    }
+    if (typeof body[field] === "string" && body[field].trim().length > 1000) {
+      return { valid: false, error: `${field} cannot exceed 1000 characters.` };
+    }
+  }
   const destination = typeof body.destination === "string" ? body.destination.trim() : "";
   const description = typeof body.description === "string" ? body.description.trim() : "";
   const primaryText = destination || description;
@@ -29,8 +37,8 @@ export function validateTripInput(body) {
   let days = 3;
   if (body.days !== undefined && body.days !== null && body.days !== "") {
     const parsedDays = Number(body.days);
-    if (!Number.isInteger(parsedDays) || parsedDays < 1 || parsedDays > 30) {
-      return { valid: false, error: "Trip length must be a whole number between 1 and 30 days." };
+    if ((typeof body.days !== "number" && (typeof body.days !== "string" || !body.days.trim())) || !Number.isInteger(parsedDays) || parsedDays < 1 || parsedDays > 14) {
+      return { valid: false, error: "Trip length must be a whole number between 1 and 14 days." };
     }
     days = parsedDays;
   }
@@ -50,7 +58,7 @@ export function validateTripInput(body) {
   let budget = "";
   if (body.budget !== undefined && body.budget !== null && body.budget !== "") {
     const parsedBudget = Number(body.budget);
-    if (!Number.isFinite(parsedBudget) || parsedBudget < 0 || parsedBudget > 1_000_000_000) {
+    if ((typeof body.budget !== "number" && (typeof body.budget !== "string" || !body.budget.trim())) || !Number.isFinite(parsedBudget) || parsedBudget < 0 || parsedBudget > 1_000_000_000) {
       return { valid: false, error: "Budget must be a non-negative number up to 1,000,000,000." };
     }
     budget = parsedBudget;
