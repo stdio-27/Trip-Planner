@@ -1,6 +1,13 @@
 import "dotenv/config";
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import express from "express";
 import { buildTripPrompt } from "./prompt.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const distPath = path.resolve(__dirname, "../dist");
 
 const app = express();
 const port = Number(process.env.PORT) || 8787;
@@ -9,6 +16,7 @@ const mockMode = process.env.MOCK?.toLowerCase();
 const geminiModel = process.env.GEMINI_MODEL || "gemini-2.0-flash";
 
 app.use(express.json({ limit: "1mb" }));
+app.use(express.static(distPath));
 
 function delay(milliseconds) {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
@@ -147,12 +155,29 @@ app.post("/api/plan", async (req, res) => {
   }
 });
 
-app.get("/", (req, res) => {
-  res.send("Trip Planner API is running. Access the frontend at http://localhost:5173");
-});
-
 app.get("/api/health", (req, res) => {
   res.json({ ok: true, status: "healthy" });
+});
+
+// Unknown /api routes return 404 JSON
+app.all("/api/*", (req, res) => {
+  res.status(404).json({ error: `Not found: ${req.method} ${req.originalUrl}` });
+});
+
+// Non-/api GET requests fallback to index.html in production if dist exists
+app.use((req, res, next) => {
+  if (req.method === "GET" && !req.path.startsWith("/api")) {
+    const indexPath = path.join(distPath, "index.html");
+    if (fs.existsSync(indexPath)) {
+      res.sendFile(indexPath);
+      return;
+    }
+  }
+  next();
+});
+
+app.get("/", (req, res) => {
+  res.send("Trip Planner API is running. Access the frontend at http://localhost:5173");
 });
 
 const server = app.listen(port, () => {
