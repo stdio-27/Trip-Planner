@@ -170,6 +170,77 @@ textarea:focus-visible {
   font-weight: 600;
 }
 
+.prompt-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 4px 0 8px;
+}
+
+.chips-label {
+  font-size: 0.74rem;
+  font-weight: 650;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-right: 2px;
+}
+
+.chip-button {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 4px 10px;
+  font-size: 0.74rem;
+  font-weight: 500;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 120ms ease;
+  line-height: 1.2;
+}
+
+.chip-button:hover {
+  background: var(--surface);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.preferences-details {
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  padding: 8px 12px;
+  background: var(--surface);
+  margin: 4px 0 8px;
+}
+
+.preferences-details[open] {
+  padding-bottom: 12px;
+}
+
+.preferences-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.82rem;
+  font-weight: 650;
+  color: var(--text);
+  cursor: pointer;
+  user-select: none;
+}
+
+.preferences-hint {
+  font-size: 0.72rem;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.preferences-content {
+  display: grid;
+  gap: 10px;
+  margin-top: 10px;
+}
+
 .trip-form input,
 .trip-form select,
 .trip-form textarea,

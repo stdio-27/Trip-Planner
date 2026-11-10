@@ -10,6 +10,7 @@ import { useGenerate } from "./hooks/useGenerate.js";
 import { useItinerary } from "./hooks/useItinerary.js";
 
 const initialForm = {
+  description: "",
   destination: "",
   days: 3,
   budget: "",

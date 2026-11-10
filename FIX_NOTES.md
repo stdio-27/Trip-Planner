@@ -31,3 +31,9 @@
 - Updated `src/schema.js` so `parsePlan` generates and assigns a cryptographically unique UUID (`id`) to each packing list item, and updated `PackingList.jsx` to rely exclusively on these stable IDs for React keys and checkbox tracking.
 - Corrected `README.md` to document the 30s client timeout, the Cancel action, input bounds (1-1000 chars), rate limiting, mock modes, and the new `start` / `start:prod` scripts.
 - Honestly updated the AI usage note to explicitly mention Google Antigravity for code review, QA auditing, and engineering fixes, and placed a clear placeholder line for interview time spent.
+
+## Task 7: Free-form Input with Prompt Chips and Collapsible Preferences
+- Replaced the narrow destination text input in `TripForm.jsx` with a prominent free-form textarea ("Describe your trip") capped at 1000 characters with a live character counter.
+- Added interactive prompt chips ("Ideas:") featuring curated example trip descriptions that populate the textarea with a single click.
+- Grouped secondary fields (trip length, currency, approximate budget) into a native `<details>` / `<summary>` collapsible section ("Preferences") to keep the primary interface uncluttered while preserving structured customization.
+- Styled chips and collapsible preferences seamlessly in `src/styles.css` adhering to the design token color system.
