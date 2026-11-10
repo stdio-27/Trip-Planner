@@ -4,7 +4,12 @@ export function PackingList({ items }) {
   const [checked, setChecked] = useState(() => new Set());
   const [customItems, setCustomItems] = useState([]);
   const [newItem, setNewItem] = useState("");
-  const allItems = [...items, ...customItems];
+
+  const planItems = items.map((text, index) => ({
+    id: `plan-${index}-${encodeURIComponent(text)}`,
+    text,
+  }));
+  const allItems = [...planItems, ...customItems];
 
   useEffect(() => {
     setChecked(new Set());
@@ -28,7 +33,8 @@ export function PackingList({ items }) {
     event.preventDefault();
     const item = newItem.trim();
     if (!item) return;
-    setCustomItems((current) => [...current, item]);
+    const customId = `custom-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+    setCustomItems((current) => [...current, { id: customId, text: item }]);
     setNewItem("");
   }
 
@@ -45,21 +51,18 @@ export function PackingList({ items }) {
         <p className="muted-copy">No packing suggestions yet. Add something you need.</p>
       ) : (
         <ul className="packing-list">
-          {allItems.map((item, index) => {
-            const id = `packing-${index}`;
-            return (
-              <li key={id}>
-                <label className={checked.has(id) ? "is-packed" : ""}>
-                  <input
-                    type="checkbox"
-                    checked={checked.has(id)}
-                    onChange={() => toggle(id)}
-                  />
-                  <span>{item}</span>
-                </label>
-              </li>
-            );
-          })}
+          {allItems.map((item) => (
+            <li key={item.id}>
+              <label className={checked.has(item.id) ? "is-packed" : ""}>
+                <input
+                  type="checkbox"
+                  checked={checked.has(item.id)}
+                  onChange={() => toggle(item.id)}
+                />
+                <span>{item.text}</span>
+              </label>
+            </li>
+          ))}
         </ul>
       )}
       <form className="packing-add" onSubmit={addItem}>
