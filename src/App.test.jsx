@@ -11,6 +11,7 @@ it("submits the chip duration and honors a subsequent explicit day preference", 
   const fetchMock = vi.fn().mockImplementation(async () => ok());
   vi.stubGlobal("fetch", fetchMock);
   render(<App />);
+  fireEvent.change(screen.getByLabelText("Origin city"), {target:{value:"Delhi"}});
   fireEvent.click(screen.getByRole("button", { name: "5-day cultural trip to Paris" }));
   expect(screen.getByLabelText("Trip length").value).toBe("5");
   fireEvent.click(screen.getByRole("button", { name: "Generate itinerary" }));
@@ -27,6 +28,7 @@ it.each(["cancel", "error", "empty"])("retains packing edits through %s and rese
   const fetchMock = vi.fn().mockResolvedValueOnce(ok()).mockImplementationOnce(() => new Promise(resolve => { resolveNext = resolve; })).mockResolvedValue(ok());
   vi.stubGlobal("fetch", fetchMock);
   render(<App />);
+  fireEvent.change(screen.getByLabelText("Origin city"), {target:{value:"Delhi"}});
   fireEvent.click(screen.getByRole("button", { name: "3 days exploring temples in Kyoto" }));
   fireEvent.click(screen.getByRole("button", { name: "Generate itinerary" }));
   await screen.findByLabelText("Shoes");
@@ -53,6 +55,7 @@ it.each(["cancel", "error", "empty"])("retains packing edits through %s and rese
 it("renders budget changes after removal and undo using the real summary", async () => {
   vi.stubGlobal("fetch", vi.fn().mockResolvedValue(ok()));
   render(<App />);
+  fireEvent.change(screen.getByLabelText("Origin city"), {target:{value:"Delhi"}});
   fireEvent.click(screen.getByRole("button", { name: "3 days exploring temples in Kyoto" }));
   fireEvent.click(screen.getByRole("button", { name: "Generate itinerary" }));
   await screen.findByRole("heading", { name: "Kyoto" });
@@ -68,8 +71,9 @@ it("blocks invalid day and budget preferences before a request", () => {
   const fetchMock = vi.fn();
   vi.stubGlobal("fetch", fetchMock);
   render(<App />);
+  fireEvent.change(screen.getByLabelText("Origin city"), {target:{value:"Delhi"}});
   fireEvent.click(screen.getByRole("button", { name: "3 days exploring temples in Kyoto" }));
-  fireEvent.change(screen.getByLabelText("Trip length"), { target: { value: "31" } });
+  fireEvent.change(screen.getByLabelText("Trip length"), { target: { value: "" } });
   fireEvent.click(screen.getByRole("button", { name: "Generate itinerary" }));
   expect(screen.getByRole("alert").textContent).toContain("between 1 and 14");
   fireEvent.change(screen.getByLabelText("Trip length"), { target: { value: "3" } });

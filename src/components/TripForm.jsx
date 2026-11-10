@@ -1,165 +1,33 @@
 import { useState } from "react";
-
-const EXAMPLE_CHIPS = [
-  { text: "Weekend food tour in Tokyo", days: 2 },
-  { text: "3 days exploring temples in Kyoto", days: 3 },
-  { text: "5-day cultural trip to Paris", days: 5 },
-  { text: "4 days hiking in Vancouver", days: 4 },
-];
-
-export function TripForm({ values, onChange, onSubmit, loading }) {
-  const [error, setError] = useState("");
-
-  const currentText = values.description ?? values.destination ?? "";
-
-  function update(field, value) {
-    if (error && (field === "description" || field === "destination")) {
-      setError("");
-    }
-    onChange((current) => ({ ...current, [field]: value }));
-  }
-
-  function handleFormSubmit(event) {
+import { validateTripInput } from "../../shared/tripInput.js";
+const ideas = [["Weekend food tour in Tokyo",2,"Tokyo"],["3 days exploring temples in Kyoto",3,"Kyoto"],["5-day cultural trip to Paris",5,"Paris"],["4 days hiking in Vancouver",4,"Vancouver"]];
+const interests = ["food","history","nature","adventure","nightlife","shopping","relaxation","family-friendly"];
+export function TripForm({values,onChange,onSubmit,loading,submitLabel="Generate itinerary"}) {
+  const [error,setError] = useState(null);
+  const update = (field,value) => onChange(current=>({...current,[field]:value}));
+  function submit(event) {
     event.preventDefault();
-    const primaryText = currentText.trim();
-    if (!primaryText) {
-      setError("Please describe the trip you'd like to plan.");
-      return;
-    }
-    const days = Number(values.days);
-    const budget = values.budget;
-    if (!Number.isInteger(days) || days < 1 || days > 14) {
-      setError("Trip length must be a whole number between 1 and 14 days.");
-      return;
-    }
-    if (budget !== "" && (!Number.isFinite(Number(budget)) || Number(budget) < 0 || Number(budget) > 1_000_000_000)) {
-      setError("Budget must be a non-negative number up to 1,000,000,000.");
-      return;
-    }
-    setError("");
-    const sanitized = {
-      ...values,
-      days,
-      description: primaryText,
-      destination: primaryText,
-      interests: (values.interests || "").trim(),
-    };
-    onChange(sanitized);
-    onSubmit(sanitized);
+    const result = validateTripInput(values);
+    if (!result.valid) { setError(result); return; }
+    setError(null); onSubmit(result.data);
   }
-
-  function handleChipClick(chip) {
-    setError("");
-    onChange((current) => ({ ...current, description: chip.text, destination: chip.text, days: chip.days }));
+  function field(name,label,type="text",maxLength=100) {
+    return <div className="setup-field" key={name}><label htmlFor={name}>{label}</label><input id={name} type={type} maxLength={maxLength} value={values[name] ?? ""} aria-invalid={error?.field===name} aria-describedby={error?.field===name ? "setup-error" : undefined} onChange={e=>update(name,e.target.value)} /></div>;
   }
-
-  return (
-    <form className="trip-form" onSubmit={handleFormSubmit} noValidate>
-      <div className="field-label-row">
-        <label htmlFor="trip-description">Describe your trip</label>
-        <span className="char-counter">{currentText.length}/1000</span>
-      </div>
-      <textarea
-        id="trip-description"
-        name="description"
-        rows="4"
-        maxLength={1000}
-        value={currentText}
-        onChange={(event) => {
-          update("description", event.target.value);
-          update("destination", event.target.value);
-        }}
-        placeholder="e.g., A 5-day cultural trip to Kyoto with peaceful mornings, historic temples, and authentic local street food."
-        required
-      />
-      {error && (
-        <p className="form-inline-error" role="alert">
-          {error}
-        </p>
-      )}
-
-      <div className="prompt-chips" aria-label="Suggested trip ideas">
-        <span className="chips-label">Ideas:</span>
-        {EXAMPLE_CHIPS.map((chip) => (
-          <button
-            key={chip.text}
-            type="button"
-            className="chip-button"
-            onClick={() => handleChipClick(chip)}
-          >
-            {chip.text}
-          </button>
-        ))}
-      </div>
-
-      <details className="preferences-details">
-        <summary className="preferences-summary">
-          <span>Preferences</span>
-          <span className="preferences-hint">Days, currency, budget (optional)</span>
-        </summary>
-        <div className="preferences-content">
-          <div className="form-row">
-            <div>
-              <label htmlFor="trip-days">Trip length</label>
-              <small id="days-help">This value overrides any duration in your description.</small>
-              <input
-                id="trip-days"
-                aria-describedby="days-help"
-                name="days"
-                type="number"
-                min="1"
-                max="14"
-                value={values.days ?? 3}
-                onChange={(event) =>
-                  update("days", event.target.value ? Number(event.target.value) : "")
-                }
-                placeholder="e.g. 3"
-              />
-            </div>
-            <div>
-              <label htmlFor="currency">Currency</label>
-              <select
-                id="currency"
-                name="currency"
-                value={values.currency || "USD"}
-                onChange={(event) => update("currency", event.target.value)}
-              >
-                <option value="USD">USD</option>
-                <option value="EUR">EUR</option>
-                <option value="GBP">GBP</option>
-                <option value="CAD">CAD</option>
-                <option value="AUD">AUD</option>
-                <option value="JPY">JPY</option>
-                <option value="INR">INR</option>
-              </select>
-            </div>
-          </div>
-
-          <label htmlFor="budget">Approximate budget (optional)</label>
-          <input
-            id="budget"
-            name="budget"
-            type="number"
-            min="0"
-            max="1000000000"
-            step="1"
-            value={values.budget || ""}
-            onChange={(event) => update("budget", event.target.value)}
-            placeholder="e.g. 1500"
-          />
-        </div>
-      </details>
-
-      <button className="button button-primary submit-button" type="submit" disabled={loading}>
-        {loading ? (
-          <>
-            <span className="button-spinner" aria-hidden="true" />
-            Planning your trip…
-          </>
-        ) : (
-          "Generate itinerary"
-        )}
-      </button>
-    </form>
-  );
+  return <form className="trip-form" onSubmit={submit} noValidate>
+    {field("destination","Destination")}{field("originCity","Origin city")}
+    {field("nearestAirport","Nearest airport (optional)")}{field("nearestStation","Nearest railway station (optional)")}
+    <label htmlFor="trip-days">Trip length</label><select id="trip-days" value={values.days} onChange={e=>update("days",Number(e.target.value))}>{Array.from({length:14},(_,i)=><option key={i} value={i+1}>{i+1} {i ? "days" : "day"}</option>)}</select><small>{Math.max(Number(values.days)-1,0)} nights. This selector determines the itinerary length.</small>
+    {field("startDate","Start date (optional)","date")}
+    {field("adults","Adults (1–10)","number")}{field("children","Children (0–10)","number")}{field("rooms","Rooms (optional)","number")}<small>Default: {Math.ceil(Number(values.adults || 1)/2)} room(s).</small>
+    <label htmlFor="currency">Currency</label><select id="currency" value={values.currency} onChange={e=>update("currency",e.target.value)}>{["INR","USD","EUR","GBP","AED","SGD","JPY","AUD","CAD","THB"].map(c=><option key={c}>{c}</option>)}</select>
+    {field("budget","Approximate budget (optional)","number")}
+    <label htmlFor="pace">Travel pace</label><select id="pace" value={values.pace} onChange={e=>update("pace",e.target.value)}>{["relaxed","balanced","packed"].map(p=><option key={p}>{p}</option>)}</select>
+    <fieldset><legend>Interests</legend><div className="prompt-chips">{interests.map(item=><button className="chip-button" type="button" key={item} aria-pressed={(values.interests || "").split(", ").includes(item)} onClick={()=>{const current=(values.interests || "").split(", ").filter(Boolean);update("interests",(current.includes(item)?current.filter(x=>x!==item):[...current,item]).join(", "));}}>{item}</button>)}</div></fieldset>
+    <label htmlFor="anythingElse">Anything else about your trip?</label><textarea id="anythingElse" maxLength={500} value={values.anythingElse} onChange={e=>update("anythingElse",e.target.value)} />
+    <label htmlFor="foodPreference">Food preference</label><select id="foodPreference" value={values.foodPreference} onChange={e=>update("foodPreference",e.target.value)}>{["no preference","vegetarian","vegan","halal","other"].map(x=><option key={x}>{x}</option>)}</select>{values.foodPreference==="other" && field("foodOther","Other food preference","text",50)}
+    <div className="prompt-chips">{ideas.map(([text,days,destination])=><button className="chip-button" type="button" key={text} onClick={()=>onChange(current=>({...current,destination,description:"",days}))}>{text}</button>)}</div>
+    {error && <p id="setup-error" className="form-inline-error" role="alert">{error.error}</p>}
+    <button className="button button-primary" disabled={loading}>{loading?"Planning your trip…":submitLabel}</button>
+  </form>;
 }

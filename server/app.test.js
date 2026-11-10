@@ -9,7 +9,7 @@ async function request(app, body) {
   await new Promise(resolve => server.once("listening", resolve));
   return fetch(`http://127.0.0.1:${server.address().port}/api/plan`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
 }
-const trip = { destination: "Kyoto", days: 1, currency: "JPY" };
+const trip = { originCity: "Delhi", destination: "Kyoto", days: 1, currency: "JPY" };
 const plan = { title: "Kyoto", currency: "JPY", days: [{ label: "Day 1", stops: [{ title: "Temple", category: "sight", estCost: 500 }] }], packingList: ["Shoes"] };
 const upstream = value => vi.fn(async () => new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: JSON.stringify(value) }] } }] })));
 it.each([true, [], {}, " "])("rejects invalid numeric types %j before calling Gemini", async value => {

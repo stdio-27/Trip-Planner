@@ -15,8 +15,8 @@ const initialForm = {
   destination: "",
   days: 3,
   budget: "",
-  currency: "USD",
-  interests: "",
+  currency: "INR",
+  interests: "", originCity: "", nearestAirport: "", nearestStation: "", adults: 1, children: 0, rooms: "", startDate: "", pace: "balanced", foodPreference: "no preference", foodOther: "", anythingElse: "",
 };
 
 export default function App() {
