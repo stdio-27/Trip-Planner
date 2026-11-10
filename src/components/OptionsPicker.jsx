@@ -1,3 +1,4 @@
+import { PRESETS } from "../../shared/schemas.js";
 import { groups, priceFields } from "../../shared/optionsSchema.js";
 import {
   formatMoney,
@@ -65,7 +66,7 @@ export function OptionsPicker({
         </ul>
       </section>
       <div className="prompt-chips">
-        {["Cheapest combo", "Balanced", "Comfort"].map((p) => (
+        {PRESETS.map((p) => (
           <button
             type="button"
             className="button"

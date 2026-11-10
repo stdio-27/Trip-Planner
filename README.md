@@ -205,3 +205,11 @@ The shared request hook aborts after 30 seconds total, including its retry. A se
 Setup dates use the Asia/Kolkata calendar date for server validation. This may differ from a traveler's local date near midnight.
 The cream sketch theme is intentionally the same in light and dark OS modes.
 Custom options start at zero: enter realistic estimates before relying on totals.
+
+## v2 Phase 1 input foundation
+
+The shared Zod setup schema rejects unknown fields and numeric API strings. Limits are 1–14 days, 1–9 adults, 0–9 children, 1–9 rooms and an optional integer budget up to 10,000,000. Notes are normalized and capped at 300 characters. Start dates run from today through today+365 (Asia/Kolkata calendar). Select choices come from shared constants.
+
+Run `npm run typecheck` for the current shared/server/cost checkJs scope. The remaining UI typing work is recorded in `docs/TYPECHECK.md`; field decisions and removal evidence are in `docs/INPUT_AUDIT.md`.
+
+Geographic datasets and geocoding are not installed or used yet. `docs/DATA_SOURCES.md` records that status honestly; no attribution is claimed for an unused source. The India-only dataset-backed picker release requires the Phase 2 source files and a separately approved states/districts source.

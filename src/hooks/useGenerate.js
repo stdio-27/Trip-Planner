@@ -12,6 +12,7 @@ export function useApiCall(endpoint, parser) {
   const [status, setStatus] = useState("idle");
   const [plan, setPlan] = useState(null);
   const [error, setError] = useState(null);
+  const [fieldErrors, setFieldErrors] = useState(null);
   const [droppedItems, setDroppedItems] = useState(0);
   const controllerRef = useRef(null);
   const timeoutRef = useRef(null);
@@ -28,6 +29,7 @@ export function useApiCall(endpoint, parser) {
     controllerRef.current = null;
     setStatus(planRef.current ? "success" : "idle");
     setError(null);
+    setFieldErrors(null);
   }, []);
 
   const generate = useCallback(
@@ -51,6 +53,7 @@ export function useApiCall(endpoint, parser) {
 
       setStatus("loading");
       setError(null);
+      setFieldErrors(null);
       setDroppedItems(0);
 
       try {
@@ -77,6 +80,14 @@ export function useApiCall(endpoint, parser) {
             let message = `Trip plan request failed (${response.status}).`;
             try {
               const body = await response.json();
+              if (
+                requestId === latestId.current &&
+                body.errors &&
+                typeof body.errors === "object"
+              ) {
+                message = Object.values(body.errors).join(" ");
+                setFieldErrors(body.errors);
+              }
               if (typeof body.error === "string") {
                 message = body.error;
               }
@@ -194,7 +205,7 @@ export function useApiCall(endpoint, parser) {
     [],
   );
 
-  return { status, plan, error, droppedItems, generate, cancel };
+  return { status, plan, error, fieldErrors, droppedItems, generate, cancel };
 }
 
 export function useGenerate() {

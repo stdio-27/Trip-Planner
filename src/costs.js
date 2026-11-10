@@ -4,6 +4,8 @@ export function formatMoney(value, currency) {
     currency,
   }).format(value);
 }
+/** @typedef {{travelOptions?: Partial<import('../shared/optionsSchema.js').TravelOption>, stayOptions?: {pricePerRoomPerNight?:number}, localTransportOptions?: {pricePerDay?:number,pricing?:string}, foodOptions?: {dailyPerPerson?:number}}} CostSelections */
+/** @param {{selections?:CostSelections, travelers?:{adults:number,children:number},days?:number,rooms?:number,activitiesTotal?:number,contingencyOn?:boolean}} args */
 export function computeCostBreakdown({
   selections = {},
   travelers = { adults: 1, children: 0 },

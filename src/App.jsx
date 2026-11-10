@@ -13,12 +13,11 @@ import { useGenerate, useApiCall } from "./hooks/useGenerate.js";
 import { useItinerary } from "./hooks/useItinerary.js";
 
 const initialForm = {
-  description: "",
   destination: "",
   days: 3,
   budget: "",
   currency: "INR",
-  interests: "",
+  interests: [],
   originCity: "",
   nearestAirport: "",
   nearestStation: "",
@@ -154,6 +153,7 @@ export default function App() {
               onSubmit={handleSubmit}
               loading={optionsCall.status === "loading"}
               submitLabel="Explore options"
+              serverErrors={optionsCall.fieldErrors}
             />
           </aside>
         )}
@@ -240,7 +240,10 @@ export default function App() {
             />
           )}
           {status === "empty" && <EmptyState />}
-          {status === "idle" && !plan && step === 1 && optionsCall.status === "idle" && <EmptyHint />}
+          {status === "idle" &&
+            !plan &&
+            step === 1 &&
+            optionsCall.status === "idle" && <EmptyHint />}
           {step === 3 && planTrip === trip && plan && (
             <>
               <div className="results-heading">

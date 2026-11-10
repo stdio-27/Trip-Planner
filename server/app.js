@@ -127,7 +127,7 @@ export function createApp(options = {}) {
   app.post(["/api/plan", "/api/options"], planLimiter, async (req, res) => {
     const validation = validateTripInput(req.body);
     if (!validation.valid) {
-      res.status(400).json({ error: validation.error });
+      res.status(400).json({ errors: validation.errors, error: validation.error });
       return;
     }
 

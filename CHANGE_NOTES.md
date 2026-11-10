@@ -34,3 +34,10 @@ A seven-day demo completed the browser flow, including keyboard activation and 3
 The audit reports zero advisories and the built bundle contains neither the API key variable nor the configured key.
 Automated endpoint and hook checks cover failure modes; not every failure mode or OS color scheme was manually exercised.
 Optional localStorage persistence is deliberately omitted so this release keeps session data in memory.
+
+## v2 Phase 1 — strict input foundation
+The audit traced every field and removed the unused description alias and international shortcuts.
+Shared Zod schemas now reject unknown keys, numeric coercion, out-of-range dates and invalid enum choices.
+Numeric controls keep raw edits, block exponent/sign input, clamp on blur and show accessible field errors.
+Core/server checkJs now passes; the remaining UI typing categories are listed separately for later work.
+The app still uses illustrative demo hubs; Phase 2 waits for real source files instead of inventing geographic data.

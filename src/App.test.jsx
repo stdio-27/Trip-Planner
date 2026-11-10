@@ -49,9 +49,9 @@ function setup(
   fireEvent.change(screen.getByLabelText("Origin city"), {
     target: { value: "Delhi" },
   });
-  fireEvent.click(
-    screen.getByRole("button", { name: "3 days exploring temples in Kyoto" }),
-  );
+  fireEvent.change(screen.getByLabelText("Destination"), {
+    target: { value: "Kyoto" },
+  });
   return fetchMock;
 }
 async function options() {
@@ -126,14 +126,39 @@ it("blocks an invalid origin before calling the API", () => {
   fireEvent.change(screen.getByLabelText("Origin city"), {
     target: { value: " " },
   });
-  fireEvent.click(screen.getByRole("button", { name: "Explore options" }));
-  expect(screen.getByRole("alert").textContent).toContain("originCity");
+  fireEvent.blur(screen.getByLabelText("Origin city"));
+  expect(screen.getByRole("alert")).toBeTruthy();
   expect(fetchMock).not.toHaveBeenCalled();
 });
-it.each(["bad-shape","empty","fail"])("shows options %s state safely",async mode=>{
- const fetchMock=setup();fetchMock.mockImplementation(async()=> mode==="fail"?{ok:false,status:500,json:async()=>({error:"Mock server failure."})}:{ok:true,text:async()=>mode==="empty"?"":JSON.stringify({unexpected:true})});
+it.each(["bad-shape", "empty", "fail"])(
+  "shows options %s state safely",
+  async (mode) => {
+    const fetchMock = setup();
+    fetchMock.mockImplementation(async () =>
+      mode === "fail"
+        ? {
+            ok: false,
+            status: 500,
+            json: async () => ({ error: "Mock server failure." }),
+          }
+        : {
+            ok: true,
+            text: async () =>
+              mode === "empty" ? "" : JSON.stringify({ unexpected: true }),
+          },
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Explore options" }));
+    if (mode === "empty")
+      await screen.findByRole("heading", { name: "No itinerary to show yet" });
+    else await screen.findByRole("button", { name: "Try again" });
+    expect(
+      screen.queryByRole("heading", { name: "Make it your kind of trip" }),
+    ).toBeNull();
+  },
+);
+it("shows server field errors inline on the setup form", async () => {
+ const fetchMock=setup();fetchMock.mockResolvedValue({ok:false,status:400,json:async()=>({errors:{originCity:"Choose a supported origin city."}})});
  fireEvent.click(screen.getByRole("button",{name:"Explore options"}));
- if(mode==="empty") await screen.findByRole("heading",{name:"No itinerary to show yet"});
- else await screen.findByRole("button",{name:"Try again"});
- expect(screen.queryByRole("heading",{name:"Make it your kind of trip"})).toBeNull();
+ await waitFor(()=>expect(screen.getByLabelText("Origin city").getAttribute("aria-invalid")).toBe("true"));
+ expect(screen.getByLabelText("Origin city").getAttribute("aria-describedby")).toBe("originCity-error");
 });

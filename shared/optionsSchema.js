@@ -1,4 +1,11 @@
 import { z } from "zod";
+import {
+  TIERS,
+  COMFORTS,
+  TRAVEL_MODES,
+  STAY_TYPES,
+  LOCAL_PRICINGS,
+} from "./choices.js";
 const price = z
   .unknown()
   .default(0)
@@ -11,10 +18,8 @@ const base = { label: text.min(1), notes: text.default("") };
 export const optionSchemas = {
   travelOptions: z.object({
     ...base,
-    mode: z
-      .enum(["flight", "train", "bus", "car", "cab", "other"])
-      .catch("other"),
-    comfort: z.enum(["basic", "standard", "premium"]).catch("standard"),
+    mode: z.enum(TRAVEL_MODES).catch("other"),
+    comfort: z.enum(COMFORTS).catch("standard"),
     durationHours: price,
     farePerPersonRoundTrip: price,
     originTransferPerPersonRoundTrip: price,
@@ -22,24 +27,23 @@ export const optionSchemas = {
   }),
   stayOptions: z.object({
     ...base,
-    tier: z.enum(["budget", "mid", "premium"]).catch("mid"),
-    type: z
-      .enum(["hostel", "hotel", "resort", "homestay", "other"])
-      .catch("other"),
+    tier: z.enum(TIERS).catch("mid"),
+    type: z.enum(STAY_TYPES).catch("other"),
     area: text.default(""),
     pricePerRoomPerNight: price,
   }),
   localTransportOptions: z.object({
     ...base,
-    pricing: z.enum(["perPerson", "perGroup"]).catch("perPerson"),
+    pricing: z.enum(LOCAL_PRICINGS).catch("perPerson"),
     pricePerDay: price,
   }),
   foodOptions: z.object({
     ...base,
-    tier: z.enum(["budget", "mid", "premium"]).catch("mid"),
+    tier: z.enum(TIERS).catch("mid"),
     dailyPerPerson: price,
   }),
 };
+/** @typedef {import("zod").output<typeof optionSchemas.travelOptions>} TravelOption */
 const hub = z.object({
   name: text.default(""),
   code: text.default(""),
