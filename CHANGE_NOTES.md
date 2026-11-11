@@ -174,3 +174,10 @@ We included setup, route choices, estimate edits and itinerary editing.
 We supplied isolated PowerShell commands for the fault demonstrations.
 We included cancellation during a slow request and a narrow viewport.
 We left recording and physical-device checks as tasks for the user.
+
+## Stage 3e follow-up — focus and labeled targets
+We reviewed selector specificity around the keyboard-focus outline.
+We changed the original control rule so the darker focus color actually wins.
+We expanded labeled radio and checkbox targets without changing their values.
+We retained the existing cream, orange and sketch presentation.
+We reran tests, UI type checking and the production build before this polish commit.
