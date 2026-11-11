@@ -69,3 +69,10 @@ No demo amount is asserted to be a current fare. Personal route plausibility rev
 The three-step axe test passed with zero reported violations. JSDOM colour-contrast analysis is disabled and canvas warnings remain in its output. A separate sRGB calculation measured the main CSS pairs, recorded in artifacts/master-pack/contrast.json. Full computed contrast over every blended surface, a physical phone and assistive-technology behavior remain UNVERIFIED. CLI startup and data-build console output is retained because it reports command readiness and measured data counts. No production TODO was found by the source search.
 
 Optional Stage 3f persistence is deliberately skipped. The existing in-memory session behavior is retained, and the requested polish does not justify another storage lifecycle.
+
+
+## Re-verification observations
+
+The first post-polish clean-install test run failed in “lets the traveler select dataset hubs when the geocoder is down” because the default one-second query wait expired while the state picker still showed Loading states. The next two runs passed. Evidence is artifacts/master-pack/reverify-test-1.log through reverify-test-3.log. The test now explicitly allows eight seconds for its asynchronous initial state list. This changes the test harness, not picker behavior.
+
+The new HTTP golden test also needed to wait for the arrival-hub default before submitting. Its standalone and coverage runs passed after that harness correction. No refactor has been performed while plan approval is pending.

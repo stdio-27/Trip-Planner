@@ -90,7 +90,7 @@ it("lets the traveler select dataset hubs when the geocoder is down", async () =
     );
   }
   render(<Form />);
-  await screen.findByRole("option", { name: "Delhi" });
+  await screen.findByRole("option", { name: "Delhi" }, { timeout: 8000 });
   fireEvent.change(screen.getByLabelText("Origin state"), {
     target: { value: "7" },
   });
