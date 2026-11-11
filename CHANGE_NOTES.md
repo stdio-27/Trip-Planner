@@ -237,3 +237,10 @@ The interview guide points to the final planner hook, services and cost module.
 The existing timed demo script remains applicable to the verified browser flow.
 Historical verification is labelled clearly, and real authorship/time fields remain for the user.
 All 32 local Markdown links resolve; unavailable public source links are recorded as unverified.
+
+## Stage 9 — local freeze
+The final clean-install, test, typecheck, build and audit gate is recorded.
+The submission tag identifies the final local commit without pushing it.
+The report preserves provider failures, bundle growth, timing variance and remote limits.
+The checklist explains the remaining phone, GitHub, recording and authorship work.
+No additional features were added during the freeze.

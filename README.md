@@ -152,7 +152,7 @@ Attribution covers Open-Meteo / GeoNames, OurAirports, datameet railways, OpenFl
 
 Final-structure checks passed 271 tests in 28 files on three consecutive clean-install runs, with passing typecheck/build and zero audit vulnerabilities. All 16 mock modes were checked in the browser and all six live cases eventually passed after provider retries. The full refactor adds 0.35% raw asset bytes, and startup timings vary; those acceptance limits are recorded rather than hidden.
 
-[Baseline](docs/BASELINE.md) · [QA](docs/QA_REPORT.md) · [Refactor plan](docs/REFACTOR_PLAN.md) · [Interview guide](docs/INTERVIEW_GUIDE.md) · [Demo script](docs/DEMO_SCRIPT.md)
+[Final report](docs/MASTER_REPORT.md) · [Baseline](docs/BASELINE.md) · [QA](docs/QA_REPORT.md) · [Refactor plan](docs/REFACTOR_PLAN.md) · [Interview guide](docs/INTERVIEW_GUIDE.md) · [Demo script](docs/DEMO_SCRIPT.md)
 
 ## AI usage and authorship
 
