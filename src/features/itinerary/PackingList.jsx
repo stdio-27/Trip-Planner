@@ -34,7 +34,10 @@ export function PackingList({ items = [], packing, onChange }) {
       typeof crypto !== "undefined" && crypto.randomUUID
         ? crypto.randomUUID()
         : `custom-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
-    onChange((current) => ({ ...current, customItems: [...current.customItems, { id: customId, text: item }] }));
+    onChange((current) => ({
+      ...current,
+      customItems: [...current.customItems, { id: customId, text: item }],
+    }));
     setNewItem("");
   }
 
@@ -45,10 +48,14 @@ export function PackingList({ items = [], packing, onChange }) {
           <div className="section-eyebrow">BE READY</div>
           <h3>Packing list</h3>
         </div>
-        <span className="packing-count">{checked.size}/{allItems.length} packed</span>
+        <span className="packing-count">
+          {checked.size}/{allItems.length} packed
+        </span>
       </div>
       {allItems.length === 0 ? (
-        <p className="muted-copy">No packing suggestions yet. Add something you need.</p>
+        <p className="muted-copy">
+          No packing suggestions yet. Add something you need.
+        </p>
       ) : (
         <ul className="packing-list">
           {allItems.map((item) => (
@@ -66,14 +73,20 @@ export function PackingList({ items = [], packing, onChange }) {
         </ul>
       )}
       <form className="packing-add" onSubmit={addItem}>
-        <label className="sr-only" htmlFor="packing-new-item">Add a packing item</label>
+        <label className="sr-only" htmlFor="packing-new-item">
+          Add a packing item
+        </label>
         <input
           id="packing-new-item"
           value={newItem}
           onChange={(event) => setNewItem(event.target.value)}
           placeholder="Add an item"
         />
-        <button className="button button-secondary" type="submit" disabled={!newItem.trim()}>
+        <button
+          className="button button-secondary"
+          type="submit"
+          disabled={!newItem.trim()}
+        >
           Add item
         </button>
       </form>

@@ -3,7 +3,7 @@ import React from "react";
 import { useState } from "react";
 import { afterEach, expect, it, vi } from "vitest";
 import { cleanup, render, screen, fireEvent } from "@testing-library/react";
-import { TripForm } from "./TripForm.jsx";
+import { TripForm } from "../features/setup/TripForm.jsx";
 import {
   CURRENCIES,
   PACES,

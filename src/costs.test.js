@@ -3,7 +3,7 @@ import {
   computeCostBreakdown,
   formatMoney,
   presetSelections,
-} from "./costs.js";
+} from "./lib/costs.js";
 const leg = (mode) => ({ id: mode, mode, from: { name: "A" }, to: { name: "B" } });
 const fares = {
   train: { basic: 40, standard: 65, premium: 90, pricing: "perPerson" },

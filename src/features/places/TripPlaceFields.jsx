@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Combobox } from "./Combobox.jsx";
-import { useDebouncedSearch } from "../hooks/useDebouncedSearch.js";
+import { useDebouncedSearch } from "../../hooks/useDebouncedSearch.js";
 
 const districtKey = (name) =>
   name?.toLowerCase().replace(/[^\p{L}\p{N}]/gu, "");
@@ -95,8 +95,13 @@ function Hubs({
       {nearby.loading && <p role="status">Finding nearby hubs…</p>}
       {nearby.error && (
         <p role="alert">
-          Nearby hubs are unavailable. {nearby.retryAfter > 0 && nearby.errorMessage}{" "}
-          <button type="button" onClick={nearby.retry} disabled={nearby.retryAfter > 0}>
+          Nearby hubs are unavailable.{" "}
+          {nearby.retryAfter > 0 && nearby.errorMessage}{" "}
+          <button
+            type="button"
+            onClick={nearby.retry}
+            disabled={nearby.retryAfter > 0}
+          >
             Retry
           </button>
         </p>
@@ -186,7 +191,11 @@ export function TripPlaceFields({ origin, destination, onChange, errors }) {
         </select>
         {states.loading && <p role="status">Loading states…</p>}
         {states.error && (
-          <button type="button" onClick={states.retry} disabled={states.retryAfter > 0}>
+          <button
+            type="button"
+            onClick={states.retry}
+            disabled={states.retryAfter > 0}
+          >
             Retry states {states.retryAfter > 0 && states.errorMessage}
           </button>
         )}
@@ -215,7 +224,11 @@ export function TripPlaceFields({ origin, destination, onChange, errors }) {
           ))}
         </select>
         {districts.error && (
-          <button type="button" onClick={districts.retry} disabled={districts.retryAfter > 0}>
+          <button
+            type="button"
+            onClick={districts.retry}
+            disabled={districts.retryAfter > 0}
+          >
             Retry districts {districts.retryAfter > 0 && districts.errorMessage}
           </button>
         )}
@@ -225,8 +238,13 @@ export function TripPlaceFields({ origin, destination, onChange, errors }) {
         <div>
           {districtSearch.error && (
             <p role="alert">
-              Place search is unavailable. Search for an origin hub below. {districtSearch.retryAfter > 0 && districtSearch.errorMessage}{" "}
-              <button type="button" onClick={districtSearch.retry} disabled={districtSearch.retryAfter > 0}>
+              Place search is unavailable. Search for an origin hub below.{" "}
+              {districtSearch.retryAfter > 0 && districtSearch.errorMessage}{" "}
+              <button
+                type="button"
+                onClick={districtSearch.retry}
+                disabled={districtSearch.retryAfter > 0}
+              >
                 Retry district lookup
               </button>
             </p>

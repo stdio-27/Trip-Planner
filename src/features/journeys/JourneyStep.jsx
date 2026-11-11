@@ -1,5 +1,5 @@
-import { fareTiers } from "../../shared/journeys.js";
-import { formatMoney, journeyLegCosts } from "../costs.js";
+import { fareTiers } from "../../../shared/journeys.js";
+import { formatMoney, journeyLegCosts } from "../../lib/costs.js";
 
 const labels = {
   scheduled: "Timetable match",

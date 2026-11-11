@@ -1,18 +1,17 @@
-import { TripForm } from "../TripForm.jsx";
-import { Skeleton } from "../Skeleton.jsx";
-import { ErrorState } from "../ErrorState.jsx";
-import { EmptyState } from "../EmptyStates.jsx";
-export function SetupStep({ model }) {
-  const {
-    formValues,
-    handleSubmit,
-    optionsCall,
-    pendingTrip,
-    setFormValues,
-    stale,
-    step,
-    stepHeading,
-  } = model;
+import { TripForm } from "./TripForm.jsx";
+import { Skeleton } from "../common/Skeleton.jsx";
+import { ErrorState } from "../common/ErrorState.jsx";
+import { EmptyState } from "../common/EmptyStates.jsx";
+export function SetupStep({
+  formValues,
+  handleSubmit,
+  optionsCall,
+  setFormValues,
+  stale,
+  step,
+  stepHeading,
+  retryOptions,
+}) {
   return (
     <>
       {step === 1 && stale && (
@@ -50,12 +49,10 @@ export function SetupStep({ model }) {
         <ErrorState
           message={optionsCall.error}
           loading={optionsCall.retryAfter > 0}
-          onRetry={() => optionsCall.generate(pendingTrip.current)}
+          onRetry={retryOptions}
         />
       )}
-      {optionsCall.status === "empty" && (
-        <EmptyState onRetry={() => optionsCall.generate(pendingTrip.current)} />
-      )}
+      {optionsCall.status === "empty" && <EmptyState onRetry={retryOptions} />}
     </>
   );
 }

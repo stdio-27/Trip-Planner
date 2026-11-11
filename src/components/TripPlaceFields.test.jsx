@@ -11,7 +11,7 @@ import {
   within,
 } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
-import { TripPlaceFields } from "./TripPlaceFields.jsx";
+import { TripPlaceFields } from "../features/places/TripPlaceFields.jsx";
 import { useDebouncedSearch } from "../hooks/useDebouncedSearch.js";
 
 afterEach(() => {

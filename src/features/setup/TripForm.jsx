@@ -1,4 +1,4 @@
-import { timeBuckets } from "../../shared/journeyTiming.js";
+import { timeBuckets } from "../../../shared/journeyTiming.js";
 import { lazy, Suspense, useState, useRef, useEffect } from "react";
 import {
   tripSetupSchema,
@@ -9,11 +9,13 @@ import {
   PACES,
   FOOD_PREFERENCES,
   INTERESTS,
-} from "../../shared/schemas.js";
-import { validateTripInput } from "../../shared/tripInput.js";
-const TripPlaceFields = lazy(() => import("./TripPlaceFields.jsx").then(
-  (module) => ({ default: module.TripPlaceFields }),
-));
+} from "../../../shared/schemas.js";
+import { validateTripInput } from "../../../shared/tripInput.js";
+const TripPlaceFields = lazy(() =>
+  import("../places/TripPlaceFields.jsx").then((module) => ({
+    default: module.TripPlaceFields,
+  })),
+);
 const numeric = {
   adults: [1, 9],
   children: [0, 9],
@@ -29,7 +31,9 @@ export function TripForm({
   serverErrors,
   submitLabel = "Generate itinerary",
 }) {
-  const [errors, setErrors] = useState(/** @type {Record<string, string>} */ ({}));
+  const [errors, setErrors] = useState(
+    /** @type {Record<string, string>} */ ({}),
+  );
   useEffect(() => {
     setErrors(serverErrors || {});
   }, [serverErrors]);
@@ -166,8 +170,14 @@ export function TripForm({
       )}
       <small>{Math.max(Number(values.days) - 1, 0)} nights</small>
       {input("startDate", "Start date (optional)", "date")}
-      {picked && select("departurePreference", "Preferred outbound departure", timeBuckets)}
-      {picked && select("returnPreference", "Preferred return departure", timeBuckets)}
+      {picked &&
+        select(
+          "departurePreference",
+          "Preferred outbound departure",
+          timeBuckets,
+        )}
+      {picked &&
+        select("returnPreference", "Preferred return departure", timeBuckets)}
       {input("adults", "Adults (1–9)", "number")}
       {input("children", "Children (0–9)", "number")}
       {input("rooms", "Rooms (optional)", "number")}
@@ -217,7 +227,10 @@ export function TripForm({
       {select("foodPreference", "Food preference", FOOD_PREFERENCES)}
       {values.foodPreference === "other" &&
         input("foodOther", "Other food preference", "text", 50)}
-      <button className="button button-primary" disabled={disabled || loading || !valid}>
+      <button
+        className="button button-primary"
+        disabled={disabled || loading || !valid}
+      >
         {loading ? "Planning your trip…" : submitLabel}
       </button>
     </form>

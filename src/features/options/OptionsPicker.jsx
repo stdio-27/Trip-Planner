@@ -1,10 +1,10 @@
-import { PRESETS } from "../../shared/schemas.js";
-import { groups, priceFields } from "../../shared/optionsSchema.js";
+import { PRESETS } from "../../../shared/schemas.js";
+import { groups, priceFields } from "../../../shared/optionsSchema.js";
 import {
   formatMoney,
   computeCostBreakdown,
   presetSelections,
-} from "../costs.js";
+} from "../../lib/costs.js";
 export function OptionsPicker({
   headingRef = undefined,
   options,
@@ -18,11 +18,7 @@ export function OptionsPicker({
     pricePerDay: "Daily local transport",
     dailyPerPerson: "Daily meals per traveler",
   };
-  const labels = [
-    "Where to stay",
-    "Getting around",
-    "Food style",
-  ];
+  const labels = ["Where to stay", "Getting around", "Food style"];
   function edit(key, id, field, value) {
     if (
       value === "" ||
@@ -40,7 +36,9 @@ export function OptionsPicker({
   }
   return (
     <section className="options-picker" aria-label="Trip options">
-      <h2 ref={headingRef} tabIndex={-1}>Make it your kind of trip</h2>
+      <h2 ref={headingRef} tabIndex={-1}>
+        Make it your kind of trip
+      </h2>
       <p>Mix it yourself: premium stays and cheap travel work together.</p>
       <section className="sketch-box hubs">
         <h3>Hubs & assumptions</h3>
@@ -209,7 +207,12 @@ export function CostPanel({
       {cost.travelLegs.length > 0 && (
         <ul aria-label="Travel costs by leg">
           {cost.travelLegs.map((leg) => (
-            <li key={leg.id}>{leg.label} · {leg.missing ? "Estimate needed" : formatMoney(leg.amount, trip.currency)}</li>
+            <li key={leg.id}>
+              {leg.label} ·{" "}
+              {leg.missing
+                ? "Estimate needed"
+                : formatMoney(leg.amount, trip.currency)}
+            </li>
           ))}
         </ul>
       )}

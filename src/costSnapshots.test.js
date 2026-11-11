@@ -1,5 +1,5 @@
 import { expect, it } from "vitest";
-import { computeCostBreakdown } from "./costs.js";
+import { computeCostBreakdown } from "./lib/costs.js";
 const route = {
   legs: [{ id: "cab", mode: "cab", from: { name: "A" }, to: { name: "B" } }],
 };

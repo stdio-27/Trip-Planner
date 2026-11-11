@@ -1,13 +1,11 @@
 import { useState } from "react";
 import { useSortable } from "@dnd-kit/sortable";
+import { formatMoney } from "../../lib/costs.js";
 import { CSS } from "@dnd-kit/utilities";
 
 function formatCost(value, currency) {
   try {
-    return new Intl.NumberFormat(undefined, {
-      style: "currency",
-      currency,
-    }).format(value);
+    return formatMoney(value, currency);
   } catch {
     return `${currency} ${Number(value).toFixed(2)}`;
   }
@@ -52,7 +50,9 @@ export function StopCard({
       <div className="stop-content">
         <div className="stop-heading">
           <div>
-            <span className={`category-tag category-${stop.category}`}>{stop.category}</span>
+            <span className={`category-tag category-${stop.category}`}>
+              {stop.category}
+            </span>
             <h4>{stop.title}</h4>
             {stop.time && <p className="stop-time">{stop.time}</p>}
           </div>
@@ -78,8 +78,15 @@ export function StopCard({
         {expanded && (
           <div className="stop-details">
             {stop.description && <p>{stop.description}</p>}
-            {stop.location && <p><strong>Location:</strong> {stop.location}</p>}
-            <p><strong>Estimated activity cost per person:</strong> {formatCost(stop.estCost, currency)}</p>
+            {stop.location && (
+              <p>
+                <strong>Location:</strong> {stop.location}
+              </p>
+            )}
+            <p>
+              <strong>Estimated activity cost per person:</strong>{" "}
+              {formatCost(stop.estCost, currency)}
+            </p>
           </div>
         )}
       </div>

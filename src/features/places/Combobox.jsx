@@ -1,5 +1,5 @@
 import { useId, useState } from "react";
-import { useDebouncedSearch } from "../hooks/useDebouncedSearch.js";
+import { useDebouncedSearch } from "../../hooks/useDebouncedSearch.js";
 
 export function Combobox({
   id = undefined,

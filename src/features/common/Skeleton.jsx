@@ -1,6 +1,10 @@
 export function Skeleton() {
   return (
-    <div className="skeleton-panel" role="status" aria-label="Generating itinerary">
+    <div
+      className="skeleton-panel"
+      role="status"
+      aria-label="Generating itinerary"
+    >
       <span className="sr-only">Generating your itinerary…</span>
       <div className="skeleton-line skeleton-title" />
       <div className="skeleton-line skeleton-short" />

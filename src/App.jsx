@@ -1,13 +1,15 @@
 import { useState } from "react";
-import { BuzzIntro, BuzzOutro } from "./components/BuzzLanding.jsx";
+import { BuzzIntro, BuzzOutro } from "./features/common/BuzzLanding.jsx";
 import { useTripPlanner } from "./hooks/useTripPlanner.js";
-import { SetupStep } from "./components/steps/SetupStep.jsx";
-import { OptionsStep } from "./components/steps/OptionsStep.jsx";
-import { ItineraryStep } from "./components/steps/ItineraryStep.jsx";
+import { SetupStep } from "./features/setup/SetupStep.jsx";
+import { OptionsStep } from "./features/options/OptionsStep.jsx";
+import { ItineraryStep } from "./features/itinerary/ItineraryStep.jsx";
 export default function App() {
   const [step, setStep] = useState(1);
-  const model = useTripPlanner(step, setStep);
-  const { mode } = model;
+  const { mode, setupStep, optionsStep, itineraryStep } = useTripPlanner(
+    step,
+    setStep,
+  );
   return (
     <main className="app-shell">
       <header className="site-header">
@@ -45,9 +47,9 @@ export default function App() {
             ),
           )}
         </nav>
-        <SetupStep model={model} />
-        <OptionsStep model={model} />
-        <ItineraryStep model={model} />
+        <SetupStep {...setupStep} />
+        <OptionsStep {...optionsStep} />
+        <ItineraryStep {...itineraryStep} />
       </section>
       <BuzzOutro />
     </main>

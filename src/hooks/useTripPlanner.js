@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { journeyTiming, routeHubs } from "../../shared/journeyTiming.js";
 import { parseOptions, groups } from "../../shared/optionsSchema.js";
-import { presetSelections } from "../costs.js";
+import { presetSelections } from "../lib/costs.js";
 import {
   journeyRequest,
   parseJourneys,
@@ -123,24 +123,7 @@ export function useTripPlanner(step, setStep) {
   }
   const stale =
     trip &&
-    [
-      "destination",
-      "origin",
-      "days",
-      "adults",
-      "children",
-      "currency",
-      "startDate",
-      "rooms",
-      "departurePreference",
-      "returnPreference",
-      "pace",
-      "foodPreference",
-      "foodOther",
-      "interests",
-      "anythingElse",
-      "budget",
-    ].some(
+    Object.keys(initialForm).some(
       (k) =>
         JSON.stringify(formValues[k] ?? "") !== JSON.stringify(trip[k] ?? "") &&
         !(k === "rooms" && !formValues.rooms) &&
@@ -166,44 +149,82 @@ export function useTripPlanner(step, setStep) {
     });
   }
 
+  const retryOptions = () => optionsCall.generate(pendingTrip.current);
+  const retryRoutes = () => journeys.generate(journeyInput.current);
+  const retryFares = () => fares.generate(journeyInput.current);
+  const backToSetup = () => {
+    cancel();
+    setStep(1);
+  };
+  const activitiesTotal =
+    planTrip === trip && plan
+      ? plan.days.flatMap((d) => d.stops).reduce((sum, s) => sum + s.estCost, 0)
+      : 0;
+  const onRemove = (stopId) => dispatch({ type: "REMOVE_STOP", stopId });
+  const onMove = (stopId, toDayId, toIndex) =>
+    dispatch({ type: "MOVE_STOP", stopId, toDayId, toIndex });
+  const onUndo = () => dispatch({ type: "UNDO" });
   return {
-    buildPlan,
-    canUndo,
-    cancel,
-    choice,
-    contingencyOn,
-    dispatch,
-    error,
-    fareData,
-    fares,
-    formValues,
-    handleSubmit,
-    journeyInput,
-    journeyNotice,
-    journeys,
     mode,
-    options,
-    optionsCall,
-    packing,
-    pendingTrip,
-    plan,
-    planRetryAfter,
-    planTrip,
-    resultsPanel,
-    route,
-    selected,
-    setChoice,
-    setContingencyOn,
-    setFormValues,
-    setOptions,
-    setPacking,
-    setSelected,
-    setStep,
-    stale,
-    status,
-    step,
-    stepHeading,
-    timing,
-    trip,
+    setupStep: {
+      formValues,
+      handleSubmit,
+      optionsCall,
+      setFormValues,
+      stale,
+      step,
+      stepHeading,
+      retryOptions,
+    },
+    optionsStep: {
+      buildPlan,
+      choice,
+      contingencyOn,
+      fareData,
+      fares,
+      journeyNotice,
+      journeys,
+      options,
+      planRetryAfter,
+      route,
+      selected,
+      setChoice,
+      setContingencyOn,
+      setOptions,
+      setSelected,
+      stale,
+      status,
+      step,
+      stepHeading,
+      timing,
+      trip,
+      backToSetup,
+      onChangeHubs: () => setStep(1),
+      retryRoutes,
+      retryFares,
+      activitiesTotal,
+    },
+    itineraryStep: {
+      buildPlan,
+      canUndo,
+      cancel,
+      error,
+      showEmptyHint:
+        status === "idle" &&
+        !plan &&
+        step === 1 &&
+        optionsCall.status === "idle",
+      packing,
+      plan: planTrip === trip ? plan : null,
+      planRetryAfter,
+      resultsPanel,
+      setPacking,
+      status,
+      step,
+      stepHeading,
+      onRemove,
+      onMove,
+      onUndo,
+    },
   };
 }

@@ -16,7 +16,7 @@ import {
 } from "@dnd-kit/sortable";
 import { StopCard } from "./StopCard.jsx";
 
-function DayBoard({ day, currency, dispatch, active }) {
+function DayBoard({ day, currency, onRemove, onMove, active }) {
   const { setNodeRef, isOver } = useDroppable({ id: `day:${day.id}` });
 
   return (
@@ -27,13 +27,17 @@ function DayBoard({ day, currency, dispatch, active }) {
     >
       <div className="day-board-heading">
         <h3>{day.label}</h3>
-        <span>{day.stops.length} {day.stops.length === 1 ? "stop" : "stops"}</span>
+        <span>
+          {day.stops.length} {day.stops.length === 1 ? "stop" : "stops"}
+        </span>
       </div>
       <SortableContext
         items={day.stops.map((stop) => stop.id)}
         strategy={verticalListSortingStrategy}
       >
-        <div className={`stop-list${day.stops.length === 0 ? " is-empty" : ""}`}>
+        <div
+          className={`stop-list${day.stops.length === 0 ? " is-empty" : ""}`}
+        >
           {day.stops.map((stop, index) => (
             <StopCard
               key={stop.id}
@@ -41,35 +45,34 @@ function DayBoard({ day, currency, dispatch, active }) {
               currency={currency}
               position={index}
               total={day.stops.length}
-              onRemove={() => dispatch({ type: "REMOVE_STOP", stopId: stop.id })}
-              onMove={(toIndex) =>
-                dispatch({
-                  type: "MOVE_STOP",
-                  stopId: stop.id,
-                  toDayId: day.id,
-                  toIndex,
-                })
-              }
+              onRemove={() => onRemove(stop.id)}
+              onMove={(toIndex) => onMove(stop.id, day.id, toIndex)}
             />
           ))}
-          {day.stops.length === 0 && <p className="drop-hint">Drop a stop here</p>}
+          {day.stops.length === 0 && (
+            <p className="drop-hint">Drop a stop here</p>
+          )}
         </div>
       </SortableContext>
     </section>
   );
 }
 
-export function ItineraryView({ plan, dispatch }) {
-  const [activeDayId, setActiveDayId] = useState(plan.days[0]?.id ?? null);
+export function ItineraryView({ days, currency, onRemove, onMove }) {
+  const [activeDayId, setActiveDayId] = useState(days[0]?.id ?? null);
   useEffect(() => {
-    if (!plan.days.some((day) => day.id === activeDayId)) {
-      setActiveDayId(plan.days[0]?.id ?? null);
+    if (!days.some((day) => day.id === activeDayId)) {
+      setActiveDayId(days[0]?.id ?? null);
     }
-  }, [plan.days, activeDayId]);
+  }, [days, activeDayId]);
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
-    useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 5 } }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+    useSensor(TouchSensor, {
+      activationConstraint: { delay: 150, tolerance: 5 },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
   );
 
   function handleTabKeyDown(event) {
@@ -106,32 +109,31 @@ export function ItineraryView({ plan, dispatch }) {
 
     if (overId.startsWith("day:")) {
       const dayId = overId.slice(4);
-      targetDay = plan.days.find((day) => day.id === dayId);
+      targetDay = days.find((day) => day.id === dayId);
       toIndex = targetDay?.stops.length;
     } else {
-      targetDay = plan.days.find((day) => day.stops.some((stop) => stop.id === over.id));
+      targetDay = days.find((day) =>
+        day.stops.some((stop) => stop.id === over.id),
+      );
       toIndex = targetDay?.stops.findIndex((stop) => stop.id === over.id);
     }
 
     if (targetDay && Number.isInteger(toIndex)) {
-      dispatch({
-        type: "MOVE_STOP",
-        stopId: String(active.id),
-        toDayId: targetDay.id,
-        toIndex,
-      });
+      onMove(String(active.id), targetDay.id, toIndex);
       setActiveDayId(targetDay.id);
     }
   }
 
-  if (plan.days.length === 0) {
-    return <p className="muted-copy">There are no itinerary days to display.</p>;
+  if (days.length === 0) {
+    return (
+      <p className="muted-copy">There are no itinerary days to display.</p>
+    );
   }
 
   return (
     <section className="itinerary-section" aria-label="Daily itinerary">
       <div className="day-tabs" role="tablist" aria-label="Itinerary days">
-        {plan.days.map((day, index) => (
+        {days.map((day, index) => (
           <button
             type="button"
             key={day.id}
@@ -155,7 +157,7 @@ export function ItineraryView({ plan, dispatch }) {
         onDragEnd={handleDragEnd}
       >
         <div className="day-boards">
-          {plan.days.map((day) => (
+          {days.map((day) => (
             <div
               id={`panel-${day.id}`}
               role="tabpanel"
@@ -165,8 +167,9 @@ export function ItineraryView({ plan, dispatch }) {
             >
               <DayBoard
                 day={day}
-                currency={plan.currency}
-                dispatch={dispatch}
+                currency={currency}
+                onRemove={onRemove}
+                onMove={onMove}
                 active={activeDayId === day.id}
               />
             </div>

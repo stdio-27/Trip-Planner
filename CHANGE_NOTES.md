@@ -216,3 +216,10 @@ Keeping its existing helpers avoids an unnecessary abstraction.
 All five saved route arrays match the original JSON byte for byte.
 The existing engine tests and cost snapshots remain unchanged.
 All 271 tests, typecheck and build pass; metrics are in REFACTOR_LOG.md.
+
+## Stage 6d — client interfaces and folders
+Existing screens now live beside their features, and pure costs live under lib.
+Step screens receive only their view fields and actions.
+The planner hook keeps reducer dispatch and pending request refs private.
+All 271 tests, typecheck and build pass; browser remove/undo and responsive checks pass.
+REFACTOR_LOG.md records the small total bundle growth as an unmet acceptance target.
