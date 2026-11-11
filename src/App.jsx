@@ -42,6 +42,7 @@ export default function App() {
     error,
     generate,
     cancel,
+    retryAfter: planRetryAfter,
   } = useGenerate();
   const { plan, dispatch, canUndo, packing, setPacking } =
     useItinerary(generatedPlan);
@@ -200,6 +201,7 @@ export default function App() {
               onChange={setFormValues}
               onSubmit={handleSubmit}
               loading={optionsCall.status === "loading"}
+              disabled={optionsCall.retryAfter > 0}
               submitLabel="Explore options"
               serverErrors={optionsCall.fieldErrors}
             />
@@ -216,6 +218,7 @@ export default function App() {
         {optionsCall.status === "error" && (
           <ErrorState
             message={optionsCall.error}
+            loading={optionsCall.retryAfter > 0}
             onRetry={() => optionsCall.generate(pendingTrip.current)}
           />
         )}
@@ -278,7 +281,7 @@ export default function App() {
             />
             <button
               className="button button-primary"
-              disabled={stale || !route || status === "loading"}
+              disabled={stale || !route || status === "loading" || planRetryAfter > 0}
               onClick={buildPlan}
             >
               Build my itinerary
@@ -305,7 +308,7 @@ export default function App() {
             <ErrorState
               message={error}
               onRetry={buildPlan}
-              loading={status === "loading"}
+              loading={status === "loading" || planRetryAfter > 0}
             />
           )}
           {step === 3 && status === "empty" && <EmptyState onRetry={buildPlan} />}

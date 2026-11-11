@@ -1,0 +1,56 @@
+import { act, cleanup, renderHook } from "@testing-library/react";
+import { afterEach, expect, it, vi } from "vitest";
+import { useDebouncedSearch, clearSearchCache } from "./hooks/useDebouncedSearch.js";
+import { useGenerate } from "./hooks/useGenerate.js";
+import { retrySeconds } from "../shared/retryAfter.js";
+afterEach(()=>{cleanup();clearSearchCache();vi.unstubAllGlobals();vi.useRealTimers();});
+it("caches normalized lookups for ten minutes, including remounts",async()=>{
+ vi.useFakeTimers();
+ const fetch=vi.fn(async()=>({ok:true,json:async()=>({results:[]})}));vi.stubGlobal("fetch",fetch);
+ const hook=renderHook(({url})=>useDebouncedSearch(url),{initialProps:{url:"/api/geo/search?q=Delhi"}});
+ await act(async()=>{await vi.advanceTimersByTimeAsync(250);});
+ hook.rerender({url:"/api/geo/search?q=%20DELHI%20"});
+ await act(async()=>{await vi.advanceTimersByTimeAsync(250);});
+ expect(fetch).toHaveBeenCalledTimes(1);
+ hook.unmount();
+ const second=renderHook(()=>useDebouncedSearch("/api/geo/search?q=delhi"));
+ await act(async()=>{await vi.advanceTimersByTimeAsync(250);});
+ expect(fetch).toHaveBeenCalledTimes(1);
+ second.unmount();
+ await act(async()=>{await vi.advanceTimersByTimeAsync(600001);});
+ renderHook(()=>useDebouncedSearch("/api/geo/search?q=delhi"));
+ await act(async()=>{await vi.advanceTimersByTimeAsync(250);});
+ expect(fetch).toHaveBeenCalledTimes(2);
+});
+it("counts down a lookup 429 and blocks retries until it expires",async()=>{
+ vi.useFakeTimers();
+ const fetch=vi.fn(async()=>({ok:false,status:429,headers:new Headers({"Retry-After":"2"})}));vi.stubGlobal("fetch",fetch);
+ const {result}=renderHook(()=>useDebouncedSearch("/api/hubs/search?type=airport&q=del"));
+ await act(async()=>{await vi.advanceTimersByTimeAsync(250);});
+ expect(result.current.errorMessage).toContain("2 seconds");
+ act(()=>result.current.retry());
+ expect(fetch).toHaveBeenCalledTimes(1);
+ await act(async()=>{await vi.advanceTimersByTimeAsync(2000);});
+ expect(result.current.retryAfter).toBe(0);
+ act(()=>result.current.retry());
+ await act(async()=>{await vi.advanceTimersByTimeAsync(250);});
+ expect(fetch).toHaveBeenCalledTimes(2);
+});
+it("counts down a planning 429 and suppresses another generation until ready",async()=>{
+ vi.useFakeTimers();
+ const fetch=vi.fn(async()=>({ok:false,status:429,headers:new Headers({"Retry-After":"2"}),json:async()=>({error:"Rate limited."})}));vi.stubGlobal("fetch",fetch);
+ const {result}=renderHook(()=>useGenerate());
+ await act(async()=>{await result.current.generate({days:1});});
+ expect(result.current.error).toContain("2 seconds");
+ await act(async()=>{await result.current.generate({days:1});});
+ expect(fetch).toHaveBeenCalledTimes(1);
+ await act(async()=>{await vi.advanceTimersByTimeAsync(2000);});
+ expect(result.current.retryAfter).toBe(0);
+ await act(async()=>{await result.current.generate({days:1});});
+ expect(fetch).toHaveBeenCalledTimes(2);
+});
+it("handles missing, malformed and HTTP-date retry headers",()=>{
+ expect(retrySeconds({headers:new Headers()})).toBe(60);
+ expect(retrySeconds({headers:new Headers({"Retry-After":"bad"})})).toBe(60);
+ expect(retrySeconds({headers:new Headers({"Retry-After":new Date(5000).toUTCString()})},0)).toBe(5);
+});

@@ -1,3 +1,4 @@
+import { clearSearchCache } from "../hooks/useDebouncedSearch.js";
 import React from "react";
 import { useState } from "react";
 import { afterEach, expect, it, vi } from "vitest";

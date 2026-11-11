@@ -1,3 +1,5 @@
+import { retrySeconds, cooldownMessage } from "../../shared/retryAfter.js";
+import { useCooldown } from "./useCooldown.js";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { parsePlan } from "../schema.js";
 
@@ -9,6 +11,7 @@ class InvalidPlanError extends Error {
 }
 
 export function useApiCall(endpoint, parser) {
+  const { retryAfter, beginCooldown, isCoolingDown } = useCooldown();
   const [status, setStatus] = useState("idle");
   const [plan, setPlan] = useState(null);
   const [error, setError] = useState(null);
@@ -41,6 +44,7 @@ export function useApiCall(endpoint, parser) {
 
   const generate = useCallback(
     async (tripDetails) => {
+      if (isCoolingDown()) return;
       controllerRef.current?.abort();
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
@@ -84,6 +88,7 @@ export function useApiCall(endpoint, parser) {
           }
 
           if (!response.ok) {
+            if (response.status === 429) beginCooldown(retrySeconds(response));
             let message = `Trip plan request failed (${response.status}).`;
             try {
               const body = await response.json();
@@ -196,7 +201,7 @@ export function useApiCall(endpoint, parser) {
         }
       }
     },
-    [endpoint, parser],
+    [endpoint, parser, beginCooldown, isCoolingDown],
   );
 
   useEffect(
@@ -212,7 +217,7 @@ export function useApiCall(endpoint, parser) {
     [],
   );
 
-  return { status, plan, error, fieldErrors, droppedItems, generate, cancel, reset };
+  return { status, plan, error: retryAfter ? cooldownMessage(retryAfter) : error, retryAfter, fieldErrors, droppedItems, generate, cancel, reset };
 }
 
 export function useGenerate() {

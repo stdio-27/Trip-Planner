@@ -111,3 +111,10 @@ We capped provider fares at the same maximum already used by editable estimates.
 We changed the expected-failure regression into a normal passing test.
 We preserved tier normalization and the existing partial-failure recovery path.
 We recorded the fix against its original QA finding.
+
+## Stage 3b — rate limits and error recovery
+We added a visible countdown from the server retry delay and blocked early retries.
+We cached normalized place and hub lookups in session memory for ten minutes.
+We kept cancellation and stale-response guards around every lookup.
+We supplied a safe retry header for provider quota errors without forwarding provider text.
+We tested cache expiry, query reuse, countdown completion and sanitized retry headers.

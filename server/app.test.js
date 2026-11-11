@@ -364,3 +364,10 @@ it.each(["bad-json", "bad-shape", "empty", "fail"])(
     expect(fetch).not.toHaveBeenCalled();
   },
 );
+
+it("forwards only a sanitized retry delay for upstream quota errors", async()=>{
+ const response=await request(createApp({mockMode:"off",apiKey:"test",fetch:async()=>new Response("private upstream data",{status:429,headers:{"Retry-After":"7"}})}),trip);
+ expect(response.status).toBe(429);
+ expect(response.headers.get("Retry-After")).toBe("7");
+ expect(JSON.stringify(await response.json())).not.toContain("private upstream data");
+});

@@ -25,6 +25,7 @@ export function TripForm({
   onChange,
   onSubmit,
   loading,
+  disabled = false,
   serverErrors,
   submitLabel = "Generate itinerary",
 }) {
@@ -216,7 +217,7 @@ export function TripForm({
       {select("foodPreference", "Food preference", FOOD_PREFERENCES)}
       {values.foodPreference === "other" &&
         input("foodOther", "Other food preference", "text", 50)}
-      <button className="button button-primary" disabled={loading || !valid}>
+      <button className="button button-primary" disabled={disabled || loading || !valid}>
         {loading ? "Planning your trip…" : submitLabel}
       </button>
     </form>

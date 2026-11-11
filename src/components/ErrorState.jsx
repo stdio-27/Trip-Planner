@@ -1,4 +1,4 @@
-export function ErrorState({ message, onRetry, loading }) {
+export function ErrorState({ message, onRetry, loading = false }) {
   return (
     <div className="error-panel" role="alert">
       <div className="error-icon" aria-hidden="true">!</div>

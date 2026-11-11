@@ -112,8 +112,8 @@ export function Combobox({
       )}
       {search.error && (
         <p role="alert">
-          Search is unavailable.{" "}
-          <button type="button" onClick={search.retry}>
+          {search.errorMessage}{" "}
+          <button type="button" onClick={search.retry} disabled={search.retryAfter > 0}>
             Retry
           </button>
         </p>

@@ -21,8 +21,8 @@ Audited from `v2-feature-complete` plus Stage 1 hygiene, on 11 November 2026 IST
 | ID | Severity | Repro and actual behavior | Expected and suggested fix | Evidence / status |
 | --- | --- | --- | --- | --- |
 | H1 | High | Feed a finite fare of 1e308 to normalizeFares. It passes and multiplying by a traveling group can overflow totals. | Apply the existing UI's 1e9 fare limit to server/model fare validation. | server/qaAudit.test.js “QA-H1 rejects finite fares that can overflow group totals”, initially it.fails; shared/journeys.js fareSchema. FIXED in Stage 3a |
-| M1 | Medium | Revisit a place query. useDebouncedSearch requests it again. A 429 exposes no countdown. | Ten-minute normalized session cache and Retry-After countdown. | src/hooks/useDebouncedSearch.js; useGenerate.js HTTP-error branch. OPEN, Stage 3b |
-| M2 | Medium | Upstream Gemini 429 maps to HTTP 429 without explicitly setting Retry-After. | Supply a safe retry delay header for every 429 path. | server/app.js provider error mapping. OPEN, Stage 3b |
+| M1 | Medium | Revisit a place query. useDebouncedSearch requests it again. A 429 exposes no countdown. | Ten-minute normalized session cache and Retry-After countdown. | src/hooks/useDebouncedSearch.js; useGenerate.js HTTP-error branch. FIXED, Stage 3b |
+| M2 | Medium | Upstream Gemini 429 maps to HTTP 429 without explicitly setting Retry-After. | Supply a safe retry delay header for every 429 path. | server/app.js provider error mapping. FIXED, Stage 3b |
 | M3 | Medium | Demo and live health return the same status-only object, with no visible demo badge. | Expose safe mode metadata and show Demo data. | server/app.js /api/health; src/App.jsx header. OPEN, Stage 3d |
 | M4 | Medium | Run the JSX type scan described in TYPECHECK.md. UI remains outside the blocking type check. | Resolve bounded typing issues or record exact remaining diagnostics. | jsconfig.json include list; docs/TYPECHECK.md. OPEN, Stage 3e |
 | L1 | Low | Multiple flight variants share identical radio accessible names. | Include the actual hub route in the label. | JourneyPicker.jsx aria-label. OPEN, Stage 3e |
@@ -38,7 +38,7 @@ No Critical finding was established in this audit. Failure to establish one is n
 | Every possible paste/string and real IST midnight transition | UNVERIFIED beyond the explicit schema, numeric-paste and date fixtures |
 | Typing without selection, state reset, Back | App.test.jsx and TripPlaceFields.test.jsx |
 | Rapid typing, stale results, provider down/slow/empty | TripPlaceFields.test.jsx; server/geo/routes.test.js provider/fault tests |
-| Search 429 countdown and normalized repeated queries | Missing at audit, M1 |
+| Search 429 countdown and normalized repeated queries | Added and tested in Stage 3b, M1 |
 | LGD naming mismatch and same name in different states | State-scoped district matcher in TripPlaceFields.jsx; complete geographic ambiguity set UNVERIFIED |
 | Same-city, direct, multi-leg, missing junction, sparse north-east | journeys/engine.test.js and QA_ROUTES.json |
 | Andaman remote hub | QA_ROUTES.json Port Blair route using the committed IXZ record |

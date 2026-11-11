@@ -32,7 +32,7 @@ export function JourneyPicker({ trip, journeys, fares, choice, setChoice, notice
       {notice && <p role="status">{notice}</p>}
       {journeys.status === "loading" && <p role="status">Finding journeys…</p>}
       {["error", "empty"].includes(journeys.status) && (
-        <p role="alert">Journey options could not load. <button className="button" onClick={retryRoutes}>Retry journeys</button></p>
+        <p role="alert">Journey options could not load. {journeys.retryAfter > 0 && journeys.error} <button className="button" onClick={retryRoutes} disabled={journeys.retryAfter > 0}>Retry journeys</button></p>
       )}
       {journeys.status === "success" && !journeys.plan.journeys.length && (
         <p role="status">{journeys.plan.emptyReason} <button className="button" onClick={onChangeHubs}>Change hubs</button></p>
@@ -46,7 +46,7 @@ export function JourneyPicker({ trip, journeys, fares, choice, setChoice, notice
             <label><input type="checkbox" checked={roundTrip}
               onChange={(event) => setChoice({ ...choice, roundTrip: event.target.checked })} /> Return the same way</label>
           </div>
-          {fareFailed && <p role="alert">Fare estimates are unavailable. Enter your own estimates or <button className="button" onClick={retryFares}>Estimate prices again</button>.</p>}
+          {fareFailed && <p role="alert">Fare estimates are unavailable. {fares.retryAfter > 0 && fares.error} Enter your own estimates or <button className="button" onClick={retryFares} disabled={fares.retryAfter > 0}>Estimate prices again</button>.</p>}
           <fieldset>
             <legend>Choose a journey</legend>
             <div className="journey-grid">

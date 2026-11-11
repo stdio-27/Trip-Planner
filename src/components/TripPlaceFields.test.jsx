@@ -1,3 +1,4 @@
+import { clearSearchCache } from "../hooks/useDebouncedSearch.js";
 // @vitest-environment jsdom
 import { useState } from "react";
 import {
@@ -14,6 +15,7 @@ import { TripPlaceFields } from "./TripPlaceFields.jsx";
 import { useDebouncedSearch } from "../hooks/useDebouncedSearch.js";
 
 afterEach(() => {
+  clearSearchCache();
   cleanup();
   vi.unstubAllGlobals();
   vi.useRealTimers();

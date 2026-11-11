@@ -1,3 +1,4 @@
+import { retrySeconds } from "../shared/retryAfter.js";
 import { loadData } from "./data/index.js";
 import { buildJourneys } from "./journeys/engine.js";
 import { clockTime, journeyTiming, routeHubs } from "../shared/journeyTiming.js";
@@ -322,6 +323,7 @@ export function createApp(options = {}) {
             404: `Gemini model ${geminiModel} is unavailable. Update GEMINI_MODEL and restart the server.`,
             429: "Gemini quota or rate limit reached. Check your Google AI quota and billing, then try again.",
           };
+          if (response.status === 429) res.set("Retry-After", String(retrySeconds(response)));
           res.status(response.status === 429 ? 429 : 502).json({
             error:
               messages[response.status] ??

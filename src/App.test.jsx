@@ -1,3 +1,4 @@
+import { clearSearchCache } from "./hooks/useDebouncedSearch.js";
 import React from "react";
 import { afterEach, expect, it, vi } from "vitest";
 import {
@@ -10,6 +11,7 @@ import {
 import App from "./App.jsx";
 import { demoOptions } from "../server/demoOptions.js";
 afterEach(() => {
+  clearSearchCache();
   cleanup();
   vi.unstubAllGlobals();
 });
