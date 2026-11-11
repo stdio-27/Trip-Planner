@@ -90,3 +90,10 @@ Place pickers load separately, and keyboard focus follows the active planning st
 Failure mocks and retry controls preserve trip input and previously usable results.
 The README describes setup, data attribution, fare evidence, and the recovery paths.
 Live Gemini and browser verification results are recorded in the QA documents.
+
+## Stage 1 — baseline and hygiene
+We tagged the starting version and checked the same code three times after a clean install.
+We measured five server starts with one command and recorded the results and their limits.
+We checked tracked data, local files, environment settings and secret patterns without exposing values.
+We added temporary-file ignore rules, clarified environment comments and archived two historical documents.
+We verified a keyless fresh clone through the full demo flow and recorded the evidence in the baseline report.
