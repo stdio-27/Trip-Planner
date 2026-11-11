@@ -9,3 +9,10 @@ artifacts/
 
 # Source datasets are local inputs; commit processed server/data outputs only.
 data/raw/
+
+# Transient tooling output and operating-system metadata
+*.log
+coverage/
+*.tsbuildinfo
+.DS_Store
+Thumbs.db
