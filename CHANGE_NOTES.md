@@ -188,3 +188,10 @@ We added a regression that failed against the previous behavior.
 We now focus the current result heading when generation reaches its next state.
 We made result, error and empty headings accept programmatic focus.
 We kept cost and stop edits from triggering unrelated focus movement.
+
+## Stage 5 — approved YAGNI cleanup
+We removed the unused legacy budget component after confirming it had no caller.
+We removed only the CSS selectors rendered by that obsolete component.
+We removed two travel-choice exports that had no remaining references.
+We kept provider seams, declaration packages and uncertain CSS with their documented reasons.
+We preserved the golden demo path, API contracts and fixed cost snapshots.
