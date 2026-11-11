@@ -132,3 +132,10 @@ We made health responses identify demo or live mode without returning configurat
 We added a visible Demo data badge driven by the backend mode.
 We documented keyless and live startup and the changing behavior of latest model aliases.
 We tested health shapes, the badge and the startup-warning conditions.
+
+## Stage 3b follow-up — local lookup budget
+We checked repeated new queries as well as cached queries against the server limit.
+We capped one page at twenty-four uncached lookup requests per minute.
+We show the existing countdown while a local request slot is unavailable.
+We preserve query cancellation and never spend a slot on a cache hit.
+We documented that other tabs and shared IP addresses can still reach the server limit.

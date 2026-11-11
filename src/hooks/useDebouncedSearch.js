@@ -4,7 +4,8 @@ import { useCooldown } from "./useCooldown.js";
 
 const cache = new Map();
 const ttl = 10 * 60 * 1000;
-export const clearSearchCache = () => cache.clear();
+const requestTimes = [];
+export const clearSearchCache = () => { cache.clear(); requestTimes.length = 0; };
 function cacheKey(url) {
   const parsed = new URL(url, "http://trip.local");
   if (parsed.searchParams.has("q")) parsed.searchParams.set("q",
@@ -32,6 +33,16 @@ export function useDebouncedSearch(url, delay = 250) {
         if (current) setResult({ url, attempt, error: true });
         return;
       }
+      const now = Date.now();
+      while (requestTimes.length && requestTimes[0] <= now - 60000) requestTimes.shift();
+      if (requestTimes.length >= 24) {
+        if (current) {
+          beginCooldown(Math.max(1, Math.ceil((requestTimes[0] + 60000 - now) / 1000)));
+          setResult({ url, attempt, error: true });
+        }
+        return;
+      }
+      requestTimes.push(now);
       try {
         const response = await fetch(url, { signal: controller.signal });
         if (!response.ok) {

@@ -90,3 +90,5 @@ Time spent: **[enter time spent, e.g. 4.5 hours]**
 For a keyless demo, copy .env.example to .env and set MOCK=demo before npm start. Place search uses Open-Meteo. Demo data is labeled in the header.
 For live generation, leave MOCK unset and set GEMINI_API_KEY only on the server. GEMINI_MODEL defaults to gemini-flash-lite-latest.
 The latest alias can change behavior over time. A missing live key produces a startup warning. Health returns only ok and the demo/live mode.
+
+The browser also caps uncached lookup requests at 24 per minute per page, leaving room below the server's shared 30-request lookup budget. Cached reads use no request slots. Multiple tabs and users behind one IP can still share the server limit.

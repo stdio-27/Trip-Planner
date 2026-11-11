@@ -54,3 +54,15 @@ it("handles missing, malformed and HTTP-date retry headers",()=>{
  expect(retrySeconds({headers:new Headers({"Retry-After":"bad"})})).toBe(60);
  expect(retrySeconds({headers:new Headers({"Retry-After":new Date(5000).toUTCString()})},0)).toBe(5);
 });
+
+it("keeps a single page below the shared 30-per-minute lookup limit",async()=>{
+ vi.useFakeTimers();
+ const fetch=vi.fn(async()=>({ok:true,json:async()=>({results:[]})}));vi.stubGlobal("fetch",fetch);
+ const hook=renderHook(({url})=>useDebouncedSearch(url),{initialProps:{url:"/api/geo/search?q=town0"}});
+ for(let i=0;i<30;i++){
+  hook.rerender({url:"/api/geo/search?q=town"+i});
+  await act(async()=>{await vi.advanceTimersByTimeAsync(250);});
+ }
+ expect(fetch).toHaveBeenCalledTimes(24);
+ expect(hook.result.current.retryAfter).toBeGreaterThan(0);
+});
