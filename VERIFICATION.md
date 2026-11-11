@@ -5,8 +5,8 @@
 - **Static Type Checking:** Core schemas, cost module, and server modules pass type checks without errors (`npm run typecheck` via `tsc -p jsconfig.json`).
 - **Production Asset Build:** `npm run build` succeeds; the place picker component is split into its own lazy-loaded bundle chunk (`dist/assets/TripPlaceFields-*.js`, 7.59 kB raw / 2.82 kB gzip).
 - **Security & Dependency Audit:** `npm audit` reports 0 vulnerabilities. Grep and binary scans on `dist/` confirm zero references to `GEMINI_API_KEY` or Google AI key patterns (`AIza*`).
-- **Server Startup & Memory:** Verified via `artifacts/phase8-benchmark.mjs` — server starts and loads indexed data in ~2.09s, process working set memory is 162.2 MiB, and static assets serve with `Content-Encoding: gzip`.
-- **Live Gemini Model Verification:** 6 diverse real-world Indian itinerary scenarios executed against live Gemini `gemini-flash-lite-latest` with 100% success (documented in `docs/LIVE_RUNS.md`).
+- **Server Startup & Memory:** Verified via `artifacts/phase8-benchmark.mjs` — latest isolated server startup and index loading took 1.187s, process working set memory was 162.4 MiB, and static assets serve with `Content-Encoding: gzip`.
+- **Live Gemini Model Verification:** 6 diverse real-world Indian itinerary scenarios executed against live Gemini `gemini-flash-lite-latest` with the requested day counts in all six responses (documented in `docs/LIVE_RUNS.md`).
 - **Browser Accessibility & Responsiveness:** Verified at 360px, 390px, and 768px widths with zero unintended horizontal overflow. Keyboard focus follows step navigation, and ARIA combobox / listbox states are correctly managed.
 
 ## Failure-mode coverage matrix
@@ -30,6 +30,24 @@
 
 ## Honest limits
 - Live seat inventory, booking status, and real-time rail/air fares are not available through free public APIs. All timetables reflect documented snapshot years (2016 for datameet rail, 2014 for OpenFlights) and fares are explicitly marked as AI estimates.
-- Unofficial booking links (IRCTC and Google Flights) open external official sites in new tabs; their live pricing is not fetched programmatically.
+- Train and flight links open IRCTC or Google Flights in a new tab. The app does not fetch live booking inventory from those pages.
 - Client state is maintained in-memory for the current browser session. A hard page refresh clears state back to Step 1.
 - Two benign Rollup/Zod comment-placement warnings appear during Vite production builds; they do not impact output or runtime behavior.
+
+
+## Final Phase 8 status check
+
+Rechecked on 11 November 2026 IST from commit `91ffcdf`.
+
+- The full suite passed all 233 tests across 20 files. Type checking and the production build passed.
+- The npm audit reported zero vulnerabilities. The production scan found zero configured-key matches or Google API key signatures.
+- A fresh local clone installed with `npm install`. Running `npm start` on isolated ports served the Vite frontend and returned a successful `/api/health` response through its proxy. The test process tree was stopped after verification.
+- Production serving returned HTTP 200 with `Content-Encoding: gzip`. The place picker remained a separate lazy-loaded chunk. The latest measured startup was below the two-second target.
+- All three planning steps were checked at viewport widths of 360, 390 and 768 pixels. Document width stayed within the available width at every step.
+- The browser showed Cancel during a simulated four-second API delay. Cancelling preserved the previous itinerary. A delayed generation also completed successfully.
+- During a simulated API connection failure, the browser displayed an error with Try again and retained the previous itinerary. Restoring the connection and retrying cleared the error and generated a usable result.
+- Back restored the selected destination and origin district. Keyboard arrow navigation changed the active itinerary day.
+
+The delayed and disconnected checks used an isolated local test server with deterministic place results and demo generation. They test the loaded page's API recovery behavior. A full offline reload still requires the app server, as documented in the README.
+
+The earlier keyboard traversal covered setup, journey expansion and itinerary navigation. A physical-phone check remains pending because no connected phone is available in this workspace. Responsive desktop viewports provide the recorded mobile-width evidence.
