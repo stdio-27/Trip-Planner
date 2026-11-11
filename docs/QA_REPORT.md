@@ -76,3 +76,6 @@ Optional Stage 3f persistence is deliberately skipped. The existing in-memory se
 The first post-polish clean-install test run failed in “lets the traveler select dataset hubs when the geocoder is down” because the default one-second query wait expired while the state picker still showed Loading states. The next two runs passed. Evidence is artifacts/master-pack/reverify-test-1.log through reverify-test-3.log. The test now explicitly allows eight seconds for its asynchronous initial state list. This changes the test harness, not picker behavior.
 
 The new HTTP golden test also needed to wait for the arrival-hub default before submitting. Its standalone and coverage runs passed after that harness correction. No refactor has been performed while plan approval is pending.
+
+
+A browser recheck reproduced a new Medium focus finding: loading focused its temporary heading, but removing that heading after a usable plan left focus on BODY. The “keeps focus on the itinerary heading after the loading view disappears” regression failed before the fix (artifacts/master-pack/focus-regression-before.log). The result effect now focuses the current result heading after status/plan transitions, and result/error/empty headings accept programmatic focus. This small Stage 3e correction leaves cost edits from moving focus.

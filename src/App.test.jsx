@@ -325,3 +325,10 @@ it("has no automated axe violations across setup, choices and itinerary",async()
  await build();
  await check();
 },60000);
+
+it("keeps focus on the itinerary heading after the loading view disappears",async()=>{
+ await setup();
+ await options();
+ await build();
+ await waitFor(()=>expect(document.activeElement).toBe(screen.getByRole("heading",{name:"Kyoto",exact:true})));
+});

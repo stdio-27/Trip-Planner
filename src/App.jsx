@@ -66,10 +66,13 @@ export default function App() {
   const resultsPanel = useRef(null);
   const previousStep = useRef(1);
   useEffect(() => {
-    if (step === previousStep.current) return;
-    (stepHeading.current ?? resultsPanel.current)?.focus();
+    if (step === previousStep.current && step !== 3) return;
+    const heading = step === 3
+      ? resultsPanel.current?.querySelector("h2")
+      : stepHeading.current;
+    (heading ?? resultsPanel.current)?.focus();
     previousStep.current = step;
-  }, [step]);
+  }, [step, status, plan?.days[0]?.id, planTrip]);
   useEffect(() => {
     if (optionsCall.status === "success" && optionsCall.plan) {
       const submission = pendingTrip.current;
@@ -324,7 +327,7 @@ export default function App() {
               <div className="results-heading">
                 <div>
                   <div className="section-eyebrow">YOUR ITINERARY</div>
-                  <h2>{plan.title}</h2>
+                  <h2 tabIndex={-1}>{plan.title}</h2>
                 </div>
                 <button
                   type="button"

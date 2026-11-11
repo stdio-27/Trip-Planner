@@ -181,3 +181,10 @@ We changed the original control rule so the darker focus color actually wins.
 We expanded labeled radio and checkbox targets without changing their values.
 We retained the existing cream, orange and sketch presentation.
 We reran tests, UI type checking and the production build before this polish commit.
+
+## Stage 3e follow-up — focus after loading
+We reproduced focus falling back to the document after the loading heading disappeared.
+We added a regression that failed against the previous behavior.
+We now focus the current result heading when generation reaches its next state.
+We made result, error and empty headings accept programmatic focus.
+We kept cost and stop edits from triggering unrelated focus movement.
