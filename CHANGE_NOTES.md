@@ -125,3 +125,10 @@ We compared each fare per kilometer with the median for the same mode and tier.
 We added relative checks for other currencies and skipped division for zero-distance legs.
 We preserved flagged estimates and kept every fare editable and every journey selectable.
 We tested normal, high, low, single-leg and non-INR cases.
+
+## Stage 3d — configuration clarity
+We added a secret-free warning when live generation has no configured key.
+We made health responses identify demo or live mode without returning configuration.
+We added a visible Demo data badge driven by the backend mode.
+We documented keyless and live startup and the changing behavior of latest model aliases.
+We tested health shapes, the badge and the startup-warning conditions.

@@ -1,3 +1,4 @@
+import { useServerMode } from "./hooks/useServerMode.js";
 import { clockTime, journeyTiming, routeHubs } from "../shared/journeyTiming.js";
 import { useEffect, useState, useRef } from "react";
 import { BuzzIntro, BuzzOutro } from "./components/BuzzLanding.jsx";
@@ -35,6 +36,7 @@ const initialForm = {
 };
 
 export default function App() {
+  const mode = useServerMode();
   const [formValues, setFormValues] = useState(initialForm);
   const {
     status,
@@ -161,6 +163,7 @@ export default function App() {
           </span>
           <span>Trip Planner</span>
         </a>
+        {mode === "demo" && <span className="demo-badge" role="status">Demo data</span>}
         <a className="header-link" href="#planner">
           Find your buzz <span aria-hidden="true">↗</span>
         </a>

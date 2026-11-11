@@ -84,3 +84,9 @@ OpenAI Codex implemented and verified the planning flow and v2 phases. Google An
 ## Time spent
 
 Time spent: **[enter time spent, e.g. 4.5 hours]**
+
+## Configuration quick starts
+
+For a keyless demo, copy .env.example to .env and set MOCK=demo before npm start. Place search uses Open-Meteo. Demo data is labeled in the header.
+For live generation, leave MOCK unset and set GEMINI_API_KEY only on the server. GEMINI_MODEL defaults to gemini-flash-lite-latest.
+The latest alias can change behavior over time. A missing live key produces a startup warning. Health returns only ok and the demo/live mode.

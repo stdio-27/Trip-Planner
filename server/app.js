@@ -1,3 +1,4 @@
+import { serverMode } from "./config.js";
 import { retrySeconds } from "../shared/retryAfter.js";
 import { loadData } from "./data/index.js";
 import { buildJourneys } from "./journeys/engine.js";
@@ -426,7 +427,7 @@ export function createApp(options = {}) {
   });
 
   app.get("/api/health", otherApiLimiter, noQuery, (_req, res) => {
-    res.json({ ok: true, status: "healthy" });
+    res.json({ ok: true, mode: serverMode(mockMode) });
   });
 
   // Unknown /api routes return 404 JSON

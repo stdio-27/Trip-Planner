@@ -80,6 +80,7 @@ async function setup(
     lon: 91.75,
   };
   vi.stubGlobal("fetch", async (url, init) => {
+    if (url === "/api/health") return Response.json({ ok: true, mode: "demo" });
     if (url === "/api/journeys/structure") return Response.json(journeyOverrides.routes ?? routes);
     if (url === "/api/journeys/fares") return Response.json(journeyOverrides.fares?.() ?? fares);
     if (init?.method === "POST") return fetchMock(url, init);
@@ -303,4 +304,9 @@ it("keeps trip details available when no journeys are found", async () => {
   fireEvent.click(screen.getByRole("button", { name: "Change hubs" }));
   expect((await screen.findByRole("combobox", { name: "Destination" })).value).toBe("Guwahati");
   expect(screen.getByLabelText("Origin district").value).toBe("New Delhi");
+});
+
+it("shows Demo data when the backend reports demo mode", async()=>{
+ await setup();
+ expect(await screen.findByText("Demo data")).toBeTruthy();
 });

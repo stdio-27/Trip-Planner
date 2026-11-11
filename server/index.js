@@ -1,6 +1,9 @@
+import { startupWarning } from "./config.js";
 import "dotenv/config";
 import { createApp } from "./app.js";
 import { loadData } from "./data/index.js";
+const warning = startupWarning({ apiKey: process.env.GEMINI_API_KEY, mockMode: process.env.MOCK?.toLowerCase() });
+if (warning) console.warn(warning);
 loadData();
 const app = createApp();
 const port = Number(process.env.PORT) || 8787;

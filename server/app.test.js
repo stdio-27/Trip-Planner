@@ -371,3 +371,10 @@ it("forwards only a sanitized retry delay for upstream quota errors", async()=>{
  expect(response.headers.get("Retry-After")).toBe("7");
  expect(JSON.stringify(await response.json())).not.toContain("private upstream data");
 });
+
+it.each([["demo","demo"],["off","live"],["fares-fail","demo"]])("health reports only safe mode metadata for %s",async(mockMode,mode)=>{
+ const server=createApp({mockMode}).listen(0,"127.0.0.1");servers.push(server);
+ await new Promise(resolve=>server.once("listening",resolve));
+ const res=await fetch("http://127.0.0.1:"+server.address().port+"/api/health");
+ expect(await res.json()).toEqual({ok:true,mode});
+});
