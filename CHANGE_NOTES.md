@@ -153,3 +153,10 @@ We exercised the full demo flow against a real Node HTTP server.
 We captured API response contracts and five fixed cost snapshots.
 We measured coverage, source sizes, dependency cycles and static-analysis findings.
 We wrote a concrete refactor plan and requested the approval required by the prompt pack.
+
+## Stage 8a — README
+We rewrote setup instructions for both keyless demo and live generation.
+We documented the actual request flow, scripts and six environment variables.
+We listed every fault mode and explained what the traveler can retry.
+We linked source licenses, current limits and the code-reading order.
+We left the user's authorship confirmation and real time spent as explicit placeholders.

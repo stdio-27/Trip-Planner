@@ -1,94 +1,162 @@
 # Trip Planner
 
-Plan a trip within India with bundled transport snapshots and Gemini-generated price estimates and itineraries.
+An India trip planner built with React and Express. Choose places and transport hubs, compare journeys from bundled transport snapshots, edit fare/stay/local/meal estimates, then generate an itinerary with Gemini. Each journey explains its evidence and buffers, and every fare remains an estimate.
 
-## Setup
+## Quick start
 
-Use Node.js 22.22.2+ in the 22.x line, or Node.js 24.15.0+, and npm.
+Use Node.js 22.22.2+ in the 22.x line or 24.15.0+, and npm. These commands assume PowerShell and a fresh clone.
 
-```sh
+### Keyless demo
+
+```powershell
 npm install
+Copy-Item .env.example .env
+$env:MOCK = "demo"
 npm start
 ```
 
-Open [localhost:5173](http://localhost:5173). Vite forwards `/api` to Express on port 8787. Copy `.env.example` to `.env` and set `GEMINI_API_KEY` for live generation. Keep credentials in the server environment. Use `MOCK=demo` for keyless estimates and itineraries. The place search still uses Open-Meteo unless an arrival hub is selected directly or a geocoder mock is enabled.
+Open [localhost:5173](http://localhost:5173). The header displays **Demo data**. Demo prices and itineraries are deterministic illustrations. Place search still uses Open-Meteo. During an outage, choose hubs from the bundled search.
 
-If either port is occupied, stop the previous instance or set `VITE_DEV_PORT` and `PORT` in `.env`. Run `npm run start:prod` to build and serve the compressed client from Express.
+### Live Gemini
 
-## Planning flow
+Set the real key in your local .env, leave MOCK unset, and use the configured model.
 
-1. Select the origin state and district, destination, and transport hubs. If a place search fails, use the bundled hub search. Specify trip length, travelers, and departure preferences.
-2. Choose a journey, fare tier, and return or one-way travel. Expand individual legs to see their evidence, buffer, booking link where available, and editable fare estimate. Pick stay, local transport, and food estimates separately.
-3. Build the itinerary using the selected route, approximate arrival, last-day leave-by time for return trips, and local transport choice. Rebuild after changing options that should affect the itinerary. The itinerary supports stop reordering, removal, undo, and a packing checklist.
-
-Travel uses the sum of each one-way leg's fare multiplied by travelers for per-person pricing or by one vehicle per four travelers, rounded up, for per-vehicle pricing. The return toggle doubles this estimate. Children count as paying travelers. Stay uses rooms × nights × nightly rate, with zero nights for a one-day trip. Local transport uses the daily rate per group or person, and meals and activities use per-person amounts. The optional contingency adds 10%. Missing fares are called out in the cost summary and excluded until supplied.
-
-## Architecture
-
-```text
-React setup, journey and itinerary screens
-  └─ /api through Vite in development or Express in production
-       ├─ geo and hubs → Open-Meteo Geocoding + bundled LGD and hub indexes
-       ├─ journeys/structure → bundled rail graph, flight hints and road estimates
-       ├─ journeys/fares → Gemini using computed leg facts
-       └─ options and plan → Gemini with validated trip and journey context
+```powershell
+Remove-Item Env:MOCK -ErrorAction SilentlyContinue
+npm start
 ```
 
-Zod validates trip inputs and model output. Express verifies the selected journey and ordered hub IDs and computes itinerary timing from the bundled route. The browser loads place-picker code as a separate chunk. Journeys can render while fare estimates are pending. The server loads snapshots once at startup and compresses production static responses for supported clients.
+The example model is `gemini-flash-lite-latest`. Latest aliases can change behavior over time. Express warns when live generation has no key. Keep the key in the server environment and keep .env ignored.
+
+Vite defaults to port 5173 and proxies API requests to Express on 8787. Change PORT and VITE_DEV_PORT if needed, then restart both processes and reload the browser. Vite may choose another available port.
+
+## Features
+
+- State/district and destination pickers, nearby hubs and dataset-only hub search.
+- Up to five routes with leg details, duration, transfers and dated evidence.
+- Budget, Standard and Comfort fare tiers, manual edits and return/one-way estimates.
+- Independent stay, local transport and food choices with a per-leg cost breakdown.
+- Approximate arrival/leave-by timing in itinerary generation.
+- Editable daily stops, cross-day dragging, keyboard move controls, undo and packing.
+- Loading, cancellation, retry, empty states, request cooldowns and cached lookups.
+- A visible demo badge and source attribution.
+
+## Architecture and data flow
+
+```mermaid
+flowchart TD
+  UI[React setup and planner] --> H[Request and lookup hooks]
+  H --> API[Express validation and rate limits]
+  API --> GEO[Open-Meteo place search]
+  API --> DATA[Cached LGD and transport snapshots]
+  DATA --> ENGINE[Journey engine and buffers]
+  ENGINE --> FARE[Gemini fare estimates and warnings]
+  API --> OPTIONS[Gemini stay local and food options]
+  ENGINE --> PLAN[Verified journey and approximate timing]
+  OPTIONS --> PLAN
+  PLAN --> GEMINI[Gemini itinerary JSON]
+  GEMINI --> VALIDATE[Server and browser schema validation]
+  VALIDATE --> EDIT[Itinerary reducer and cost panel]
+```
+
+The server calculates route structure and verifies journey IDs and hubs. Gemini receives computed leg facts for fares and verified trip context for itinerary generation. The browser's request IDs prevent stale results from replacing newer ones. [Architecture notes](docs/ARCHITECTURE.md)
+
+## Scripts
 
 | Command | Purpose |
 | --- | --- |
-| `npm start` or `npm run dev` | Start the frontend and API |
-| `npm run start:prod` | Build and serve the production app |
-| `npm run build` | Build the frontend |
-| `npm test` | Run unit, UI and API regression tests |
-| `npm run typecheck` | Check the shared, server and cost modules |
-| `npm run data:fetch` | Download source snapshots to ignored `data/raw/` |
-| `npm run data:build` | Build processed snapshots and validate them |
-| `npm run data:check` | Check bundled data and print source counts and regional gaps |
-| `npm audit` | Check dependencies for known advisories |
+| `npm start` / `npm run dev` | Start Vite and Express |
+| `npm run start:prod` | Build and serve compressed production assets |
+| `npm test` | Unit, UI, HTTP and characterization tests |
+| `npm run typecheck` | Blocking production UI, shared and server checkJs |
+| `npm run build` | Production frontend build |
+| `npm run data:fetch` | Fetch source snapshots into ignored data/raw |
+| `npm run data:build` | Build and validate processed snapshots |
+| `npm run data:check` | Validate bundled data and print source counts |
+| `npm audit` | Check known dependency advisories |
 
-## Failure modes
+## Environment
 
-Set `MOCK` in `.env` and restart Express. For `bad-json`, `bad-shape`, `empty`, `fail`, `slow`, and `jitter`, add `MOCK_STAGE=plan` to use working demo options and isolate the itinerary stage. Failure paths are covered across HTTP, request-hook and UI tests. Browser checks and live model results are recorded separately.
+| Variable | Purpose and default |
+| --- | --- |
+| GEMINI_API_KEY | Server-only key, empty in the example |
+| GEMINI_MODEL | Defaults to gemini-flash-lite-latest |
+| PORT | Express and Vite proxy target, 8787 |
+| VITE_DEV_PORT | Requested Vite port, 5173 |
+| MOCK | Unset for live generation, demo for keyless illustrations |
+| MOCK_STAGE | Optional plan value to isolate generic faults to itinerary generation |
 
-| Mode | Visible behavior and recovery | State retained |
-| --- | --- | --- |
-| `geo-down` | Search unavailable with Retry and direct hub search. | Entered search and setup details. |
-| `geo-slow` | Searching, then the same outage fallback when the search times out. | Search and setup details. |
-| `geo-empty` | No matches. Refine the search or choose a bundled hub. | Search and setup details. |
-| `fares-bad-json`, `fares-fail` | Fare estimates are unavailable. Edit prices or use Estimate prices again. | Routes, selected journey, tier and edits. |
-| `journeys-empty` | No route matched or no hub is in range. Change hubs returns to setup. | Setup selections. |
-| `options-bad-shape`, `bad-shape`, `bad-json` | Invalid-response message after one client retry. Try again. | Setup and any previous usable itinerary. |
-| `options-empty`, `empty` | No itinerary to show yet. Try again or edit setup. | Setup and any previous usable itinerary. |
-| `fail` | Server error with Try again. | Setup and any previous usable itinerary. |
-| `slow` | Loading and Cancel, followed by a timeout and Try again after 30 seconds. | Setup and any previous usable itinerary. |
-| `jitter` | Loading until completion. Cancelling or starting a new request invalidates stale responses. | Setup and the last usable itinerary until a replacement arrives. |
-| `wrong-days` | Wrong itinerary day count triggers one client retry and then an error. | Setup, journey, and any previous usable itinerary. |
-| `demo` | Illustrative prices and itineraries for the requested duration. | Same in-session editing behavior as live mode. |
+Health returns only `{ ok, mode }`, where mode is demo or live. It contains no credentials.
 
-## Limits and data sources
+## Failure handling
 
-- Rail timetable matches use the **2016** datameet snapshot. Flight hints use **2014** OpenFlights routes. Road travel, buffers, and arrival times are approximate. Fares are AI estimates. Verify service, departure times, and prices with IRCTC or the relevant airline before booking.
-- Routes can be sparse in regions with incomplete snapshot coverage. A route result can contain fewer than three candidates. [Data QA and regional gaps](docs/DATA_QA.md)
-- Attribution includes datameet/railways (CC0), OurAirports (public domain), OpenFlights (ODbL/DbCL), LGD via the ramSeraph mirror (GODL-India), and Open-Meteo Geocoding with GeoNames (CC BY 4.0 location data and non-commercial free hosted endpoint). [Data sources and licenses](docs/DATA_SOURCES.md)
-- Trips support 1–14 days, 1–9 adults, 0–9 children and 1–9 rooms. Dates are checked in the Asia/Kolkata time zone. Approximate timing uses 08:00, 13:00, 18:00 and 22:00 anchors for the four departure preferences.
-- Express caps JSON requests at 10 KB. Per-IP limits are 30 lookup requests, 10 planning and journey requests, and 60 health or other API requests per minute. Limits are per process. The browser uses a 30-second deadline and offers cancellation while generating options or an itinerary.
-- The app stores trip and edit state in memory for the current page session. A full reload clears it. Loading the app and fetching new data require access to the app server.
-- Generated activities and estimates need review. The app has no bookings, live seat inventory, currency conversion, or persisted user accounts. [Live Gemini verification](docs/LIVE_RUNS.md)
+Set MOCK in .env or the shell and restart. Add `MOCK_STAGE=plan` to isolate generic faults to the final itinerary stage.
 
-## AI usage note
+| Mode/case | What the traveler sees and can do |
+| --- | --- |
+| demo | Demo data badge, illustrative options/fares and a requested-length plan |
+| geo-down | Search unavailable, Retry and bundled hub fallback |
+| geo-slow | Searching, then the same fallback after the provider deadline |
+| geo-empty | No matches, refine the query or use a hub |
+| fares-bad-json / fares-fail | Routes remain, edit prices or choose Estimate prices again |
+| journeys-empty | A reason for the missing route and Change hubs |
+| options-bad-shape / bad-shape | Invalid-response error after one browser retry, then Try again |
+| bad-json | Invalid JSON error after one browser retry |
+| options-empty / empty | Empty panel with Try again |
+| fail | Server error and Try again |
+| slow | Loading and Cancel, followed by a 30-second browser deadline |
+| jitter | Loading with stale-response protection |
+| wrong-days | A wrong count triggers one corrective browser retry and an error |
+| 429 | Retry-After countdown, disabled action until it expires |
+| Invalid key/access | Friendly authentication/configuration message |
+| Missing model | A model configuration message |
+| Provider quota / 5xx / timeout | Friendly quota, temporary-unavailable or timeout message |
 
-OpenAI Codex implemented and verified the planning flow and v2 phases. Google Antigravity contributed earlier review, QA and engineering fixes. Google Gemini generates fare, local option and itinerary estimates at runtime.
+Place/hub results are cached in page-session memory for ten minutes per normalized query. One page sends at most 24 uncached lookups per minute, below the server's shared 30-lookup limit. Other tabs and users sharing an IP can still reach that server limit. Planning and journey requests share 10 requests per minute. Health/other API routes have a separate 60-request limit. Requests have a 10 KB JSON cap.
+
+## Costs and fare warnings
+
+Travel sums each selected-tier one-way fare times paying travelers, or times ceil(travelers/4) for vehicle fares. The return toggle doubles travel. Children are charged as adults. Stay is room price × rooms × max(days-1,0). Meals, local transport and activities use the selected pricing basis. The optional contingency adds 10%.
+
+Model fares must be finite, positive and at most 1e9. Unordered tiers are normalized. Unusual per-km estimates receive a non-blocking Check this estimate warning. Relative checks compare the same mode and tier within one response. Broad INR-only diagnostic bounds are documented in [fare references](docs/FARE_REFERENCE_RANGES.md). These ranges require human review and do not establish actual market prices.
+
+## Data sources and licenses
+
+Attribution covers Open-Meteo / GeoNames, OurAirports, datameet railways, OpenFlights and LGD. The committed data license record lists CC BY 4.0 location data, public-domain airport data, CC0 railway data, ODbL/DbCL flight data and GODL-India LGD data. The hosted free geocoder has non-commercial terms. [Sources and license details](docs/DATA_SOURCES.md)
+
+## Known limitations
+
+- Rail matches use a 2016 timetable snapshot, flight hints use 2014 data, and route coverage has regional gaps. [Data QA](docs/DATA_QA.md)
+- Availability badges do not establish current service or seats. Verify on IRCTC or the airline/search site.
+- Road distances, buffers, fares and activities are approximate. The app performs no currency conversion.
+- Four departure buckets use 08:00, 13:00, 18:00 and 22:00 anchors. They are planning approximations.
+- An in-progress browser cancellation can leave the server finishing an upstream request.
+- Trip edits are held in memory. Reloading clears them. Optional persistence was not implemented.
+- JSDOM axe checks do not establish full computed color contrast, assistive-technology behavior or physical-phone usability.
+- The type check includes production UI but retains the project's strict:false JavaScript policy.
+- Route plausibility, the diagnostic fare ranges, physical-phone checks and user authorship details require human review. [QA report](docs/QA_REPORT.md)
+
+## Where to start reading the code
+
+1. [App.jsx](src/App.jsx) for the three-step orchestration.
+2. [TripForm.jsx](src/components/TripForm.jsx) for setup and validation.
+3. [useGenerate.js](src/hooks/useGenerate.js) for request lifecycle protections.
+4. [shared/schemas.js](shared/schemas.js) for request contracts.
+5. [server/app.js](server/app.js) for HTTP behavior and provider handling.
+6. [journeys/engine.js](server/journeys/engine.js) for route construction.
+7. [costs.js](src/costs.js) for cost arithmetic.
+8. [itineraryReducer.js](src/itineraryReducer.js) for editing and undo.
+
+## Verification and interview preparation
+
+[Baseline](docs/BASELINE.md) · [QA](docs/QA_REPORT.md) · [Refactor plan](docs/REFACTOR_PLAN.md) · [Interview guide](docs/INTERVIEW_GUIDE.md) · [Demo script](docs/DEMO_SCRIPT.md)
+
+## AI usage and authorship
+
+OpenAI Codex implemented and checked the requested repository changes. Its tools included shell/Git, Python PDF extraction, browser automation, Vitest/V8 coverage, axe, Babel source analysis, madge, jscpd and depcheck. Gemini supplies runtime estimates and itineraries.
+
+An earlier README credited Google Antigravity for review and QA. **[USER CONFIRMATION REQUIRED — identify every AI tool you used, its contribution, and the code or reasoning you wrote or changed yourself.]** These authorship details are UNVERIFIED until confirmed.
 
 ## Time spent
 
-Time spent: **[enter time spent, e.g. 4.5 hours]**
-
-## Configuration quick starts
-
-For a keyless demo, copy .env.example to .env and set MOCK=demo before npm start. Place search uses Open-Meteo. Demo data is labeled in the header.
-For live generation, leave MOCK unset and set GEMINI_API_KEY only on the server. GEMINI_MODEL defaults to gemini-flash-lite-latest.
-The latest alias can change behavior over time. A missing live key produces a startup warning. Health returns only ok and the demo/live mode.
-
-The browser also caps uncached lookup requests at 24 per minute per page, leaving room below the server's shared 30-request lookup budget. Cached reads use no request slots. Multiple tabs and users behind one IP can still share the server limit.
+**[USER TO FILL — actual time spent. No hours have been invented.]**
