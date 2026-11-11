@@ -97,7 +97,7 @@ async function setup(
     return { ok: true, json: async () => data };
   });
   render(<App />);
-  await screen.findByRole("option", { name: "Delhi" });
+  await screen.findByRole("option", { name: "Delhi" }, { timeout: 8000 });
   fireEvent.change(screen.getByLabelText("Origin state"), {
     target: { value: "7" },
   });
@@ -146,6 +146,7 @@ it.each([1, 2, 3, 5, 7, 14])(
       JSON.parse(fetchMock.mock.calls[0][1].body).destination,
     ).toMatchObject({ placeName: "Guwahati", stateCode: "18" });
   },
+  15000,
 );
 it("updates totals for choices, editable estimates and presets without an AI call", async () => {
   const fetchMock = await setup();
@@ -290,4 +291,14 @@ it("retries fares only and keeps the selected journey", async () => {
   expect(screen.getByRole("radio", { name: /Cab New Delhi/ }).checked).toBe(true);
   expect(optionsFetch).toHaveBeenCalledTimes(1);
   expect(failedOnce).toHaveBeenCalledTimes(2);
+});
+
+it("keeps trip details available when no journeys are found", async () => {
+  await setup(undefined, { routes: { journeys: [], emptyReason: "No connection matched the selected hubs." } });
+  await options();
+  expect((await screen.findByText(/No connection matched/)).textContent).toContain("Change hubs");
+  expect(screen.getByRole("button", { name: "Build my itinerary" }).disabled).toBe(true);
+  fireEvent.click(screen.getByRole("button", { name: "Change hubs" }));
+  expect((await screen.findByRole("combobox", { name: "Destination" })).value).toBe("Guwahati");
+  expect(screen.getByLabelText("Origin district").value).toBe("New Delhi");
 });

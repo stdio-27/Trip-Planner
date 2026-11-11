@@ -13,6 +13,11 @@ import {
   uniqueLegs,
 } from "./fares.js";
 
+export const demoFareModes = new Set([
+  "demo", "jitter", "slow", "bad-json", "bad-shape", "empty", "fail",
+  "wrong-days", "options-bad-shape", "options-empty", "geo-down", "geo-slow", "geo-empty",
+]);
+
 const requestSchema = z.strictObject({
   origin: originSchema,
   destination: destinationSchema,
@@ -32,13 +37,15 @@ const requestSchema = z.strictObject({
 
 export function createJourneyRouter({
   limiter,
+  jsonBody,
+  noQuery,
   mockMode,
   apiKey,
   model,
   fetchImpl,
 }) {
   const router = Router();
-  router.post(["/journeys", "/journeys/structure", "/journeys/fares"], limiter, async (req, res) => {
+  router.post(["/journeys", "/journeys/structure", "/journeys/fares"], limiter, noQuery, jsonBody, async (req, res) => {
     const parsed = requestSchema.safeParse(req.body);
     if (!parsed.success) {
       res
@@ -78,7 +85,7 @@ export function createJourneyRouter({
     let faresError = null;
     if (legs.length) {
       try {
-        if (mockMode === "demo") fares = demoFares(legs);
+        if (demoFareModes.has(mockMode)) fares = demoFares(legs);
         else if (mockMode === "fares-bad-json")
           fares = parseFareText(
             "{",

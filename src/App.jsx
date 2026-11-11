@@ -59,6 +59,14 @@ export default function App() {
   const [contingencyOn, setContingencyOn] = useState(false);
   const [planTrip, setPlanTrip] = useState(null);
   const pendingTrip = useRef(null);
+  const stepHeading = useRef(null);
+  const resultsPanel = useRef(null);
+  const previousStep = useRef(1);
+  useEffect(() => {
+    if (step === previousStep.current) return;
+    (step === 3 ? resultsPanel : stepHeading).current?.focus();
+    previousStep.current = step;
+  }, [step]);
   useEffect(() => {
     if (optionsCall.status === "success" && optionsCall.plan) {
       const submission = pendingTrip.current;
@@ -167,6 +175,8 @@ export default function App() {
           {["Trip details", "Choose options", "Your itinerary"].map(
             (label, i) => (
               <span
+                ref={step === i + 1 ? stepHeading : undefined}
+                tabIndex={step === i + 1 ? -1 : undefined}
                 key={label}
                 aria-current={step === i + 1 ? "step" : undefined}
               >
@@ -209,7 +219,7 @@ export default function App() {
             onRetry={() => optionsCall.generate(pendingTrip.current)}
           />
         )}
-        {optionsCall.status === "empty" && <EmptyState />}
+        {optionsCall.status === "empty" && <EmptyState onRetry={() => optionsCall.generate(pendingTrip.current)} />}
         {step > 1 && options && (
           <>
             <button
@@ -276,8 +286,8 @@ export default function App() {
           </>
         )}
 
-        <section className="results-panel" aria-live="polite">
-          {status === "loading" && (
+        <section className="results-panel" ref={resultsPanel} tabIndex={-1} aria-label="Itinerary results" aria-live="polite">
+          {step === 3 && status === "loading" && (
             <div className="loading-view">
               <div className="loading-actions">
                 <button
@@ -291,14 +301,14 @@ export default function App() {
               <Skeleton />
             </div>
           )}
-          {status === "error" && (
+          {step === 3 && status === "error" && (
             <ErrorState
               message={error}
               onRetry={buildPlan}
               loading={status === "loading"}
             />
           )}
-          {status === "empty" && <EmptyState />}
+          {step === 3 && status === "empty" && <EmptyState onRetry={buildPlan} />}
           {status === "idle" &&
             !plan &&
             step === 1 &&

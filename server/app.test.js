@@ -332,3 +332,35 @@ it("rejects a tampered journey, hubs or client fares before calling Gemini", asy
   }
   expect(fetch).not.toHaveBeenCalled();
 });
+
+it("bounds and sanitizes API request bodies and rejects unexpected query parameters", async () => {
+  const app = createApp({ mockMode: "demo" });
+  const server = app.listen(0, "127.0.0.1");
+  servers.push(server);
+  await new Promise((resolve) => server.once("listening", resolve));
+  const url = "http://127.0.0.1:" + server.address().port + "/api/";
+  const post = (path, body) => fetch(url + path, {
+    method: "POST", headers: { "Content-Type": "application/json" }, body,
+  });
+  const malformed = await post("plan", '{"private-text":');
+  expect(malformed.status).toBe(400);
+  expect(await malformed.json()).toEqual({ error: "Invalid request body." });
+  const oversized = await post("journeys/structure", JSON.stringify({ text: "x".repeat(11000) }));
+  expect(oversized.status).toBe(413);
+  expect(await oversized.json()).toEqual({ error: "Request body exceeds 10 KB." });
+  expect((await post("plan?extra=yes", JSON.stringify(trip))).status).toBe(400);
+  expect((await fetch(url + "health?extra=yes")).status).toBe(400);
+  expect((await fetch(url + "health")).headers.has("ratelimit-limit")).toBe(true);
+});
+
+it.each(["bad-json", "bad-shape", "empty", "fail"])(
+  "sets up the itinerary flow without Gemini when mocking a %s plan",
+  async (mockMode) => {
+    const fetch = vi.fn();
+    const app = createApp({ mockMode, mockStage: "plan", fetch });
+    expect((await request(app, pickedTrip, "options")).status).toBe(200);
+    expect((await request(app, journeyInput, "journeys/fares").then((res) => res.json())).fares).toBeTruthy();
+    expect((await request(app, pickedTrip)).status).toBe(mockMode === "fail" ? 500 : 200);
+    expect(fetch).not.toHaveBeenCalled();
+  },
+);

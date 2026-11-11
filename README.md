@@ -1,251 +1,86 @@
 # Trip Planner
 
-A React itinerary planner powered by a small Express API and the Gemini
-`gemini-flash-lite-latest` model. The client can be run with mock API response modes
-while developing.
-
-## Requirements
-
-- Node.js 22.22.2 or newer (or Node 24.15+)
-- npm
-- A Gemini API key to generate real itineraries
+Plan a trip within India with bundled transport snapshots and Gemini-generated price estimates and itineraries.
 
 ## Setup
 
-Install dependencies:
+Use Node.js 22.22.2+ in the 22.x line, or Node.js 24.15.0+, and npm.
 
 ```sh
 npm install
-```
-
-Create a `.env` file in the project root for real Gemini requests:
-
-```dotenv
-GEMINI_API_KEY=your_gemini_api_key
-```
-
-Keep the API key on the server; do not put it in a `VITE_` variable or commit
-the `.env` file.
-
-Start the Vite client and Express API together:
-
-```sh
 npm start
 ```
 
-Or run dev mode with `npm run dev`. Vite runs on `http://localhost:5173` and proxies `/api` requests to Express on `http://localhost:8787`.
+Open [localhost:5173](http://localhost:5173). Vite forwards `/api` to Express on port 8787. Copy `.env.example` to `.env` and set `GEMINI_API_KEY` for live generation. Keep credentials in the server environment. Use `MOCK=demo` for keyless estimates and itineraries. The place search still uses Open-Meteo unless an arrival hub is selected directly or a geocoder mock is enabled.
 
-To run production mode (build client and serve static assets via Express):
+If either port is occupied, stop the previous instance or set `VITE_DEV_PORT` and `PORT` in `.env`. Run `npm run start:prod` to build and serve the compressed client from Express.
 
-```sh
-npm run start:prod
-```
+## Planning flow
 
-To run either process by itself, use `npm run client` or `npm run server`. Build the client with `npm run build`. Run unit and integration tests with `npm test`; use `npm run test:watch` while developing.
+1. Select the origin state and district, destination, and transport hubs. If a place search fails, use the bundled hub search. Specify trip length, travelers, and departure preferences.
+2. Choose a journey, fare tier, and return or one-way travel. Expand individual legs to see their evidence, buffer, booking link where available, and editable fare estimate. Pick stay, local transport, and food estimates separately.
+3. Build the itinerary using the selected route, approximate arrival, last-day leave-by time for return trips, and local transport choice. Rebuild after changing options that should affect the itinerary. The itinerary supports stop reordering, removal, undo, and a packing checklist.
+
+Travel uses the sum of each one-way leg's fare multiplied by travelers for per-person pricing or by one vehicle per four travelers, rounded up, for per-vehicle pricing. The return toggle doubles this estimate. Children count as paying travelers. Stay uses rooms × nights × nightly rate, with zero nights for a one-day trip. Local transport uses the daily rate per group or person, and meals and activities use per-person amounts. The optional contingency adds 10%. Missing fares are called out in the cost summary and excluded until supplied.
 
 ## Architecture
 
 ```text
-React UI -> Vite /api proxy -> Express -> Gemini LLM
-                                      <- JSON response
-React hook -> Zod validation and normalization -> itinerary UI
+React setup, journey and itinerary screens
+  └─ /api through Vite in development or Express in production
+       ├─ geo and hubs → Open-Meteo Geocoding + bundled LGD and hub indexes
+       ├─ journeys/structure → bundled rail graph, flight hints and road estimates
+       ├─ journeys/fares → Gemini using computed leg facts
+       └─ options and plan → Gemini with validated trip and journey context
 ```
 
-- **React UI:** `src/App.jsx` coordinates the trip form, generation states, and
-  itinerary presentation. Existing results remain visible during replacement
-  requests and after errors or empty responses. `useItinerary` owns packing
-  checklist edits, resetting them only when a new usable plan arrives.
-  `useGenerate` manages requests; `useItinerary` and
-  `itineraryReducer` manage edits and undo.
-- **Vite proxy:** `vite.config.js` forwards `/api` to the local Express server,
-  so the browser uses a same-origin API URL.
-- **Express:** `server/index.js` starts the app factory in `server/app.js`, which exposes `POST /api/plan` with a 10 req/min rate
-  limiter, a 10KB payload cap, and input validation via `server/validator.js`.
-  It calls Gemini with a 25-second timeout and Gemini `responseSchema`. The
-  server parses response text with a balanced-brace scanner (`server/extractJson.js`),
-  which extracts JSON from markdown fences or surrounding commentary. Live model
-  responses are limited to 1 MB and validated on the server for bounded fields,
-  non-negative costs, requested currency, and requested day count (or zero days
-  for an empty result). The shared transport schema lives in `shared/planSchema.js`.
-- **Zod:** `src/schema.js` validates the model response in the browser,
-  normalizes categories and estimated costs, and adds client-generated UUIDs.
-  Invalid individual stops are dropped while valid stops are retained.
-- **UI:** Components render loading/error/empty states, sortable daily stops,
-  cost summaries, and an editable local packing checklist.
+Zod validates trip inputs and model output. Express verifies the selected journey and ordered hub IDs and computes itinerary timing from the bundled route. The browser loads place-picker code as a separate chunk. Journeys can render while fare estimates are pending. The server loads snapshots once at startup and compresses production static responses for supported clients.
 
-The expected itinerary shape is:
+| Command | Purpose |
+| --- | --- |
+| `npm start` or `npm run dev` | Start the frontend and API |
+| `npm run start:prod` | Build and serve the production app |
+| `npm run build` | Build the frontend |
+| `npm test` | Run unit, UI and API regression tests |
+| `npm run typecheck` | Check the shared, server and cost modules |
+| `npm run data:fetch` | Download source snapshots to ignored `data/raw/` |
+| `npm run data:build` | Build processed snapshots and validate them |
+| `npm run data:check` | Check bundled data and print source counts and regional gaps |
+| `npm audit` | Check dependencies for known advisories |
 
-```json
-{
-  "title": "A weekend in Kyoto",
-  "currency": "USD",
-  "days": [
-    {
-      "label": "Day 1",
-      "stops": [
-        {
-          "title": "Visit a temple",
-          "category": "sight",
-          "estCost": 0,
-          "description": "Allow time to explore the grounds.",
-          "location": "Kyoto",
-          "time": "09:00"
-        }
-      ]
-    }
-  ],
-  "packingList": ["Comfortable walking shoes"]
-}
-```
+## Failure modes
 
-## Trip duration
+Set `MOCK` in `.env` and restart Express. For `bad-json`, `bad-shape`, `empty`, `fail`, `slow`, and `jitter`, add `MOCK_STAGE=plan` to use working demo options and isolate the itinerary stage. Failure paths are covered across HTTP, request-hook and UI tests. Browser checks and live model results are recorded separately.
 
-Example chips populate both the description and trip length. The Trip length
-preference is authoritative when it conflicts with a duration in the description;
-changing that preference overrides the example duration. The form validates trip
-length and budget before sending a request.
+| Mode | Visible behavior and recovery | State retained |
+| --- | --- | --- |
+| `geo-down` | Search unavailable with Retry and direct hub search. | Entered search and setup details. |
+| `geo-slow` | Searching, then the same outage fallback when the search times out. | Search and setup details. |
+| `geo-empty` | No matches. Refine the search or choose a bundled hub. | Search and setup details. |
+| `fares-bad-json`, `fares-fail` | Fare estimates are unavailable. Edit prices or use Estimate prices again. | Routes, selected journey, tier and edits. |
+| `journeys-empty` | No route matched or no hub is in range. Change hubs returns to setup. | Setup selections. |
+| `options-bad-shape`, `bad-shape`, `bad-json` | Invalid-response message after one client retry. Try again. | Setup and any previous usable itinerary. |
+| `options-empty`, `empty` | No itinerary to show yet. Try again or edit setup. | Setup and any previous usable itinerary. |
+| `fail` | Server error with Try again. | Setup and any previous usable itinerary. |
+| `slow` | Loading and Cancel, followed by a timeout and Try again after 30 seconds. | Setup and any previous usable itinerary. |
+| `jitter` | Loading until completion. Cancelling or starting a new request invalidates stale responses. | Setup and the last usable itinerary until a replacement arrives. |
+| `wrong-days` | Wrong itinerary day count triggers one client retry and then an error. | Setup, journey, and any previous usable itinerary. |
+| `demo` | Illustrative prices and itineraries for the requested duration. | Same in-session editing behavior as live mode. |
 
-## Handling invalid or unusual AI output
+## Limits and data sources
 
-1. **Server response extraction:** The API extracts the outermost JSON object
-   from Gemini's text, including when the response is wrapped in markdown. A
-   missing object or malformed JSON is returned as an API error.
-2. **Schema validation and salvage:** `parsePlan` rejects a response missing
-   required top-level fields or with invalid day/packing-list shapes. Within a
-   valid day, a malformed stop (for example one with a blank title) is dropped
-   and counted; other stops in that day are kept. Empty days remain in the
-   itinerary and are listed in `emptyDays`.
-3. **Normalization:** Categories are trimmed and lowercased; unrecognized or
-   non-string categories become `other`. A non-numeric, negative, or otherwise
-   invalid `estCost` becomes `0`. Valid days and stops receive UUIDs on the
-   client.
-4. **One automatic retry:** `useGenerate` retries once (two attempts total)
-   when the HTTP response is successful but its body is invalid JSON or fails
-   the required plan shape. Recoverable bad individual stops are salvaged by
-   Zod and do not trigger a retry. Empty bodies become the `empty` state;
-   non-success HTTP responses become errors without retry.
-5. **Stale request protection:** A new generation aborts the previous request.
-   The hook also checks a monotonically increasing request ID before applying
-   responses, so an older or cancelled request cannot overwrite newer state.
-   Aborting on unmount prevents updates after the hook is removed.
-6. **Mock modes:** Set `MOCK` in `.env` to test server responses without using
-   Gemini:
-
-   | `MOCK` value | Behavior |
-   | --- | --- |
-   | `jitter` | Returns a valid sample plan after a random delay of up to five seconds, useful for checking request ordering. |
-   | `slow` | Waits 40 seconds before returning a sample plan, useful for testing the pending UI and manually aborting a request by starting another. |
-   | `bad-json` | Returns malformed JSON; the client retries once, then shows an error. |
-   | `bad-shape` | Returns a JSON object with the wrong plan shape; the client retries once, then shows an error. |
-   | `empty` | Returns an empty HTTP body; the client enters the `empty` state. |
-   | `fail` | Returns HTTP 500; the client displays an error and does not retry. |
-
-   For example, `MOCK=bad-shape` can be added to `.env`. Restart the server
-   after changing environment variables. Any unrecognized or unset `MOCK`
-   value uses Gemini.
-
-## Known limitations and boundaries
-
-- The app has no user accounts, database, or server-side itinerary persistence;
-  edited plans and packing checklist state live in the current browser session.
-- Budget totals are estimates derived from each stop's `estCost`; they do not
-  include costs omitted by the model.
-- The client retries invalid successful response bodies once, but it does not
-  automatically retry network failures or non-2xx API responses.
-- The client enforces a 30-second request timeout; requests that exceed 30
-  seconds abort with a retry option ("This is taking too long. Please try again.").
-  Users can also cancel an in-flight request at any time using the Cancel button.
-- Rate limiting enforces a maximum of 10 requests per minute per IP address on
-  `POST /api/plan`.
-- Input limits: Destination is required (1–100 characters); Interests is optional
-  (max 500 characters); Trip length is bounded between 1 and 14 days.
-- Day tabs and stop controls are accessible, but drag-and-drop behavior can
-  vary by browser and assistive technology; the keyboard reorder buttons are
-  also available.
-- The Vite proxy is for local development; in production, Express serves the
-  built static assets from `dist/` directly via `npm run start:prod`.
+- Rail timetable matches use the **2016** datameet snapshot. Flight hints use **2014** OpenFlights routes. Road travel, buffers, and arrival times are approximate. Fares are AI estimates. Verify service, departure times, and prices with IRCTC or the relevant airline before booking.
+- Routes can be sparse in regions with incomplete snapshot coverage. A route result can contain fewer than three candidates. [Data QA and regional gaps](docs/DATA_QA.md)
+- Attribution includes datameet/railways (CC0), OurAirports (public domain), OpenFlights (ODbL/DbCL), LGD via the ramSeraph mirror (GODL-India), and Open-Meteo Geocoding with GeoNames (CC BY 4.0 location data and non-commercial free hosted endpoint). [Data sources and licenses](docs/DATA_SOURCES.md)
+- Trips support 1–14 days, 1–9 adults, 0–9 children and 1–9 rooms. Dates are checked in the Asia/Kolkata time zone. Approximate timing uses 08:00, 13:00, 18:00 and 22:00 anchors for the four departure preferences.
+- Express caps JSON requests at 10 KB. Per-IP limits are 30 lookup requests, 10 planning and journey requests, and 60 health or other API requests per minute. Limits are per process. The browser uses a 30-second deadline and offers cancellation while generating options or an itinerary.
+- The app stores trip and edit state in memory for the current page session. A full reload clears it. Loading the app and fetching new data require access to the app server.
+- Generated activities and estimates need review. The app has no bookings, live seat inventory, currency conversion, or persisted user accounts. [Live Gemini verification](docs/LIVE_RUNS.md)
 
 ## AI usage note
 
-AI assistance was used to help implement, review, and document this project.
-Specifically, Codex implemented the three-step setup/options/itinerary feature work. Google Antigravity was used for code review, QA auditing, and
-engineering fixes. Gemini (`gemini-flash-lite-latest`) generates itinerary suggestions;
-its output can be inaccurate, incomplete, or unsuitable for your situation.
-Verify opening hours, routes, accessibility, visa and safety requirements, and
-all prices before relying on the plan. Estimated costs are suggestions, not
-quotes or reservations. Do not send sensitive personal information in trip
-details, and review generated code before relying on it.
+OpenAI Codex implemented and verified the planning flow and v2 phases. Google Antigravity contributed earlier review, QA and engineering fixes. Google Gemini generates fare, local option and itinerary estimates at runtime.
 
 ## Time spent
 
 Time spent: **[enter time spent, e.g. 4.5 hours]**
-
-## Three-step planning and estimate model
-
-1. Enter destination, origin hubs, 1–14 days, dates, travelers, rooms and preferences.
-2. `POST /api/options` returns independent travel, accommodation, local transport and food estimates. Select or edit any combination; Back preserves inputs.
-3. Build the itinerary with `POST /api/plan`. Selected modes, stay area and pace are sent to the model. After generation, changing option selections only recalculates costs; rebuild the itinerary if routes should reflect those changes.
-
-Travel is round-trip fare plus both origin/destination transfers per traveler.
-Stay is price per room per night × max(days − 1, 0) × rooms.
-Local transport is per day, multiplied by travelers only for per-person pricing.
-Food is daily per-person food × days × travelers.
-Activity stop costs are per person and multiplied by travelers. Base transport, stay and ordinary meals are excluded from stop costs to avoid double counting.
-Children are charged as adults; the app does not know child discounts. Rooms default to ceil(adults / 2); children may require a manual room override.
-Optional contingency adds 10% to the subtotal. There is no currency conversion.
-JPY uses the currency's normal zero-decimal format. Distances and prices are approximate AI estimates with no live availability or booking links.
-Changing setup requires regenerating options. Prices are not live prices; verify before booking.
-
-### Additional mock modes
-`MOCK=demo` runs all three steps without an API key and respects requested days/currency. Demo amounts are illustrative, not destination-specific market estimates.
-`wrong-days` deliberately returns the wrong count: the browser retries once, then shows an error.
-`options-bad-shape` returns invalid options and `options-empty` returns an empty options body.
-Existing bad-json, bad-shape, empty, fail, slow and jitter modes apply to both endpoints.
-The shared request hook aborts after 30 seconds total, including its retry. A server corrective retry shares that overall browser deadline.
-Setup dates use the Asia/Kolkata calendar date for server validation. This may differ from a traveler's local date near midnight.
-The cream sketch theme is intentionally the same in light and dark OS modes.
-Custom options start at zero: enter realistic estimates before relying on totals.
-
-## v2 Phase 1 input foundation
-
-The shared Zod setup schema rejects unknown fields and numeric API strings. Limits are 1–14 days, 1–9 adults, 0–9 children, 1–9 rooms and an optional integer budget up to 10,000,000. Notes are normalized and capped at 300 characters. Start dates run from today through today+365 (Asia/Kolkata calendar). Select choices come from shared constants.
-
-Run `npm run typecheck` for the current shared/server/cost checkJs scope. The remaining UI typing work is recorded in `docs/TYPECHECK.md`; field decisions and removal evidence are in `docs/INPUT_AUDIT.md`.
-
-Geographic datasets and geocoding are not installed or used yet. `docs/DATA_SOURCES.md` records that status honestly; no attribution is claimed for an unused source. The India-only dataset-backed picker release requires the Phase 2 source files and a separately approved states/districts source.
-
-## v2 Phase 2 data layer
-
-- `npm run data:fetch` downloads source snapshots into ignored `data/raw/`; `npm run data:fetch -- --refresh` refreshes the cache.
-- `npm run data:build` fetches missing sources, streams the railway schedules, and rebuilds and checks `server/data/`.
-- `npm run data:check` validates the committed data, prints source and output counts, and reports state coverage and isolated junctions without network access.
-
-Attribution: LGD, Ministry of Panchayati Raj (GODL-India, via the ramSeraph report mirror); datameet/railways (CC0); OurAirports (public domain); OpenFlights (ODbL/DbCL). See [data sources and licenses](docs/DATA_SOURCES.md) and the [data QA report](docs/DATA_QA.md). Historical 2016 rail and 2014 flight evidence cannot establish live schedules or seat availability. The server starts using committed outputs; raw files and downloads are build-time only.
-
-## v2 Phase 3 places API
-
-- GET /api/geo/states returns { states }. GET /api/geo/districts?state=CODE returns { districts }.
-- GET /api/geo/search?q=NAME&state=CODE returns { results }. State is optional and filters the ten candidates returned by the provider.
-- GET /api/hubs/nearby?lat=LAT&lon=LON returns { airports, stations, notes } with straight-line distances.
-- GET /api/hubs/search?type=airport|station&q=NAME returns { results }, with up to eight matches.
-- MOCK=geo-down and MOCK=geo-slow return GEOCODER_UNAVAILABLE. MOCK=geo-empty returns an empty results list.
-
-Place search uses [Open-Meteo Geocoding](https://open-meteo.com/en/docs/geocoding-api) with location data from GeoNames. Successful responses are cached for 24 hours with a 500-query limit. The five places endpoints share the existing API rate limiter. Bundled hub metadata carries the source coverage limits described in the data QA report.
-
-## v2 Phase 4 place pickers
-
-Choose an origin state and district, then select a destination from place search. If the district lookup finds no matching administrative label, choose a nearby town in the same state. Each end supports nearby hub selection and search across the bundled airport and major-station lists. New destination selections default to the closest returned airport and station. Hub selections and explicit opt-outs persist when returning to setup.
-
-During a geocoder outage, origin hub search can supply approximate district coordinates. An arrival hub with a known state can serve as the destination. This fallback uses hub coordinates for the search center. A station without a known state can still be chosen as a hub for an already selected destination.
-
-Both generation endpoints accept structured origin and destination objects. The server checks the district/state relationship, coordinate bounds, and hub IDs against the bundled datasets and resolves the hub display names. Existing clients can still submit the earlier text payload. The browser setup uses structured selections.
-
-## v2 Phase 5 journey engine
-
-POST /api/journeys accepts the structured origin and destination objects, optional date, travelers with adults and children, and currency. It returns journeys, emptyReason, currency, fares and faresError. POST /api/journeys/fares accepts the same payload and returns only currency, fares and faresError. It reconstructs eligible leg IDs from the bundled data before requesting estimates.
-
-Rail paths use at most two trains. Each flight segment needs a directional historical route hint, including when connecting through a hub. Trips under 30 km offer road modes, and direct road candidates have a 500 km straight-line limit. First and last mile connections use the configured road factor and speeds. The ranking combines duration, a distance-weighted mode heuristic and number of changes. Fewer than three results can be returned when the data offers fewer distinct candidates.
-
-The train match refers to a 2016 timetable snapshot. The 2014 flight route hints and estimated road legs have separate evidence labels. Times include planning buffers, and connections use approximate transfer durations. Train and flight legs carry links to IRCTC and Google Flights. Road legs have no universal booking link.
-
-Gemini receives only server-computed leg facts, currency and optional travel date for one-way price estimates. All requested legs need valid fares. A provider failure preserves journeys with fares set to null. Demo returns deterministic illustrative amounts. The fares-bad-json, fares-fail and journeys-empty mocks exercise unavailable estimates and empty results.

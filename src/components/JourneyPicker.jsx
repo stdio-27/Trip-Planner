@@ -26,8 +26,8 @@ export function JourneyPicker({ trip, journeys, fares, choice, setChoice, notice
   return (
     <section className="journey-picker" aria-label="Journey options">
       <h2>Getting there</h2>
-      <p>{years.length ? "Timetable data is from " + years.join(", ") + ". " : ""}
-        Fares are AI estimates. Verify service and prices on the booking site.
+      <p>
+        Timetable data is from {years.length ? years.join(", ") : "2016"}; fares are AI estimates; verify on the official site.
       </p>
       {notice && <p role="status">{notice}</p>}
       {journeys.status === "loading" && <p role="status">Finding journeys…</p>}

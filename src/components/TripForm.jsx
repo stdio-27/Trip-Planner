@@ -1,6 +1,5 @@
 import { timeBuckets } from "../../shared/journeyTiming.js";
-import { TripPlaceFields } from "./TripPlaceFields.jsx";
-import { useState, useRef, useEffect } from "react";
+import { lazy, Suspense, useState, useRef, useEffect } from "react";
 import {
   tripSetupSchema,
   pickedTripSchema,
@@ -12,6 +11,9 @@ import {
   INTERESTS,
 } from "../../shared/schemas.js";
 import { validateTripInput } from "../../shared/tripInput.js";
+const TripPlaceFields = lazy(() => import("./TripPlaceFields.jsx").then(
+  (module) => ({ default: module.TripPlaceFields }),
+));
 const numeric = {
   adults: [1, 9],
   children: [0, 9],
@@ -140,12 +142,14 @@ export function TripForm({
   return (
     <form className="trip-form" ref={form} onSubmit={submit} noValidate>
       {picked ? (
-        <TripPlaceFields
-          origin={values.origin}
-          destination={values.destination}
-          onChange={update}
-          errors={errors}
-        />
+        <Suspense fallback={<p role="status">Loading place pickers…</p>}>
+          <TripPlaceFields
+            origin={values.origin}
+            destination={values.destination}
+            onChange={update}
+            errors={errors}
+          />
+        </Suspense>
       ) : (
         <>
           {input("destination", "Destination")}

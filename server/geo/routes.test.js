@@ -73,7 +73,7 @@ it("normalizes, filters and deduplicates provider matches with a shared query ca
   expect(upstream).toHaveBeenCalledTimes(1);
   expect(upstream.mock.calls[0][0].searchParams.get("countryCode")).toBe("IN");
   expect(upstream.mock.calls[0][0].searchParams.get("count")).toBe("10");
-});
+}, 15000);
 
 it("expires empty cached results after 24 hours", async () => {
   let time = 0;
@@ -199,9 +199,11 @@ it("serves bundled states, districts and ordered hub matches", async () => {
   );
 });
 
-it("applies the existing rate limit to places requests", async () => {
+it("applies the shared lookup rate limit to places requests", async () => {
   const get = await serve(createApp({ mockMode: "off" }));
-  for (let i = 0; i < 10; i++)
-    expect((await get("/api/geo/states")).status).toBe(200);
+  const responses = await Promise.all(
+    Array.from({ length: 30 }, () => get("/api/geo/states")),
+  );
+  for (const res of responses) expect(res.status).toBe(200);
   expect((await get("/api/hubs/search?type=airport&q=DEL")).status).toBe(429);
-});
+}, 15000);

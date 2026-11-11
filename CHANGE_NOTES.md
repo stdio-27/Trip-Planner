@@ -83,3 +83,10 @@ Journey timing shows an approximate arrival day and time, and a leave-by time fo
 The server rebuilds the selected journey, verifies its hubs and computes the timing itself.
 The itinerary prompt uses that timing, the selected local transport and the costs already budgeted.
 Tests cover the timing instructions, invalid selections and itinerary lengths of one, three, seven and fourteen days.
+
+## v2 Phase 8 — hardening and verification
+The production server compresses static assets and uses separate request budgets for lookups and planning.
+Place pickers load separately, and keyboard focus follows the active planning step.
+Failure mocks and retry controls preserve trip input and previously usable results.
+The README describes setup, data attribution, fare evidence, and the recovery paths.
+Live Gemini and browser verification results are recorded in the QA documents.
