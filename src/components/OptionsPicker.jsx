@@ -6,6 +6,7 @@ import {
   presetSelections,
 } from "../costs.js";
 export function OptionsPicker({
+  headingRef = undefined,
   options,
   setOptions,
   selected,
@@ -39,7 +40,7 @@ export function OptionsPicker({
   }
   return (
     <section className="options-picker" aria-label="Trip options">
-      <h2>Make it your kind of trip</h2>
+      <h2 ref={headingRef} tabIndex={-1}>Make it your kind of trip</h2>
       <p>Mix it yourself: premium stays and cheap travel work together.</p>
       <section className="sketch-box hubs">
         <h3>Hubs & assumptions</h3>

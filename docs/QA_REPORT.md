@@ -24,9 +24,9 @@ Audited from `v2-feature-complete` plus Stage 1 hygiene, on 11 November 2026 IST
 | M1 | Medium | Revisit a place query. useDebouncedSearch requests it again. A 429 exposes no countdown. | Ten-minute normalized session cache and Retry-After countdown. | src/hooks/useDebouncedSearch.js; useGenerate.js HTTP-error branch. FIXED, Stage 3b |
 | M2 | Medium | Upstream Gemini 429 maps to HTTP 429 without explicitly setting Retry-After. | Supply a safe retry delay header for every 429 path. | server/app.js provider error mapping. FIXED, Stage 3b |
 | M3 | Medium | Demo and live health return the same status-only object, with no visible demo badge. | Expose safe mode metadata and show Demo data. | server/app.js /api/health; src/App.jsx header. FIXED, Stage 3d |
-| M4 | Medium | Run the JSX type scan described in TYPECHECK.md. UI remains outside the blocking type check. | Resolve bounded typing issues or record exact remaining diagnostics. | jsconfig.json include list; docs/TYPECHECK.md. OPEN, Stage 3e |
-| L1 | Low | Multiple flight variants share identical radio accessible names. | Include the actual hub route in the label. | JourneyPicker.jsx aria-label. OPEN, Stage 3e |
-| L2 | Low | Footer lacks dataset attribution. | Add the requested source credits and a working source-document link. | BuzzLanding.jsx footer. OPEN, Stage 3e |
+| M4 | Medium | Run the JSX type scan described in TYPECHECK.md. UI remains outside the blocking type check. | Resolve bounded typing issues or record exact remaining diagnostics. | jsconfig.json include list; docs/TYPECHECK.md. FIXED, Stage 3e |
+| L1 | Low | Multiple flight variants share identical radio accessible names. | Include the actual hub route in the label. | JourneyPicker.jsx aria-label. FIXED, Stage 3e |
+| L2 | Low | Footer lacks dataset attribution. | Add the requested source credits and a working source-document link. | BuzzLanding.jsx footer. FIXED, Stage 3e |
 
 No Critical finding was established in this audit. Failure to establish one is not a proof of their absence.
 
@@ -56,10 +56,16 @@ No Critical finding was established in this audit. Failure to establish one is n
 | Injection strings, unknown query, oversized body, rate limits, sanitized errors | app.test.js, validator.test.js, geo/routes.test.js, qaAudit.test.js |
 | Build secret patterns | BASELINE.md and stage1 scan evidence |
 | Keyboard, focus, ARIA, reduced motion | Stage 1 browser evidence; Combobox.jsx; styles.css reduced-motion rules |
-| Automated axe and measured colour contrast | Not yet run at audit; Stage 3e |
+| Automated axe and measured colour contrast | Automated axe added in Stage 3e; JSDOM colour contrast is disabled and visual contrast review remains separately scoped. |
 
 ## Sanity routes and complete outputs
 
 `docs/QA_ROUTES.json` contains every returned journey, leg, duration, evidence label and deterministic basic/standard/premium demo fare for all five routes. Reproduce with `node artifacts/master-pack/routes.mjs`. Coordinates deliberately use the selected airport snapshot locations to make the fixture reproducible. They do not represent city-center geocoding.
 
 No demo amount is asserted to be a current fare. Personal route plausibility review, real inventory and schedules remain UNVERIFIED.
+
+## Stage 3 accessibility verification limits
+
+The three-step axe test passed with zero reported violations. JSDOM colour-contrast analysis is disabled and canvas warnings remain in its output. A separate sRGB calculation measured the main CSS pairs, recorded in artifacts/master-pack/contrast.json. Full computed contrast over every blended surface, a physical phone and assistive-technology behavior remain UNVERIFIED. CLI startup and data-build console output is retained because it reports command readiness and measured data counts. No production TODO was found by the source search.
+
+Optional Stage 3f persistence is deliberately skipped. The existing in-memory session behavior is retained, and the requested polish does not justify another storage lifecycle.

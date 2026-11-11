@@ -2,14 +2,14 @@ import { useId, useState } from "react";
 import { useDebouncedSearch } from "../hooks/useDebouncedSearch.js";
 
 export function Combobox({
-  id,
+  id = undefined,
   label,
   selectedLabel = "",
   endpoint,
   onSelect,
-  onClear,
-  error,
-  getLabel,
+  onClear = undefined,
+  error = undefined,
+  getLabel = undefined,
 }) {
   const generatedId = useId();
   const inputId = id || generatedId;

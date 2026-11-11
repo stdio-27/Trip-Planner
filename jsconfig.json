@@ -9,23 +9,29 @@
     "skipLibCheck": true,
     "strict": false,
     "types": [
-      "node"
+      "node",
+      "react",
+      "react-dom"
     ],
     "lib": [
       "ES2023",
       "DOM"
     ],
-    "maxNodeModuleJsDepth": 0
+    "maxNodeModuleJsDepth": 0,
+    "jsx": "react-jsx"
   },
   "include": [
     "shared/*.js",
     "server/*.js",
-    "src/costs.js"
+    "src/**/*.js",
+    "src/**/*.jsx",
+    "src/**/*.d.ts"
   ],
   "exclude": [
     "**/*.test.js",
     "node_modules",
     "artifacts",
-    "dist"
+    "dist",
+    "**/*.test.jsx"
   ]
 }

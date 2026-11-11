@@ -67,7 +67,7 @@ export default function App() {
   const previousStep = useRef(1);
   useEffect(() => {
     if (step === previousStep.current) return;
-    (step === 3 ? resultsPanel : stepHeading).current?.focus();
+    (stepHeading.current ?? resultsPanel.current)?.focus();
     previousStep.current = step;
   }, [step]);
   useEffect(() => {
@@ -179,8 +179,6 @@ export default function App() {
           {["Trip details", "Choose options", "Your itinerary"].map(
             (label, i) => (
               <span
-                ref={step === i + 1 ? stepHeading : undefined}
-                tabIndex={step === i + 1 ? -1 : undefined}
                 key={label}
                 aria-current={step === i + 1 ? "step" : undefined}
               >
@@ -195,7 +193,7 @@ export default function App() {
         {step === 1 && (
           <aside className="form-panel">
             <div className="section-eyebrow">YOUR NEXT ADVENTURE</div>
-            <h2>Plan a trip</h2>
+            <h2 ref={stepHeading} tabIndex={-1}>Plan a trip</h2>
             <p className="muted-copy">
               Tell us a little about where you want to go.
             </p>
@@ -261,6 +259,7 @@ export default function App() {
               )}
             />
             <OptionsPicker
+              headingRef={step === 2 ? stepHeading : undefined}
               options={options}
               setOptions={setOptions}
               selected={selected}
@@ -295,6 +294,7 @@ export default function App() {
         <section className="results-panel" ref={resultsPanel} tabIndex={-1} aria-label="Itinerary results" aria-live="polite">
           {step === 3 && status === "loading" && (
             <div className="loading-view">
+              <h2 ref={stepHeading} tabIndex={-1}>Building your itinerary</h2>
               <div className="loading-actions">
                 <button
                   type="button"
@@ -311,7 +311,7 @@ export default function App() {
             <ErrorState
               message={error}
               onRetry={buildPlan}
-              loading={status === "loading" || planRetryAfter > 0}
+              loading={planRetryAfter > 0}
             />
           )}
           {step === 3 && status === "empty" && <EmptyState onRetry={buildPlan} />}

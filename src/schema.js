@@ -97,7 +97,7 @@ export const tripSchema = z
           const text =
             typeof candidate === "string"
               ? candidate.trim()
-              : candidate && typeof candidate.text === "string"
+              : candidate && typeof candidate === "object" && "text" in candidate && typeof candidate.text === "string"
                 ? candidate.text.trim()
                 : "";
           if (text) {

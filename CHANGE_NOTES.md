@@ -139,3 +139,10 @@ We capped one page at twenty-four uncached lookup requests per minute.
 We show the existing countdown while a local request slot is unavailable.
 We preserve query cancellation and never spend a slot on a cache hit.
 We documented that other tabs and shared IP addresses can still reach the server limit.
+
+## Stage 3e — accessibility and UI checks
+We added automated accessibility checks for setup, options and itinerary.
+We moved step-change focus to a heading and strengthened visible keyboard focus.
+We kept reduced-motion rules and enlarged interactive targets where needed.
+We added source credits and a working data-source document link in both serving modes.
+We resolved the UI diagnostics and included production UI files in the blocking type check.

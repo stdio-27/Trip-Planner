@@ -29,7 +29,7 @@ export function TripForm({
   serverErrors,
   submitLabel = "Generate itinerary",
 }) {
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState(/** @type {Record<string, string>} */ ({}));
   useEffect(() => {
     setErrors(serverErrors || {});
   }, [serverErrors]);

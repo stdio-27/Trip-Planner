@@ -60,9 +60,9 @@ function Hubs({
   place,
   onChange,
   onFallback,
-  fallbackState,
-  autoSelect,
-  onAutoSelect,
+  fallbackState = undefined,
+  autoSelect = false,
+  onAutoSelect = undefined,
 }) {
   const url = place
     ? "/api/hubs/nearby?lat=" + place.lat + "&lon=" + place.lon

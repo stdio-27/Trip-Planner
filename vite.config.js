@@ -8,6 +8,10 @@ export default defineConfig(({ mode }) => {
     server: {
       port: Number(process.env.VITE_DEV_PORT || env.VITE_DEV_PORT) || 5173,
       proxy: {
+        "/docs": {
+          target: `http://localhost:${process.env.PORT || env.PORT || 8787}`,
+          changeOrigin: true,
+        },
         "/api": {
           target: `http://localhost:${process.env.PORT || env.PORT || 8787}`,
           changeOrigin: true,

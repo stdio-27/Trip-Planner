@@ -1,11 +1,7 @@
 # Type-checking scope
 
-`npm run typecheck` runs checkJs over shared schemas/parsers, the pure cost model, and server modules. Core TripSetup and cost selections have JSDoc typedefs. Third-party JavaScript is not checked (`maxNodeModuleJsDepth: 0`); installed declaration files supply library types.
+The blocking `npm run typecheck` now includes all production JSX and JavaScript in src, shared schemas/parsers and server modules, plus the CSS module declaration. Tests remain excluded. Evidence is jsconfig.json and the Stage 3e check output.
 
-The UI is intentionally not part of the blocking check yet. A separate exploratory UI scan found these remaining categories:
-- ErrorState's inferred props require `loading`, but its options-error call site omits that optional flag.
-- React component `key` typing needs React declarations and explicit component prop types.
-- The CSS side-effect import in main.jsx needs a Vite/CSS module declaration.
-- The browser packing-list salvage parser needs narrowing before accessing `.text` on an unknown object.
+The exploratory scan in artifacts/master-pack/ui-diagnostics.log initially contained thirteen diagnostics. They concerned optional component props, an impossible loading/error comparison, inferred reducer dispatch, the form error map, CSS imports and narrowing unknown packing items. Those were resolved through optional defaults, an explicit error-map and reducer action description, the CSS declaration and an object guard. No @ts-ignore or @ts-nocheck suppression was added.
 
-These are a documented next typing step, not suppressed core errors. The UI scan report is in ignored local artifacts/ui-typecheck.txt; it is not represented as passing.
+The project retains its existing strict:false checkJs policy. Inferred legacy plan and reducer values still include broad JavaScript types. Passing checkJs does not establish strict TypeScript coverage.

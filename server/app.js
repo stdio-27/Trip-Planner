@@ -36,6 +36,9 @@ export function createApp(options = {}) {
   app.disable("x-powered-by");
   app.use(compression({ filter: (req, res) => !req.path.startsWith("/api/") && compression.filter(req, res) }));
   app.use(express.static(distPath));
+  app.get("/docs/DATA_SOURCES.md", (_req, res) => {
+    res.type("text/markdown").sendFile(path.resolve(__dirname, "../docs/DATA_SOURCES.md"));
+  });
 
   function delay(milliseconds) {
     return new Promise((resolve) => setTimeout(resolve, milliseconds));

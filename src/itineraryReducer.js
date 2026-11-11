@@ -66,6 +66,8 @@ export function moveStop(plan, stopId, toDayId, toIndex) {
   return { ...plan, days };
 }
 
+/** @param {{present: any, past: any[]}} state
+ * @param {{type: string, plan?: any, stopId?: string, toDayId?: string, toIndex?: number}} action */
 export function itineraryReducer(state = initialItineraryState, action) {
   switch (action.type) {
     case "LOAD":

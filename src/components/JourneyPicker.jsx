@@ -57,7 +57,7 @@ export function JourneyPicker({ trip, journeys, fares, choice, setChoice, notice
                 return (
                   <article key={route.id} className={"sketch-box option-card" + (route.id === id ? " chosen" : "")}>
                     <label className="journey-choice">
-                      <input type="radio" name="journey" aria-label={route.label + " " + route.legs[0].from.name + " to " + route.legs.at(-1).to.name} checked={route.id === id}
+                      <input type="radio" name="journey" aria-label={route.label + " " + [route.legs[0].from.name, ...route.legs.map((leg) => leg.to.name)].join(" → ")} checked={route.id === id}
                         onChange={() => setChoice((current) => ({ ...current, id: route.id }))} />
                       <strong>{route.label}</strong>
                       <span>{[route.legs[0].from.name, ...route.legs.map((leg) => leg.to.name)].join(" → ")}</span>

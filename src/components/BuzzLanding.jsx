@@ -45,7 +45,11 @@ export function BuzzOutro() {
         <a className="button button-primary" href="#planner">Let’s make a plan <span aria-hidden="true">↗</span></a>
         <a className="handwritten secondary-cta" href="#curve-title">Take another look at the curve ↑</a>
       </section>
-      <footer className="site-footer"><span className="footer-star" aria-hidden="true">✳</span> A LITTLE PLAN. A BIG ADVENTURE. <span>TRIP PLANNER</span></footer>
+      <footer className="site-footer"><span className="footer-star" aria-hidden="true">✳</span> A LITTLE PLAN. A BIG ADVENTURE. <span>TRIP PLANNER</span>
+        <p className="source-credits">Open-Meteo / GeoNames · OurAirports · datameet railways · OpenFlights · LGD
+          {" "}<a href="/docs/DATA_SOURCES.md" target="_blank" rel="noopener noreferrer">Data sources</a>
+        </p>
+      </footer>
     </>
   );
 }
