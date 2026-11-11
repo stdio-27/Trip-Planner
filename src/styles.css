@@ -495,55 +495,6 @@ textarea:focus-visible {
   min-width: 84px;
 }
 
-.budget-summary {
-  display: grid;
-  grid-template-columns: minmax(130px, 0.75fr) 2fr;
-  gap: 12px 20px;
-  padding: 19px;
-  border: 2px solid var(--border);
-  border-radius: 14px;
-  background: var(--surface);
-}
-
-.budget-total {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 5px;
-  padding-right: 14px;
-  border-right: 1px solid var(--border);
-}
-
-.budget-label,
-.budget-day span {
-  color: var(--muted);
-  font-size: 0.78rem;
-}
-
-.budget-total strong {
-  color: var(--accent);
-  font-size: 1.3rem;
-}
-
-.budget-days {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px 22px;
-  align-items: center;
-}
-
-.budget-day {
-  display: grid;
-  gap: 4px;
-}
-
-.budget-disclaimer {
-  grid-column: 1 / -1;
-  margin: 0;
-  color: var(--muted);
-  font-size: 0.72rem;
-}
-
 .itinerary-section {
   margin-top: 24px;
 }
@@ -887,16 +838,6 @@ textarea:focus-visible {
   .form-panel {
     padding: 21px;
   }
-
-  .budget-summary {
-    grid-template-columns: 1fr;
-  }
-
-  .budget-total {
-    padding: 0 0 12px;
-    border-right: 0;
-    border-bottom: 1px solid var(--border);
-  }
 }
 
 @media (max-width: 640px) {
@@ -935,10 +876,6 @@ textarea:focus-visible {
 
   .results-heading {
     align-items: flex-start;
-  }
-
-  .budget-summary {
-    padding: 16px;
   }
 
   .day-boards {
@@ -994,7 +931,7 @@ h1, h2, h3, h4 { font-family: "Plus Jakarta Sans", sans-serif; font-weight: 800;
 .button:not(:disabled):active { transform: translate(4px, 4px); box-shadow: none; }
 .button:disabled { box-shadow: 2px 2px 0 #1a1a1a; }
 .button-spinner { border-color: rgba(26,26,26,0.25); border-top-color: #1a1a1a; }
-.sketch-box, .form-panel, .empty-panel, .error-panel, .skeleton-panel, .budget-summary, .day-board, .stop-card, .packing-section, .skeleton-card {
+.sketch-box, .form-panel, .empty-panel, .error-panel, .skeleton-panel, .day-board, .stop-card, .packing-section, .skeleton-card {
   border: 2px solid #1a1a1a;
   border-radius: var(--sketch-radius);
   background: rgba(255,255,255,0.85);

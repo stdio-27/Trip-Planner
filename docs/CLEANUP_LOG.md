@@ -1,7 +1,14 @@
 # Cleanup log
 
-Status: awaiting the explicit Stage 4 plan approval. No Stage 5 deletions have been performed.
+The full Stage 4 plan was approved in the user reply during this run.
 
-The proposed removals are the unused BudgetSummary component and the unused COMFORTS/TRAVEL_MODES exports. Evidence and rejected removals are in REFACTOR_PLAN.md. The historical-document moves belong to Stage 1 and preserve their original blob contents.
+| Item | Evidence | Action |
+| --- | --- | --- |
+| BudgetSummary component | No caller in production or tests, confirmed by the Stage 4 source search | Removed the unused component |
+| Its budget-* CSS rules | Only the removed component rendered these classes | Removed those rules and selector entries |
+| COMFORTS and TRAVEL_MODES | Only their declarations remained in shared/choices.js | Next approved removal |
+| Geocoder wrapper | Contains validation and timeouts, used as a test seam | Retained |
+| NoLiveProvider | Documented Phase 5 contract with a contract test | Retained |
+| @types/compression and @types/express | Used by the blocking check and middleware declarations | Retained despite depcheck suggestions |
 
-Unused dependencies reported by depcheck are not automatically safe to remove. The reported @types packages support the blocking type check and are retained. The geocoder wrapper contains behavior, and NoLiveProvider remains a documented contract.
+The active CostPanel and cost tests remain. Historical document moves belong to Stage 1 and preserve original contents. Uncertain CSS beyond the removed component is retained.
