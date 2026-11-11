@@ -167,3 +167,10 @@ We explained validation, stale responses, cost arithmetic and historical route e
 We separated measured behavior from the still-pending refactor proposals.
 We wrote module questions, bug-spotting exercises and feature practice drills.
 We kept cleanup and refactor logs explicit about the outstanding approval gate.
+
+## Stage 8c — demo recording script
+We wrote a three-minute-forty-five-second walkthrough of the current app.
+We included setup, route choices, estimate edits and itinerary editing.
+We supplied isolated PowerShell commands for the fault demonstrations.
+We included cancellation during a slow request and a narrow viewport.
+We left recording and physical-device checks as tasks for the user.
