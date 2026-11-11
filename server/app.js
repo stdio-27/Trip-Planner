@@ -1,8 +1,16 @@
+import { loadData } from "./data/index.js";
+import { buildJourneys } from "./journeys/engine.js";
+import { clockTime, journeyTiming, routeHubs } from "../shared/journeyTiming.js";
 import "dotenv/config";
+import { createJourneyRouter } from "./journeys/routes.js";
+import { resolveTripPlaces } from "./tripPlaces.js";
+import { createPlacesRouter } from "./geo/routes.js";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import express from "express";
+import compression from "compression";
+import { demoFareModes } from "./journeys/routes.js";
 import rateLimit from "express-rate-limit";
 import { extractJson } from "./extractJson.js";
 import { buildTripPrompt, buildOptionsPrompt } from "./prompt.js";
@@ -20,9 +28,11 @@ export function createApp(options = {}) {
   const app = express();
   const geminiTimeoutMs = 25_000;
   const mockMode = options.mockMode ?? process.env.MOCK?.toLowerCase();
+  const mockStage = options.mockStage ?? process.env.MOCK_STAGE;
   const geminiModel = process.env.GEMINI_MODEL || "gemini-flash-lite-latest";
 
-  app.use(express.json({ limit: "10kb" }));
+  app.disable("x-powered-by");
+  app.use(compression({ filter: (req, res) => !req.path.startsWith("/api/") && compression.filter(req, res) }));
   app.use(express.static(distPath));
 
   function delay(milliseconds) {
@@ -41,7 +51,12 @@ export function createApp(options = {}) {
       currency: tripDetails.currency,
       days: Array.from({ length: tripDetails.days }, (_, index) => ({
         label: `Day ${index + 1}`,
-        stops: [
+        stops: tripDetails.journey &&
+          (index + 1 < tripDetails.journey.arrivalDay ||
+            (index + 1 === tripDetails.days && index + 1 === tripDetails.journey.arrivalDay &&
+              tripDetails.journey.leaveByMinute !== null && tripDetails.journey.arrivalMinute >= tripDetails.journey.leaveByMinute))
+          ? [{ title: "Travel day", category: "transport", estCost: 0, location: destination }]
+          : [
           {
             title: "Explore the city",
             category: "sight",
@@ -49,7 +64,9 @@ export function createApp(options = {}) {
             description:
               "Visit a well-known local landmark and nearby neighborhood.",
             location: destination,
-            time: "09:00",
+            time: clockTime(index + 1 === tripDetails.journey?.arrivalDay
+              ? tripDetails.journey.arrivalMinute
+              : Math.min(540, index + 1 === tripDetails.days ? tripDetails.journey?.leaveByMinute ?? 540 : 540)),
           },
         ],
       })),
@@ -67,9 +84,10 @@ export function createApp(options = {}) {
         res.status(200).end();
         return true;
       }
-      if (["demo", "jitter", "slow", "wrong-days"].includes(mockMode)) {
-        if (mockMode === "jitter") await delay(Math.random() * 5000);
-        if (mockMode === "slow") await delay(40000);
+      if ((demoFareModes.has(mockMode) && mockStage === "plan") ||
+        ["demo", "jitter", "slow", "wrong-days", "geo-down", "geo-slow", "geo-empty", "fares-bad-json", "fares-fail", "journeys-empty"].includes(mockMode)) {
+        if (mockMode === "jitter" && mockStage !== "plan") await delay(Math.random() * 5000);
+        if (mockMode === "slow" && mockStage !== "plan") await delay(40000);
         res.json(demoOptions(tripDetails));
         return true;
       }
@@ -83,6 +101,12 @@ export function createApp(options = {}) {
           }),
         );
         return true;
+      case "geo-down":
+      case "geo-slow":
+      case "geo-empty":
+      case "fares-bad-json":
+      case "fares-fail":
+      case "journeys-empty":
       case "demo":
         res.json(mockPlan(tripDetails));
         return true;
@@ -111,28 +135,83 @@ export function createApp(options = {}) {
     }
   }
 
-  const planLimiter = rateLimit({
+  const limitRequests = (max) => rateLimit({
     windowMs: 60 * 1000,
-    max: 10,
+    max,
     standardHeaders: true,
     legacyHeaders: false,
     handler: (req, res) => {
       res.status(429).json({
+        code: "RATE_LIMITED",
         error:
           "Too many trip planning requests. Please wait a minute before trying again.",
       });
     },
   });
 
-  app.post(["/api/plan", "/api/options"], planLimiter, async (req, res) => {
+  const planLimiter = limitRequests(10);
+  const lookupLimiter = limitRequests(30);
+  const otherApiLimiter = limitRequests(60);
+  const jsonBody = express.json({ limit: "10kb" });
+  /** @type {import("express").RequestHandler} */
+  const noQuery = (req, res, next) => {
+    if (Object.keys(req.query).length) {
+      res.status(400).json({ code: "INVALID_QUERY", error: "Invalid query parameters." });
+      return;
+    }
+    next();
+  };
+
+  const places = createPlacesRouter({
+    provider: options.geoProvider,
+    mockMode,
+  });
+  app.use("/api/geo", lookupLimiter);
+  app.use("/api/hubs", lookupLimiter);
+  app.use("/api", places);
+  app.use("/api", createJourneyRouter({
+    limiter: planLimiter,
+    jsonBody,
+    noQuery,
+    mockMode,
+    apiKey: options.apiKey ?? process.env.GEMINI_API_KEY,
+    model: geminiModel,
+    fetchImpl: options.fetch,
+  }));
+
+  app.post(["/api/plan", "/api/options"], planLimiter, noQuery, jsonBody, async (req, res) => {
     const validation = validateTripInput(req.body);
     if (!validation.valid) {
-      res.status(400).json({ error: validation.error });
+      res.status(400).json({ errors: validation.errors, error: validation.error });
       return;
     }
 
-    const tripDetails = validation.data;
+    const resolved = resolveTripPlaces(validation.data);
+    if (resolved.errors) {
+      res.status(400).json({ errors: resolved.errors, error: Object.values(resolved.errors)[0] });
+      return;
+    }
+    const { journey: requestedJourney, ...tripDetails } = resolved.data;
     const isOptions = req.path === "/api/options";
+    if (requestedJourney) {
+      const selected = !isOptions && "origin" in validation.data &&
+        buildJourneys({ origin: validation.data.origin, destination: validation.data.destination }, loadData()).find((item) => item.id === requestedJourney.id);
+      if (!selected || JSON.stringify(routeHubs(selected)) !== JSON.stringify(requestedJourney.hubs)) {
+        res.status(400).json({ error: "The selected journey or hubs changed. Choose a journey again." });
+        return;
+      }
+      const timing = journeyTiming(selected, tripDetails.departurePreference, tripDetails.returnPreference, requestedJourney.roundTrip);
+      const arrivalHub = selected.legs.map((leg) => leg.to).filter((point) => point.kind !== "place").at(-1);
+      tripDetails["journey"] = {
+        id: selected.id,
+        hubs: routeHubs(selected),
+        roundTrip: requestedJourney.roundTrip,
+        durationMinutes: selected.totalDurationMin,
+        arrivalHub: arrivalHub?.name ?? null,
+        legs: selected.legs.map(({ mode, from, to }) => ({ mode, from: from.name, to: to.name })),
+        ...timing,
+      };
+    }
 
     if (await handleMock(req, res, tripDetails)) {
       return;
@@ -215,7 +294,7 @@ export function createApp(options = {}) {
                         ? buildOptionsPrompt(tripDetails)
                         : buildTripPrompt(tripDetails)) +
                       (attempt
-                        ? (isOptions ? "\nCorrection: return the complete valid options object in the requested currency, with all four option groups." : `\nCorrection: you returned ${returnedDays} days; return exactly ${tripDetails.days} day objects.`)
+                        ? (isOptions ? "\nCorrection: return the complete valid options object in the requested currency, with all three option groups." : `\nCorrection: you returned ${returnedDays} days; return exactly ${tripDetails.days} day objects.`)
                         : ""),
                   },
                 ],
@@ -344,15 +423,15 @@ export function createApp(options = {}) {
     }
   });
 
-  app.get("/api/health", (req, res) => {
+  app.get("/api/health", otherApiLimiter, noQuery, (_req, res) => {
     res.json({ ok: true, status: "healthy" });
   });
 
   // Unknown /api routes return 404 JSON
-  app.all("/api/*", (req, res) => {
+  app.all(["/api", "/api/*"], otherApiLimiter, (_req, res) => {
     res
       .status(404)
-      .json({ error: `Not found: ${req.method} ${req.originalUrl}` });
+      .json({ error: "API route not found." });
   });
 
   // Non-/api GET requests fallback to index.html in production if dist exists
@@ -373,5 +452,17 @@ export function createApp(options = {}) {
     );
   });
 
+  /** @type {import("express").ErrorRequestHandler} */
+  const reportRequestError = (error, _req, res, next) => {
+    if (res.headersSent) return next(error);
+    if (error.status === 413) {
+      res.status(413).json({ error: "Request body exceeds 10 KB." });
+    } else if (error.status >= 400 && error.status < 500) {
+      res.status(error.status).json({ error: "Invalid request body." });
+    } else {
+      res.status(500).json({ error: "The server could not complete the request." });
+    }
+  };
+  app.use(reportRequestError);
   return app;
 }

@@ -26,19 +26,9 @@ export function demoOptions(trip) {
     },
     destination: {
       city: trip.destination,
-      arrivalAirport: hub(`${trip.destination} airport (assumed)`),
-      arrivalStation: hub(`${trip.destination} station (assumed)`),
+      arrivalAirport: hub(trip.arrivalAirport || `${trip.destination} airport (assumed)`),
+      arrivalStation: hub(trip.arrivalStation || `${trip.destination} station (assumed)`),
     },
-    travelOptions: ["basic", "standard", "premium"].map((comfort, i) => ({
-      label: ["Train", "Flight", "Premium flight"][i],
-      mode: i ? "flight" : "train",
-      comfort,
-      durationHours: i ? 3 : 10,
-      farePerPersonRoundTrip: [1200, 5000, 12000][i],
-      originTransferPerPersonRoundTrip: 100,
-      destinationTransferPerPersonRoundTrip: 200,
-      notes: "Illustrative round-trip fare per traveler.",
-    })),
     stayOptions: ["budget", "mid", "premium"].map((tier, i) => ({
       label: `${tier} stay`,
       tier,

@@ -1,3 +1,4 @@
+import { PRESETS } from "../../shared/schemas.js";
 import { groups, priceFields } from "../../shared/optionsSchema.js";
 import {
   formatMoney,
@@ -12,17 +13,11 @@ export function OptionsPicker({
   trip,
 }) {
   const priceLabels = {
-    farePerPersonRoundTrip: "Round-trip fare per traveler",
-    originTransferPerPersonRoundTrip:
-      "Origin transfers per traveler (round trip)",
-    destinationTransferPerPersonRoundTrip:
-      "Arrival transfers per traveler (round trip)",
     pricePerRoomPerNight: "Per room per night",
     pricePerDay: "Daily local transport",
     dailyPerPerson: "Daily meals per traveler",
   };
   const labels = [
-    "Getting there",
     "Where to stay",
     "Getting around",
     "Food style",
@@ -65,7 +60,7 @@ export function OptionsPicker({
         </ul>
       </section>
       <div className="prompt-chips">
-        {["Cheapest combo", "Balanced", "Comfort"].map((p) => (
+        {PRESETS.map((p) => (
           <button
             type="button"
             className="button"
@@ -113,7 +108,6 @@ export function OptionsPicker({
                   </p>
                 )}
                 {item.area && <p>Area: {item.area}</p>}
-                {item.durationHours > 0 && <p>{item.durationHours} hours</p>}
                 {priceFields[key].map((field) => (
                   <label className="estimate-field" key={field}>
                     {priceLabels[field]}
@@ -157,6 +151,7 @@ export function CostPanel({
   selected,
   trip,
   activitiesTotal,
+  journey,
   contingencyOn,
   setContingencyOn,
 }) {
@@ -172,6 +167,7 @@ export function CostPanel({
     rooms: trip.rooms,
     activitiesTotal,
     contingencyOn,
+    journey,
   };
   const cost = computeCostBreakdown({ ...args, selections });
   // Costs are additive across independent groups; each group can be minimized separately.
@@ -209,6 +205,16 @@ export function CostPanel({
           </div>
         ))}
       </dl>
+      {cost.travelLegs.length > 0 && (
+        <ul aria-label="Travel costs by leg">
+          {cost.travelLegs.map((leg) => (
+            <li key={leg.id}>{leg.label} · {leg.missing ? "Estimate needed" : formatMoney(leg.amount, trip.currency)}</li>
+          ))}
+        </ul>
+      )}
+      {(!journey?.route || cost.travelLegs.some((leg) => leg.missing)) && (
+        <p>Totals exclude travel legs without a fare estimate.</p>
+      )}
       <label>
         <input
           type="checkbox"
@@ -232,7 +238,7 @@ export function CostPanel({
         </>
       )}
       <p>
-        Range across all combinations:{" "}
+        Range for these journey settings:{" "}
         {range.map((v) => formatMoney(v, trip.currency)).join(" – ")}
       </p>
       <small>AI estimates, not live prices. Verify before booking.</small>

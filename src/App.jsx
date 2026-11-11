@@ -1,3 +1,4 @@
+import { clockTime, journeyTiming, routeHubs } from "../shared/journeyTiming.js";
 import { useEffect, useState, useRef } from "react";
 import { BuzzIntro, BuzzOutro } from "./components/BuzzLanding.jsx";
 import { EmptyHint, EmptyState } from "./components/EmptyStates.jsx";
@@ -8,24 +9,25 @@ import { Skeleton } from "./components/Skeleton.jsx";
 import { TripForm } from "./components/TripForm.jsx";
 import { parseOptions, groups } from "../shared/optionsSchema.js";
 import { presetSelections } from "./costs.js";
+import { journeyRequest, parseJourneys, parseFares } from "../shared/journeys.js";
+import { JourneyPicker } from "./components/JourneyPicker.jsx";
 import { OptionsPicker, CostPanel } from "./components/OptionsPicker.jsx";
 import { useGenerate, useApiCall } from "./hooks/useGenerate.js";
 import { useItinerary } from "./hooks/useItinerary.js";
 
 const initialForm = {
-  description: "",
-  destination: "",
+  destination: null,
+  origin: null,
   days: 3,
   budget: "",
   currency: "INR",
-  interests: "",
-  originCity: "",
-  nearestAirport: "",
-  nearestStation: "",
+  interests: [],
   adults: 1,
   children: 0,
   rooms: "",
   startDate: "",
+  departurePreference: "morning",
+  returnPreference: "evening",
   pace: "balanced",
   foodPreference: "no preference",
   foodOther: "",
@@ -45,6 +47,11 @@ export default function App() {
     useItinerary(generatedPlan);
 
   const optionsCall = useApiCall("/api/options", parseOptions);
+  const journeys = useApiCall("/api/journeys/structure", parseJourneys);
+  const fares = useApiCall("/api/journeys/fares", parseFares);
+  const [choice, setChoice] = useState({ id: null, tier: "standard", roundTrip: true, edits: {} });
+  const [journeyNotice, setJourneyNotice] = useState("");
+  const journeyInput = useRef(null);
   const [step, setStep] = useState(1);
   const [options, setOptions] = useState(null);
   const [selected, setSelected] = useState({});
@@ -52,14 +59,45 @@ export default function App() {
   const [contingencyOn, setContingencyOn] = useState(false);
   const [planTrip, setPlanTrip] = useState(null);
   const pendingTrip = useRef(null);
+  const stepHeading = useRef(null);
+  const resultsPanel = useRef(null);
+  const previousStep = useRef(1);
+  useEffect(() => {
+    if (step === previousStep.current) return;
+    (step === 3 ? resultsPanel : stepHeading).current?.focus();
+    previousStep.current = step;
+  }, [step]);
   useEffect(() => {
     if (optionsCall.status === "success" && optionsCall.plan) {
-      setTrip(pendingTrip.current);
+      const submission = pendingTrip.current;
+      const input = journeyRequest(submission);
+      if (JSON.stringify(input) !== JSON.stringify(journeyInput.current)) {
+        setJourneyNotice(journeyInput.current
+          ? "Your previous journey selection was reset because the trip details changed."
+          : "");
+        journeyInput.current = input;
+        setChoice((current) => ({ ...current, id: null, edits: {} }));
+        fares.reset();
+        journeys.generate(input);
+      }
+      setTrip(submission);
       setOptions(optionsCall.plan);
       setSelected(presetSelections(optionsCall.plan));
       setStep(2);
     }
   }, [optionsCall.plan]);
+  useEffect(() => {
+    const routes = journeys.plan?.journeys;
+    if (routes?.length) {
+      setChoice((current) => ({ ...current, id: current.id ?? routes[0].id }));
+      fares.generate(journeyInput.current);
+    }
+  }, [journeys.plan]);
+  const route = journeys.status === "success"
+    ? journeys.plan?.journeys.find((item) => item.id === choice.id)
+    : null;
+  const timing = route && journeyTiming(route, trip.departurePreference, trip.returnPreference, choice.roundTrip);
+  const fareData = fares.status === "success" ? fares.plan?.fares : null;
   useEffect(() => {
     if (generatedPlan?.days.some((d) => d.stops.length))
       setPlanTrip(pendingTrip.current);
@@ -72,15 +110,15 @@ export default function App() {
     trip &&
     [
       "destination",
-      "originCity",
+      "origin",
       "days",
       "adults",
       "children",
       "currency",
-      "nearestAirport",
-      "nearestStation",
       "startDate",
       "rooms",
+      "departurePreference",
+      "returnPreference",
       "pace",
       "foodPreference",
       "foodOther",
@@ -89,7 +127,7 @@ export default function App() {
       "budget",
     ].some(
       (k) =>
-        String(formValues[k] ?? "") !== String(trip[k] ?? "") &&
+        JSON.stringify(formValues[k] ?? "") !== JSON.stringify(trip[k] ?? "") &&
         !(k === "rooms" && !formValues.rooms) &&
         !(k === "budget" && formValues.budget === "" && trip.budget == null),
     );
@@ -97,6 +135,13 @@ export default function App() {
     setStep(3);
     generate({
       ...trip,
+      journey: {
+        id: route.id,
+        hubs: routeHubs(route),
+        roundTrip: choice.roundTrip,
+        arrival: timing.arrival,
+        leaveBy: timing.leaveBy,
+      },
       selections: Object.fromEntries(
         groups.map((key) => [
           key,
@@ -130,6 +175,8 @@ export default function App() {
           {["Trip details", "Choose options", "Your itinerary"].map(
             (label, i) => (
               <span
+                ref={step === i + 1 ? stepHeading : undefined}
+                tabIndex={step === i + 1 ? -1 : undefined}
                 key={label}
                 aria-current={step === i + 1 ? "step" : undefined}
               >
@@ -154,6 +201,7 @@ export default function App() {
               onSubmit={handleSubmit}
               loading={optionsCall.status === "loading"}
               submitLabel="Explore options"
+              serverErrors={optionsCall.fieldErrors}
             />
           </aside>
         )}
@@ -171,7 +219,7 @@ export default function App() {
             onRetry={() => optionsCall.generate(pendingTrip.current)}
           />
         )}
-        {optionsCall.status === "empty" && <EmptyState />}
+        {optionsCall.status === "empty" && <EmptyState onRetry={() => optionsCall.generate(pendingTrip.current)} />}
         {step > 1 && options && (
           <>
             <button
@@ -186,6 +234,26 @@ export default function App() {
             {stale && (
               <p role="alert">Trip details changed. Regenerate options</p>
             )}
+            <JourneyPicker
+              trip={trip}
+              journeys={journeys.status === "loading" || journeys.status === "error" ? { ...journeys, plan: null } : journeys}
+              fares={fares.status !== "success" ? { ...fares, plan: null } : fares}
+              choice={choice}
+              setChoice={setChoice}
+              notice={journeyNotice}
+              onChangeHubs={() => setStep(1)}
+              retryRoutes={() => journeys.generate(journeyInput.current)}
+              retryFares={() => fares.generate(journeyInput.current)}
+              renderTiming={() => timing && (
+                <p role="status">
+                  Approximate arrival: Day {timing.arrivalDay}, {timing.arrival} ({clockTime(timing.arrivalMinute)}).
+                  {timing.leaveBy && ` Leave by Day ${trip.days}, ${timing.leaveBy} (${clockTime(timing.leaveByMinute)}).`}
+                  {(timing.arrivalDay > trip.days ||
+                    (timing.leaveBy && timing.arrivalDay === trip.days && timing.arrivalMinute >= timing.leaveByMinute))
+                    && " The selected timing leaves no activity time at the destination."}
+                </p>
+              )}
+            />
             <OptionsPicker
               options={options}
               setOptions={setOptions}
@@ -197,6 +265,7 @@ export default function App() {
               options={options}
               selected={selected}
               trip={trip}
+              journey={{ ...choice, route, fares: fareData }}
               activitiesTotal={
                 planTrip === trip && plan
                   ? plan.days
@@ -209,7 +278,7 @@ export default function App() {
             />
             <button
               className="button button-primary"
-              disabled={stale || status === "loading"}
+              disabled={stale || !route || status === "loading"}
               onClick={buildPlan}
             >
               Build my itinerary
@@ -217,8 +286,8 @@ export default function App() {
           </>
         )}
 
-        <section className="results-panel" aria-live="polite">
-          {status === "loading" && (
+        <section className="results-panel" ref={resultsPanel} tabIndex={-1} aria-label="Itinerary results" aria-live="polite">
+          {step === 3 && status === "loading" && (
             <div className="loading-view">
               <div className="loading-actions">
                 <button
@@ -232,15 +301,18 @@ export default function App() {
               <Skeleton />
             </div>
           )}
-          {status === "error" && (
+          {step === 3 && status === "error" && (
             <ErrorState
               message={error}
               onRetry={buildPlan}
               loading={status === "loading"}
             />
           )}
-          {status === "empty" && <EmptyState />}
-          {status === "idle" && !plan && step === 1 && optionsCall.status === "idle" && <EmptyHint />}
+          {step === 3 && status === "empty" && <EmptyState onRetry={buildPlan} />}
+          {status === "idle" &&
+            !plan &&
+            step === 1 &&
+            optionsCall.status === "idle" && <EmptyHint />}
           {step === 3 && planTrip === trip && plan && (
             <>
               <div className="results-heading">

@@ -1,190 +1,222 @@
-import { useState } from "react";
+import { timeBuckets } from "../../shared/journeyTiming.js";
+import { lazy, Suspense, useState, useRef, useEffect } from "react";
+import {
+  tripSetupSchema,
+  pickedTripSchema,
+  formPayload,
+  dateBounds,
+  CURRENCIES,
+  PACES,
+  FOOD_PREFERENCES,
+  INTERESTS,
+} from "../../shared/schemas.js";
 import { validateTripInput } from "../../shared/tripInput.js";
-const ideas = [
-  ["Weekend food tour in Tokyo", 2, "Tokyo"],
-  ["3 days exploring temples in Kyoto", 3, "Kyoto"],
-  ["5-day cultural trip to Paris", 5, "Paris"],
-  ["4 days hiking in Vancouver", 4, "Vancouver"],
-];
-const interests = [
-  "food",
-  "history",
-  "nature",
-  "adventure",
-  "nightlife",
-  "shopping",
-  "relaxation",
-  "family-friendly",
-];
+const TripPlaceFields = lazy(() => import("./TripPlaceFields.jsx").then(
+  (module) => ({ default: module.TripPlaceFields }),
+));
+const numeric = {
+  adults: [1, 9],
+  children: [0, 9],
+  rooms: [1, 9],
+  budget: [0, 10000000],
+};
 export function TripForm({
   values,
   onChange,
   onSubmit,
   loading,
+  serverErrors,
   submitLabel = "Generate itinerary",
 }) {
-  const [error, setError] = useState(null);
-  const update = (field, value) =>
-    onChange((current) => ({ ...current, [field]: value }));
-  function submit(event) {
-    event.preventDefault();
-    const result = validateTripInput(values);
-    if (!result.valid) {
-      setError(result);
+  const [errors, setErrors] = useState({});
+  useEffect(() => {
+    setErrors(serverErrors || {});
+  }, [serverErrors]);
+  const form = useRef(null);
+  const bounds = dateBounds();
+  const update = (key, value) =>
+    onChange((current) => ({ ...current, [key]: value }));
+  const picked = "origin" in values;
+  const valid = (picked ? pickedTripSchema : tripSetupSchema).safeParse(
+    formPayload(values),
+  ).success;
+  function validate(next = values) {
+    const r = validateTripInput(formPayload(next));
+    setErrors(r.valid ? {} : r.errors);
+    return r;
+  }
+  function submit(e) {
+    e.preventDefault();
+    const r = validate();
+    if (!r.valid) {
+      form.current?.querySelector(`[id="${r.field}"]`)?.focus();
       return;
     }
-    setError(null);
-    onChange(current => ({...current,...result.data}));
-    onSubmit(result.data);
+    onChange((current) => ({ ...current, ...r.data }));
+    onSubmit(r.data);
   }
-  function field(name, label, type = "text", maxLength = 100) {
+  function error(key) {
     return (
-      <div className="setup-field" key={name}>
-        <label htmlFor={name}>{label}</label>
+      errors[key] && (
+        <p id={`${key}-error`} role="alert" className="form-inline-error">
+          {errors[key]}
+        </p>
+      )
+    );
+  }
+  function input(key, label, type = "text", max = 100) {
+    return (
+      <div className="setup-field" key={key}>
+        <label htmlFor={key}>{label}</label>
         <input
-          id={name}
+          id={key}
           type={type}
-          maxLength={maxLength}
-          value={values[name] ?? ""}
-          aria-invalid={error?.field === name}
-          aria-describedby={error?.field === name ? "setup-error" : undefined}
-          onChange={(e) => update(name, e.target.value)}
+          maxLength={max}
+          value={values[key] ?? ""}
+          min={type === "date" ? bounds.min : numeric[key]?.[0]}
+          max={type === "date" ? bounds.max : numeric[key]?.[1]}
+          step={type === "number" ? 1 : undefined}
+          inputMode={type === "number" ? "numeric" : undefined}
+          aria-invalid={!!errors[key]}
+          aria-describedby={errors[key] ? `${key}-error` : undefined}
+          onKeyDown={(e) => {
+            if (
+              type === "number" &&
+              ["e", "E", "+", "-", ".", ","].includes(e.key)
+            )
+              e.preventDefault();
+          }}
+          onPaste={(e) => {
+            if (
+              type === "number" &&
+              !/^\d+$/.test(e.clipboardData.getData("text"))
+            )
+              e.preventDefault();
+          }}
+          onChange={(e) => update(key, e.target.value)}
+          onBlur={(e) => {
+            let next = values;
+            if (type === "number" && /^\d+$/.test(e.target.value)) {
+              const [min, max] = numeric[key];
+              const value = Math.min(
+                max,
+                Math.max(min, Number(e.target.value)),
+              );
+              next = { ...values, [key]: value };
+              onChange(next);
+            }
+            validate(next);
+          }}
         />
+        {error(key)}
+      </div>
+    );
+  }
+  function select(key, label, choices) {
+    return (
+      <div className="setup-field">
+        <label htmlFor={key}>{label}</label>
+        <select
+          id={key}
+          value={values[key]}
+          aria-invalid={!!errors[key]}
+          aria-describedby={errors[key] ? `${key}-error` : undefined}
+          onChange={(e) =>
+            update(
+              key,
+              key === "days" ? Number(e.target.value) : e.target.value,
+            )
+          }
+          onBlur={() => validate()}
+        >
+          {choices.map((x) => (
+            <option key={x} value={x}>
+              {x}
+            </option>
+          ))}
+        </select>
+        {error(key)}
       </div>
     );
   }
   return (
-    <form className="trip-form" onSubmit={submit} noValidate>
-      {field("destination", "Destination")}
-      {field("originCity", "Origin city")}
-      {field("nearestAirport", "Nearest airport (optional)")}
-      {field("nearestStation", "Nearest railway station (optional)")}
-      <label htmlFor="trip-days">Trip length</label>
-      <select
-        id="trip-days"
-        value={values.days}
-        onChange={(e) => update("days", Number(e.target.value))}
-      >
-        {Array.from({ length: 14 }, (_, i) => (
-          <option key={i} value={i + 1}>
-            {i + 1} {i ? "days" : "day"}
-          </option>
-        ))}
-      </select>
-      <small>
-        {Math.max(Number(values.days) - 1, 0)} nights. This selector determines
-        the itinerary length.
-      </small>
-      {field("startDate", "Start date (optional)", "date")}
-      {field("adults", "Adults (1–10)", "number")}
-      {field("children", "Children (0–10)", "number")}
-      {field("rooms", "Rooms (optional)", "number")}
+    <form className="trip-form" ref={form} onSubmit={submit} noValidate>
+      {picked ? (
+        <Suspense fallback={<p role="status">Loading place pickers…</p>}>
+          <TripPlaceFields
+            origin={values.origin}
+            destination={values.destination}
+            onChange={update}
+            errors={errors}
+          />
+        </Suspense>
+      ) : (
+        <>
+          {input("destination", "Destination")}
+          {input("originCity", "Origin city")}
+          {input("nearestAirport", "Nearest airport (optional)")}
+          {input("nearestStation", "Nearest railway station (optional)")}
+        </>
+      )}
+      {select(
+        "days",
+        "Trip length",
+        Array.from({ length: 14 }, (_, i) => i + 1),
+      )}
+      <small>{Math.max(Number(values.days) - 1, 0)} nights</small>
+      {input("startDate", "Start date (optional)", "date")}
+      {picked && select("departurePreference", "Preferred outbound departure", timeBuckets)}
+      {picked && select("returnPreference", "Preferred return departure", timeBuckets)}
+      {input("adults", "Adults (1–9)", "number")}
+      {input("children", "Children (0–9)", "number")}
+      {input("rooms", "Rooms (optional)", "number")}
       <small>
         Default: {Math.ceil(Number(values.adults || 1) / 2)} room(s).
       </small>
-      <label htmlFor="currency">Currency</label>
-      <select
-        id="currency"
-        value={values.currency}
-        onChange={(e) => update("currency", e.target.value)}
-      >
-        {[
-          "INR",
-          "USD",
-          "EUR",
-          "GBP",
-          "AED",
-          "SGD",
-          "JPY",
-          "AUD",
-          "CAD",
-          "THB",
-        ].map((c) => (
-          <option key={c}>{c}</option>
-        ))}
-      </select>
-      {field("budget", "Approximate budget (optional)", "number")}
-      <label htmlFor="pace">Travel pace</label>
-      <select
-        id="pace"
-        value={values.pace}
-        onChange={(e) => update("pace", e.target.value)}
-      >
-        {["relaxed", "balanced", "packed"].map((p) => (
-          <option key={p}>{p}</option>
-        ))}
-      </select>
+      {select("currency", "Currency", CURRENCIES)}
+      {input("budget", "Approximate budget (optional)", "number")}
+      {select("pace", "Travel pace", PACES)}
       <fieldset>
         <legend>Interests</legend>
         <div className="prompt-chips">
-          {interests.map((item) => (
+          {INTERESTS.map((item) => (
             <button
               className="chip-button"
               type="button"
               key={item}
-              aria-pressed={(values.interests || "").split(", ").includes(item)}
-              onClick={() => {
-                const current = (values.interests || "")
-                  .split(", ")
-                  .filter(Boolean);
+              aria-pressed={values.interests.includes(item)}
+              onClick={() =>
                 update(
                   "interests",
-                  (current.includes(item)
-                    ? current.filter((x) => x !== item)
-                    : [...current, item]
-                  ).join(", "),
-                );
-              }}
+                  values.interests.includes(item)
+                    ? values.interests.filter((x) => x !== item)
+                    : [...values.interests, item],
+                )
+              }
             >
               {item}
             </button>
           ))}
         </div>
+        {error("interests")}
       </fieldset>
       <label htmlFor="anythingElse">Anything else about your trip?</label>
       <textarea
         id="anythingElse"
-        maxLength={500}
+        maxLength={300}
         value={values.anythingElse}
+        aria-invalid={!!errors.anythingElse}
+        aria-describedby={
+          errors.anythingElse ? "anythingElse-error" : undefined
+        }
         onChange={(e) => update("anythingElse", e.target.value)}
+        onBlur={() => validate()}
       />
-      <label htmlFor="foodPreference">Food preference</label>
-      <select
-        id="foodPreference"
-        value={values.foodPreference}
-        onChange={(e) => update("foodPreference", e.target.value)}
-      >
-        {["no preference", "vegetarian", "vegan", "halal", "other"].map((x) => (
-          <option key={x}>{x}</option>
-        ))}
-      </select>
+      {error("anythingElse")}
+      {select("foodPreference", "Food preference", FOOD_PREFERENCES)}
       {values.foodPreference === "other" &&
-        field("foodOther", "Other food preference", "text", 50)}
-      <div className="prompt-chips">
-        {ideas.map(([text, days, destination]) => (
-          <button
-            className="chip-button"
-            type="button"
-            key={text}
-            onClick={() =>
-              onChange((current) => ({
-                ...current,
-                destination,
-                description: "",
-                days,
-              }))
-            }
-          >
-            {text}
-          </button>
-        ))}
-      </div>
-      {error && (
-        <p id="setup-error" className="form-inline-error" role="alert">
-          {error.error}
-        </p>
-      )}
-      <button className="button button-primary" disabled={loading}>
+        input("foodOther", "Other food preference", "text", 50)}
+      <button className="button button-primary" disabled={loading || !valid}>
         {loading ? "Planning your trip…" : submitLabel}
       </button>
     </form>

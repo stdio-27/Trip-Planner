@@ -34,3 +34,59 @@ A seven-day demo completed the browser flow, including keyboard activation and 3
 The audit reports zero advisories and the built bundle contains neither the API key variable nor the configured key.
 Automated endpoint and hook checks cover failure modes; not every failure mode or OS color scheme was manually exercised.
 Optional localStorage persistence is deliberately omitted so this release keeps session data in memory.
+
+## v2 Phase 1 — strict input foundation
+The audit traced every field and removed the unused description alias and international shortcuts.
+Shared Zod schemas now reject unknown keys, numeric coercion, out-of-range dates and invalid enum choices.
+Numeric controls keep raw edits, block exponent/sign input, clamp on blur and show accessible field errors.
+Core/server checkJs now passes; the remaining UI typing categories are listed separately for later work.
+The app still uses illustrative demo hubs; Phase 2 waits for real source files instead of inventing geographic data.
+
+## v2 Phase 2 — reproducible data layer
+The build downloads and fingerprints public source files automatically, so no manual raw-file placement is required.
+LGD state and district totals are compared to the source, and large railway schedules are streamed twice.
+Station state inference, junction selection and compressed graph construction are documented with source limits.
+The server validates and indexes the committed processed datasets once, with no runtime downloads.
+The QA report lists every state, unresolved coverage and isolated junctions before any picker or journey UI is added.
+
+## v2 Phase 3 — places API
+The server serves states, districts, airports and major junctions from the bundled snapshots.
+Place search uses a replaceable Open-Meteo provider with a five-second deadline.
+A bounded cache reuses place lookups while each request applies its own state filter.
+Nearby hubs use straight-line distance and search ranks exact codes ahead of name matches.
+Validation, mock outages and upstream errors are covered by API regression tests.
+
+## v2 Phase 4 — place and hub pickers
+The form now selects origin state and district and commits a destination from the place list.
+The shared combobox supports keyboard navigation and ignores responses from superseded searches.
+Nearby hub lists and bundled search let users select or opt out of each mode.
+The server validates geographic references and resolves selected hub names from the snapshots.
+Tests cover keyboard selection, state resets, Back, outage fallback, stale results and request validation.
+
+## v2 Phase 5 — journey engine
+The server builds journeys from the bundled rail graph, flight hints and estimated road connections.
+Each leg records its evidence, source year and planning buffer so the interface can explain the estimate.
+Journey ranking balances duration, changes and a mode-based cost heuristic and limits the result to five candidates.
+Gemini receives leg facts for fares while failed estimates leave the route structure available for a fare-only retry.
+Fixture and HTTP tests cover rail changes, flight connections, historic evidence, fare validation and north-east coverage.
+
+## v2 Phase 6 — journey selection and travel costs
+Journey cards show the route, timing, changes and dated availability evidence before fares load.
+Travelers can change the fare tier, edit leg prices and choose a one-way or return journey.
+The travel total uses passenger fares or one vehicle per four travelers, with a breakdown by leg.
+Fare retries keep the selected journey and edited fares, and changed trip inputs reset the selection.
+Stay, local transport and food estimates remain available alongside the travel breakdown.
+
+## v2 Phase 7 — journey timing and itinerary generation
+The trip form accepts morning, afternoon, evening or night departure preferences.
+Journey timing shows an approximate arrival day and time, and a leave-by time for returns.
+The server rebuilds the selected journey, verifies its hubs and computes the timing itself.
+The itinerary prompt uses that timing, the selected local transport and the costs already budgeted.
+Tests cover the timing instructions, invalid selections and itinerary lengths of one, three, seven and fourteen days.
+
+## v2 Phase 8 — hardening and verification
+The production server compresses static assets and uses separate request budgets for lookups and planning.
+Place pickers load separately, and keyboard focus follows the active planning step.
+Failure mocks and retry controls preserve trip input and previously usable results.
+The README describes setup, data attribution, fare evidence, and the recovery paths.
+Live Gemini and browser verification results are recorded in the QA documents.

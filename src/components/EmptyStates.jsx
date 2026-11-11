@@ -8,12 +8,13 @@ export function EmptyHint() {
   );
 }
 
-export function EmptyState() {
+export function EmptyState({ onRetry }) {
   return (
     <div className="empty-panel" role="status">
       <div className="empty-illustration" aria-hidden="true">↗</div>
       <h2>No itinerary to show yet</h2>
       <p>Try another destination or adjust your trip details.</p>
+      {onRetry && <button className="button" onClick={onRetry}>Try again</button>}
     </div>
   );
 }

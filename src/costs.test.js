@@ -4,12 +4,12 @@ import {
   formatMoney,
   presetSelections,
 } from "./costs.js";
+const leg = (mode) => ({ id: mode, mode, from: { name: "A" }, to: { name: "B" } });
+const fares = {
+  train: { basic: 40, standard: 65, premium: 90, pricing: "perPerson" },
+  cab: { basic: 100, standard: 160, premium: 200, pricing: "perVehicle" },
+};
 const selections = {
-  travelOptions: {
-    farePerPersonRoundTrip: 100,
-    originTransferPerPersonRoundTrip: 10,
-    destinationTransferPerPersonRoundTrip: 20,
-  },
   stayOptions: { pricePerRoomPerNight: 200 },
   localTransportOptions: { pricing: "perPerson", pricePerDay: 10 },
   foodOptions: { dailyPerPerson: 30 },
@@ -17,6 +17,7 @@ const selections = {
 it("computes kids, room override, each category and contingency", () => {
   const c = computeCostBreakdown({
     selections,
+    journey: { route: { legs: [leg("train")] }, fares, tier: "standard", roundTrip: true },
     travelers: { adults: 2, children: 1 },
     days: 3,
     rooms: 2,
@@ -78,4 +79,19 @@ it("compares local transport using group size rather than sticker price", () => 
       travelers: { adults: 4, children: 0 },
     }).localTransportOptions,
   ).toBe("group");
+});
+
+it("prices edited, tier-specific, per-person and per-vehicle legs for five travelers", () => {
+  const args = {
+    travelers: { adults: 2, children: 3 },
+    journey: {
+      route: { legs: [leg("train"), leg("cab")] },
+      fares,
+      tier: "basic",
+      roundTrip: false,
+      edits: { "cab:basic": "120" },
+    },
+  };
+  expect(computeCostBreakdown(args).travel).toBe(440);
+  expect(computeCostBreakdown({ ...args, journey: { ...args.journey, tier: "premium", roundTrip: true } }).travel).toBe(1700);
 });

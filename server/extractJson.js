@@ -4,7 +4,7 @@
  * Tries each top-level object candidate in order, returning the first one that JSON.parse accepts.
  *
  * @param {string} text - Raw model response text
- * @returns {object|null} - Parsed JSON object, or null if no valid candidate found
+ * @returns {Record<string, any>|null} - Parsed JSON object, or null if no valid candidate found
  */
 export function extractJson(text) {
   if (typeof text !== "string") {

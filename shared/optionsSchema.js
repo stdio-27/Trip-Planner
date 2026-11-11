@@ -1,4 +1,9 @@
 import { z } from "zod";
+import {
+  TIERS,
+  STAY_TYPES,
+  LOCAL_PRICINGS,
+} from "./choices.js";
 const price = z
   .unknown()
   .default(0)
@@ -9,34 +14,21 @@ const price = z
 const text = z.string().trim().max(1000);
 const base = { label: text.min(1), notes: text.default("") };
 export const optionSchemas = {
-  travelOptions: z.object({
-    ...base,
-    mode: z
-      .enum(["flight", "train", "bus", "car", "cab", "other"])
-      .catch("other"),
-    comfort: z.enum(["basic", "standard", "premium"]).catch("standard"),
-    durationHours: price,
-    farePerPersonRoundTrip: price,
-    originTransferPerPersonRoundTrip: price,
-    destinationTransferPerPersonRoundTrip: price,
-  }),
   stayOptions: z.object({
     ...base,
-    tier: z.enum(["budget", "mid", "premium"]).catch("mid"),
-    type: z
-      .enum(["hostel", "hotel", "resort", "homestay", "other"])
-      .catch("other"),
+    tier: z.enum(TIERS).catch("mid"),
+    type: z.enum(STAY_TYPES).catch("other"),
     area: text.default(""),
     pricePerRoomPerNight: price,
   }),
   localTransportOptions: z.object({
     ...base,
-    pricing: z.enum(["perPerson", "perGroup"]).catch("perPerson"),
+    pricing: z.enum(LOCAL_PRICINGS).catch("perPerson"),
     pricePerDay: price,
   }),
   foodOptions: z.object({
     ...base,
-    tier: z.enum(["budget", "mid", "premium"]).catch("mid"),
+    tier: z.enum(TIERS).catch("mid"),
     dailyPerPerson: price,
   }),
 };
@@ -63,11 +55,6 @@ const schema = z.object({
 });
 export const groups = Object.keys(optionSchemas);
 export const priceFields = {
-  travelOptions: [
-    "farePerPersonRoundTrip",
-    "originTransferPerPersonRoundTrip",
-    "destinationTransferPerPersonRoundTrip",
-  ],
   stayOptions: ["pricePerRoomPerNight"],
   localTransportOptions: ["pricePerDay"],
   foodOptions: ["dailyPerPerson"],
@@ -87,8 +74,6 @@ export function parseOptions(raw) {
           ...optionSchemas[key].parse({
             label: "Custom",
             notes: "Enter your own estimate.",
-            mode: "other",
-            comfort: "standard",
             tier: "mid",
             type: "other",
             area: "",

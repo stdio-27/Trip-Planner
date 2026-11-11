@@ -1,0 +1,674 @@
+{
+  "sourceCounts": {
+    "states": 36,
+    "districts": 790,
+    "stations": 8990,
+    "trains": 5208,
+    "schedules": 417080
+  },
+  "processedCounts": {
+    "states": 36,
+    "districts": 790,
+    "stations": 8696,
+    "majorJunctions": 449,
+    "airports": 106,
+    "junctionEdges": 131478,
+    "flightRoutes": 375
+  },
+  "stationExclusions": {
+    "missingGeometry": 293,
+    "outsideBounds": 0,
+    "foreignLabel": 1,
+    "duplicate": 0
+  },
+  "unresolvedLabels": [],
+  "inferredStates": 3870,
+  "unlabelledStations": 614,
+  "scheduleRows": 417080,
+  "scheduleUnknownStations": 2662,
+  "scheduleUnknownTrains": 0,
+  "invalidGraphTimes": 1209,
+  "airportExclusions": {
+    "invalidCoordinates": 0,
+    "unmappedState": []
+  },
+  "threshold": 179,
+  "formula": "trainCount >= T, or JN/JUNCTION/CENTRAL/TERMINUS in name and trainCount >= T/2; choose integer T minimizing distance to 400, then include the three busiest evidenced stations per labelled state (or all if fewer), to reduce suburban-volume bias.",
+  "perState": [
+    {
+      "code": "35",
+      "name": "Andaman And Nicobar Islands",
+      "districts": 3,
+      "stations": 0,
+      "majorJunctions": 0,
+      "airports": 1
+    },
+    {
+      "code": "28",
+      "name": "Andhra Pradesh",
+      "districts": 28,
+      "stations": 517,
+      "majorJunctions": 23,
+      "airports": 6
+    },
+    {
+      "code": "12",
+      "name": "Arunachal Pradesh",
+      "districts": 27,
+      "stations": 0,
+      "majorJunctions": 0,
+      "airports": 1
+    },
+    {
+      "code": "18",
+      "name": "Assam",
+      "districts": 35,
+      "stations": 264,
+      "majorJunctions": 4,
+      "airports": 6
+    },
+    {
+      "code": "10",
+      "name": "Bihar",
+      "districts": 38,
+      "stations": 647,
+      "majorJunctions": 17,
+      "airports": 3
+    },
+    {
+      "code": "4",
+      "name": "Chandigarh",
+      "districts": 1,
+      "stations": 3,
+      "majorJunctions": 2,
+      "airports": 1
+    },
+    {
+      "code": "22",
+      "name": "Chhattisgarh",
+      "districts": 33,
+      "stations": 124,
+      "majorJunctions": 3,
+      "airports": 3
+    },
+    {
+      "code": "7",
+      "name": "Delhi",
+      "districts": 13,
+      "stations": 63,
+      "majorJunctions": 13,
+      "airports": 1
+    },
+    {
+      "code": "30",
+      "name": "Goa",
+      "districts": 3,
+      "stations": 20,
+      "majorJunctions": 3,
+      "airports": 2
+    },
+    {
+      "code": "24",
+      "name": "Gujarat",
+      "districts": 34,
+      "stations": 568,
+      "majorJunctions": 60,
+      "airports": 10
+    },
+    {
+      "code": "6",
+      "name": "Haryana",
+      "districts": 23,
+      "stations": 175,
+      "majorJunctions": 5,
+      "airports": 1
+    },
+    {
+      "code": "2",
+      "name": "Himachal Pradesh",
+      "districts": 12,
+      "stations": 54,
+      "majorJunctions": 3,
+      "airports": 2
+    },
+    {
+      "code": "1",
+      "name": "Jammu And Kashmir",
+      "districts": 20,
+      "stations": 18,
+      "majorJunctions": 3,
+      "airports": 2
+    },
+    {
+      "code": "20",
+      "name": "Jharkhand",
+      "districts": 24,
+      "stations": 294,
+      "majorJunctions": 7,
+      "airports": 1
+    },
+    {
+      "code": "29",
+      "name": "Karnataka",
+      "districts": 31,
+      "stations": 404,
+      "majorJunctions": 7,
+      "airports": 5
+    },
+    {
+      "code": "32",
+      "name": "Kerala",
+      "districts": 14,
+      "stations": 171,
+      "majorJunctions": 7,
+      "airports": 4
+    },
+    {
+      "code": "37",
+      "name": "Ladakh",
+      "districts": 8,
+      "stations": 0,
+      "majorJunctions": 0,
+      "airports": 1
+    },
+    {
+      "code": "31",
+      "name": "Lakshadweep",
+      "districts": 1,
+      "stations": 0,
+      "majorJunctions": 0,
+      "airports": 1
+    },
+    {
+      "code": "23",
+      "name": "Madhya Pradesh",
+      "districts": 55,
+      "stations": 485,
+      "majorJunctions": 15,
+      "airports": 6
+    },
+    {
+      "code": "27",
+      "name": "Maharashtra",
+      "districts": 36,
+      "stations": 680,
+      "majorJunctions": 67,
+      "airports": 13
+    },
+    {
+      "code": "14",
+      "name": "Manipur",
+      "districts": 16,
+      "stations": 0,
+      "majorJunctions": 0,
+      "airports": 1
+    },
+    {
+      "code": "17",
+      "name": "Meghalaya",
+      "districts": 12,
+      "stations": 0,
+      "majorJunctions": 0,
+      "airports": 1
+    },
+    {
+      "code": "15",
+      "name": "Mizoram",
+      "districts": 11,
+      "stations": 1,
+      "majorJunctions": 1,
+      "airports": 1
+    },
+    {
+      "code": "13",
+      "name": "Nagaland",
+      "districts": 17,
+      "stations": 4,
+      "majorJunctions": 3,
+      "airports": 1
+    },
+    {
+      "code": "21",
+      "name": "Odisha",
+      "districts": 30,
+      "stations": 190,
+      "majorJunctions": 4,
+      "airports": 2
+    },
+    {
+      "code": "34",
+      "name": "Puducherry",
+      "districts": 2,
+      "stations": 4,
+      "majorJunctions": 3,
+      "airports": 1
+    },
+    {
+      "code": "3",
+      "name": "Punjab",
+      "districts": 23,
+      "stations": 297,
+      "majorJunctions": 8,
+      "airports": 3
+    },
+    {
+      "code": "8",
+      "name": "Rajasthan",
+      "districts": 41,
+      "stations": 633,
+      "majorJunctions": 7,
+      "airports": 5
+    },
+    {
+      "code": "11",
+      "name": "Sikkim",
+      "districts": 6,
+      "stations": 0,
+      "majorJunctions": 0,
+      "airports": 0
+    },
+    {
+      "code": "33",
+      "name": "Tamil Nadu",
+      "districts": 38,
+      "stations": 529,
+      "majorJunctions": 10,
+      "airports": 4
+    },
+    {
+      "code": "36",
+      "name": "Telangana",
+      "districts": 33,
+      "stations": 0,
+      "majorJunctions": 0,
+      "airports": 1
+    },
+    {
+      "code": "38",
+      "name": "The Dadra And Nagar Haveli And Daman And Diu",
+      "districts": 3,
+      "stations": 0,
+      "majorJunctions": 0,
+      "airports": 0
+    },
+    {
+      "code": "16",
+      "name": "Tripura",
+      "districts": 8,
+      "stations": 17,
+      "majorJunctions": 3,
+      "airports": 1
+    },
+    {
+      "code": "9",
+      "name": "Uttar Pradesh",
+      "districts": 75,
+      "stations": 1197,
+      "majorJunctions": 68,
+      "airports": 11
+    },
+    {
+      "code": "5",
+      "name": "Uttarakhand",
+      "districts": 13,
+      "stations": 49,
+      "majorJunctions": 4,
+      "airports": 1
+    },
+    {
+      "code": "19",
+      "name": "West Bengal",
+      "districts": 23,
+      "stations": 674,
+      "majorJunctions": 35,
+      "airports": 3
+    }
+  ],
+  "unassignedMajorJunctions": [
+    {
+      "code": "AGD",
+      "name": "AGASOD"
+    },
+    {
+      "code": "ANB",
+      "name": "AMMANABROLU"
+    },
+    {
+      "code": "BAQ",
+      "name": "GANJ BASODA"
+    },
+    {
+      "code": "BET",
+      "name": "BARETH"
+    },
+    {
+      "code": "BHS",
+      "name": "VIDISHA"
+    },
+    {
+      "code": "BINA",
+      "name": "BINA JN"
+    },
+    {
+      "code": "BJA",
+      "name": "BIJROTHA"
+    },
+    {
+      "code": "BPL",
+      "name": "BHOPAL JN"
+    },
+    {
+      "code": "BSP",
+      "name": "BILASPUR JN"
+    },
+    {
+      "code": "BTTR",
+      "name": "BITRAGUNTA"
+    },
+    {
+      "code": "BVB",
+      "name": "BHADBHADAGHAT"
+    },
+    {
+      "code": "CJM",
+      "name": "CHINNA GANJAM"
+    },
+    {
+      "code": "DUA",
+      "name": "DHAURA"
+    },
+    {
+      "code": "DWA",
+      "name": "DAILWARA"
+    },
+    {
+      "code": "DWG",
+      "name": "DEWANGANJ"
+    },
+    {
+      "code": "ERS",
+      "name": "ERNAKULAM JN"
+    },
+    {
+      "code": "GDR",
+      "name": "GUDUR JN"
+    },
+    {
+      "code": "GHSR",
+      "name": "GHASARA HALT"
+    },
+    {
+      "code": "GLG",
+      "name": "GULABHGANJ"
+    },
+    {
+      "code": "HBJ",
+      "name": "HABIBGANJ"
+    },
+    {
+      "code": "JAQ",
+      "name": "JANDRAPETA"
+    },
+    {
+      "code": "JHA",
+      "name": "JAKHAURA"
+    },
+    {
+      "code": "JJK",
+      "name": "JHINJHAK"
+    },
+    {
+      "code": "JLN",
+      "name": "JAKHALAUN"
+    },
+    {
+      "code": "JRO",
+      "name": "JIRON"
+    },
+    {
+      "code": "JSG",
+      "name": "JHARSUGUDA JN"
+    },
+    {
+      "code": "KAH",
+      "name": "KALHAR"
+    },
+    {
+      "code": "KIKA",
+      "name": "KURWAI KETHORA"
+    },
+    {
+      "code": "KNS",
+      "name": "KANCHAUSI"
+    },
+    {
+      "code": "KOA",
+      "name": "KARONDA"
+    },
+    {
+      "code": "KPLL",
+      "name": "KOTTA PANDILA PALLI"
+    },
+    {
+      "code": "KRV",
+      "name": "KARAVADI"
+    },
+    {
+      "code": "KVDU",
+      "name": "KADAVAKUDURU"
+    },
+    {
+      "code": "KVZ",
+      "name": "KAVALI"
+    },
+    {
+      "code": "LAR",
+      "name": "LALITPUR"
+    },
+    {
+      "code": "MABA",
+      "name": "MANDI BAMORA"
+    },
+    {
+      "code": "MDDP",
+      "name": "MANDI DIP"
+    },
+    {
+      "code": "MSO",
+      "name": "MISROD"
+    },
+    {
+      "code": "MXS",
+      "name": "MOHASA"
+    },
+    {
+      "code": "OGL",
+      "name": "ONGOLE"
+    },
+    {
+      "code": "PAI",
+      "name": "PABAI"
+    },
+    {
+      "code": "PATA",
+      "name": "PATA"
+    },
+    {
+      "code": "PHD",
+      "name": "PHAPHUND"
+    },
+    {
+      "code": "PJY",
+      "name": "PARA JANI HALT"
+    },
+    {
+      "code": "RDE",
+      "name": "RUNDHI"
+    },
+    {
+      "code": "RKRI",
+      "name": "RAO KHEDI"
+    },
+    {
+      "code": "RPRL",
+      "name": "RAPARLA HALT"
+    },
+    {
+      "code": "SCI",
+      "name": "SANCHI"
+    },
+    {
+      "code": "SDM",
+      "name": "SURAREDDIPALEM"
+    },
+    {
+      "code": "SHLK",
+      "name": "SHOLAKA"
+    },
+    {
+      "code": "SHW",
+      "name": "SAMHON"
+    },
+    {
+      "code": "SKM",
+      "name": "SINGARAYAKONDA"
+    },
+    {
+      "code": "SMT",
+      "name": "SALAMATPUR"
+    },
+    {
+      "code": "SORI",
+      "name": "SORAI"
+    },
+    {
+      "code": "SUMR",
+      "name": "SUMER"
+    },
+    {
+      "code": "SUW",
+      "name": "SUKHISEWANIYAN"
+    },
+    {
+      "code": "SVPM",
+      "name": "S VENKTESWRPALM"
+    },
+    {
+      "code": "TNR",
+      "name": "TANGUTURU"
+    },
+    {
+      "code": "TPT",
+      "name": "TIRUPATTUR JN"
+    },
+    {
+      "code": "TTU",
+      "name": "TETTU"
+    },
+    {
+      "code": "UGD",
+      "name": "UPPUGUNDURU"
+    },
+    {
+      "code": "ULD",
+      "name": "ACHALDA"
+    },
+    {
+      "code": "UPD",
+      "name": "ULAVAPADU"
+    },
+    {
+      "code": "VTM",
+      "name": "VETAPALEMU"
+    }
+  ],
+  "isolatedJunctions": [
+    {
+      "code": "BHRB",
+      "name": "Bhairabi",
+      "stateCode": "15"
+    }
+  ],
+  "missingStateCoverage": [
+    {
+      "code": "35",
+      "name": "Andaman And Nicobar Islands",
+      "reason": "No retained station has a matching state label in the 2016 snapshot; not evidence of absent current rail service."
+    },
+    {
+      "code": "12",
+      "name": "Arunachal Pradesh",
+      "reason": "No retained station has a matching state label in the 2016 snapshot; not evidence of absent current rail service."
+    },
+    {
+      "code": "37",
+      "name": "Ladakh",
+      "reason": "No retained station has a matching state label in the 2016 snapshot; not evidence of absent current rail service."
+    },
+    {
+      "code": "31",
+      "name": "Lakshadweep",
+      "reason": "No retained station has a matching state label in the 2016 snapshot; not evidence of absent current rail service."
+    },
+    {
+      "code": "14",
+      "name": "Manipur",
+      "reason": "No retained station has a matching state label in the 2016 snapshot; not evidence of absent current rail service."
+    },
+    {
+      "code": "17",
+      "name": "Meghalaya",
+      "reason": "No retained station has a matching state label in the 2016 snapshot; not evidence of absent current rail service."
+    },
+    {
+      "code": "11",
+      "name": "Sikkim",
+      "reason": "No retained station has a matching state label in the 2016 snapshot; not evidence of absent current rail service."
+    },
+    {
+      "code": "36",
+      "name": "Telangana",
+      "reason": "No retained station has a matching state label in the 2016 snapshot; not evidence of absent current rail service."
+    },
+    {
+      "code": "38",
+      "name": "The Dadra And Nagar Haveli And Daman And Diu",
+      "reason": "No retained station has a matching state label in the 2016 snapshot; not evidence of absent current rail service."
+    }
+  ],
+  "samples": {
+    "stations": {
+      "GHY": {
+        "present": true,
+        "major": true
+      },
+      "HWH": {
+        "present": true,
+        "major": true
+      },
+      "NDLS": {
+        "present": true,
+        "major": true
+      },
+      "SCL": {
+        "present": true,
+        "major": false
+      }
+    },
+    "airports": {
+      "GAU": {
+        "present": true
+      },
+      "CCU": {
+        "present": true
+      },
+      "DEL": {
+        "present": true
+      },
+      "IXS": {
+        "present": true
+      }
+    }
+  },
+  "graphBytes": 1502798
+}

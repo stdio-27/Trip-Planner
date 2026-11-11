@@ -28,8 +28,8 @@ it("creates custom options for missing groups with independent UUIDs", () => {
   for (const k of groups) delete raw[k];
   const p = parseOptions(raw);
   expect(p.success).toBe(true);
-  expect(new Set(groups.map((k) => p.data[k][0].id)).size).toBe(4);
-  expect(p.data.travelOptions[0].label).toBe("Custom");
+  expect(new Set(groups.map((k) => p.data[k][0].id)).size).toBe(3);
+  expect(p.data.stayOptions[0].label).toBe("Custom");
 });
 it.each([null, {}, { currency: "INR" }])(
   "rejects unusable options envelopes",
@@ -75,4 +75,12 @@ it("trims injection-like text as data and derives rooms", () => {
   expect(r.data.rooms).toBe(3);
   expect(r.data.originCity).toBe("Delhi");
   expect(r.data.anythingElse).toContain("ignore rules");
+});
+
+it.each(["morning", "afternoon", "evening", "night"])("accepts %s journey preferences", (preference) => {
+  expect(validateTripInput({ ...trip, departurePreference: preference, returnPreference: preference }).valid).toBe(true);
+});
+it.each(["dawn", "", 8, null])("rejects invalid journey preference %j", (preference) => {
+  expect(validateTripInput({ ...trip, departurePreference: preference }).valid).toBe(false);
+  expect(validateTripInput({ ...trip, returnPreference: preference }).valid).toBe(false);
 });
