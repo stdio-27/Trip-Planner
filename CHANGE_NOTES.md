@@ -223,3 +223,10 @@ Step screens receive only their view fields and actions.
 The planner hook keeps reducer dispatch and pending request refs private.
 All 271 tests, typecheck and build pass; browser remove/undo and responsive checks pass.
 REFACTOR_LOG.md records the small total bundle growth as an unmet acceptance target.
+
+## Stage 7 — final re-verification
+A clean install and three consecutive runs passed all 271 tests.
+All sixteen browser mock modes and the fresh-clone demo flow were checked.
+All six live scenarios passed after bounded retries for provider 503 errors.
+Five startup samples, bundle growth and remote-clone limits are recorded honestly.
+Physical-device checks, remote release verification and human fare judgment remain unverified.

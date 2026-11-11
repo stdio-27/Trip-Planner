@@ -75,10 +75,12 @@ Stage 6c retains the existing engine: `server/journeys/engine.js` selects by dis
 | Total JS/CSS gzip bytes | 115244 | 115343 |
 | Dependency cycles | 0 | 0 |
 
-After startup min / median / max was 902.267 / 982.905 / 1011.559 ms. The original actual pre-refactor median was 1128.084 ms. These repeated process starts retain OS caches.
+After startup min / median / max was 1212.441 / 1333.288 / 1756.967 ms. The original actual pre-refactor median was 1128.084 ms. These repeated process starts retain OS caches.
 
 Evidence: artifacts/master-pack/metrics-6c.json, metrics-6d.json, cycles-6d.json and startup-6d.json.
 
 Stage 6d moved existing screens into setup, places, options, journeys, itinerary and common feature folders, with pure costs under lib. Each screen receives its own used fields; reducer dispatch and request refs stay inside useTripPlanner. ItineraryView receives days, currency and named remove/move callbacks. The original golden flow, API contract assertions and five cost snapshots pass unchanged (only the cost test import moved). No context or memo was added. Browser observations verified a three-day demo plan, remove/undo, result-heading focus, and content widths 345/375/753 at viewports 360/390/768 with no horizontal overflow.
 
 Acceptance caveat: the Stage 6d raw asset total is 46 bytes smaller than 6c, but the complete structural refactor is 1,296 raw bytes (0.35%) above the Stage 5 total of 366,106. Gzip is 115,343 bytes versus 114,620 before 6a. The strict whole-refactor no-growth target is NOT MET; no behavior or build-tool change was introduced to hide this overhead. Startup remains a sampled measurement, not a universal performance guarantee.
+
+The final 6d startup row uses the standalone Stage 7 rerun of the same code and command. A concurrent-install sample (median 3,818.608 ms) is retained as startup-stage7-contended.json rather than discarded. Timing is load-sensitive; the final median exceeds the pre-refactor median, so a strict final no-slowdown claim is UNVERIFIED.

@@ -165,3 +165,23 @@ The baseline source and data remain identified by the tag. `git diff v2-feature-
 3. External links may still refer to the documents' old root paths. Only repository references were searched before the moves.
 4. Secret scanning is limited by literal patterns and the locally available object store. The scan boundaries are stated above.
 5. Startup measurements depend on the timing boundary and OS cache state. The five samples use the boundary recorded in `artifacts/stage1/startup.json`.
+
+## Stage 7 final-structure comparison — 12 November 2026
+
+Source commit: f4285c4 on final/polish. `npm ci` exited 0, then three sequential `npm test` runs each passed **271 tests in 28 files**, with no failing/flaky name observed in this sequence. Run wall times were 49.238, 47.233 and 44.509 seconds. `npm run typecheck`, `npm run build` and `npm audit --json` exited 0; audit reported zero vulnerabilities. Stage 1 had 233 tests in 20 files. Evidence: artifacts/master-pack/stage7-checks.json and stage7-{clean,test-1,test-2,test-3,types,build,audit}.log. Earlier test-wait flakiness is documented in QA_REPORT.md and was not erased.
+
+| Measurement | Initial baseline | Final verification |
+| --- | ---: | ---: |
+| Tests / files | 233 / 20 | 271 / 28, three consecutive passes |
+| Startup minimum, ms | 864.523 | 1,212.441 |
+| Startup median, ms | 914.707 | 1,333.288 |
+| Startup maximum, ms | 1,118.515 | 1,756.967 |
+| Audit vulnerabilities | 0 | 0 |
+
+The five final starts used the same `node server/index.js` command, PORT=8916, MOCK=demo, empty key, and spawn-to-listening boundary after eager data loading. All five health probes returned 200. OS caches were retained. The actual pre-refactor comparison median was 1,128.084 ms; final timing is slower in this sample. A concurrent-install sample was slower still (min 2,792.368 / median 3,818.608 / max 5,192.862 ms). Neither sample proves an intrinsic code regression or improvement. Evidence: startup-stage7.json, startup-stage7-contended.json and startup-before-refactor.json under artifacts/master-pack.
+
+Final JS/CSS totals are 367,402 raw and 115,343 gzip bytes. Before 6a they were 366,106 / 114,620. The strict no-growth acceptance target is **NOT MET** (+0.35% raw); this is not presented as a performance improvement. REFACTOR_LOG.md contains every 6x boundary and zero-cycle results.
+
+A new keyless local clone of f4285c4 installed successfully, copied only .env.example to .env, and ran `npm start` with MOCK=demo on ports 5199/8918. Health returned `{ok:true,mode:"demo"}`. Browser acceptance used real Open-Meteo selections (Delhi/New Delhi to Guwahati), changed fare tier/stay/food, showed INR 49,660.00, and generated three days. Expand, remove/undo, keyboard cross-day drag (Day 1:0, Day 2:2), reorder, packing add/check and phone widths passed. The deterministic golden fixture uses different coordinates and retains its unchanged INR 49,556.00 assertion. Evidence: clone.json, clone-install.log, fresh-start.log, fresh-flow.json, final-demo.jpg and final-phone.jpg in artifacts/master-pack.
+
+The first clone used Windows' 8.3 temporary alias, which Vite rejected with HTTP 403. Repeating from the canonical full path fixed the verification environment without changing the app. The configured remote lacks final/polish (`git ls-remote --exit-code --heads origin refs/heads/final/polish`: exit 2); the remote clone attempt exited 128. Remote demo/live fresh-clone acceptance remains **UNVERIFIED** until the branch is pushed. A local fresh-clone live one-day request passed HTTP 200 using the existing key only in process memory (clone-live.log).
