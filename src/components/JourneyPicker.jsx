@@ -79,6 +79,7 @@ export function JourneyPicker({ trip, journeys, fares, choice, setChoice, notice
                               <strong>{modes[leg.mode]} · {leg.from.name} → {leg.to.name}</strong>
                               <p>{leg.distanceKm} km · {duration(leg.durationMin)} including {duration(leg.bufferMin)} buffer</p>
                               <p>{evidence(leg.availability)}. {leg.note}</p>
+                              {fare?.flags?.length > 0 && <p role="status" className="fare-warning">Check this estimate</p>}
                               {leg.availability.checkUrl && (
                                 <a href={leg.availability.checkUrl} target="_blank" rel="noopener noreferrer">Check live availability</a>
                               )}

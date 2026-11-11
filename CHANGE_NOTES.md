@@ -118,3 +118,10 @@ We cached normalized place and hub lookups in session memory for ten minutes.
 We kept cancellation and stale-response guards around every lookup.
 We supplied a safe retry header for provider quota errors without forwarding provider text.
 We tested cache expiry, query reuse, countdown completion and sanitized retry headers.
+
+## Stage 3c — fare plausibility warnings
+We proposed broad INR warning ranges before adding the documented constants.
+We compared each fare per kilometer with the median for the same mode and tier.
+We added relative checks for other currencies and skipped division for zero-distance legs.
+We preserved flagged estimates and kept every fare editable and every journey selectable.
+We tested normal, high, low, single-leg and non-INR cases.

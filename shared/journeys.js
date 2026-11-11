@@ -7,6 +7,7 @@ export const fareSchema = z.object({
   standard: z.number().finite().positive().max(1e9),
   premium: z.number().finite().positive().max(1e9),
   pricing: z.enum(["perPerson", "perVehicle"]),
+  flags: z.array(z.enum(["unusually_high", "unusually_low"])).max(2).default([]),
 });
 const point = z.object({ id: z.string(), name: z.string(), kind: z.string() });
 const level = z.enum(["scheduled", "route-hint", "unverified"]);

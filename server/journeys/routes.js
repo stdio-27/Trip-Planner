@@ -1,3 +1,4 @@
+import { flagFares } from "./fareChecks.js";
 import { Router } from "express";
 import { z } from "zod";
 import { originSchema, destinationSchema } from "../../shared/places.js";
@@ -101,6 +102,7 @@ export function createJourneyRouter({
             model,
             fetchImpl,
           });
+        fares = flagFares(fares, legs, input.currency);
       } catch {
         faresError =
           "Fare estimates are unavailable. You can retry the fare estimates.";
