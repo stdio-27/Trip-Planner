@@ -1,11 +1,6 @@
+import { composeApp } from "./composition.js";
 import { createMiddleware, reportRequestError } from "./middleware.js";
-import { createGeminiPlanner } from "./llm/geminiPlanner.js";
-import { createDemoPlanner } from "./llm/demoPlanner.js";
-import { createPlanningService } from "./services/planning.js";
 import { createPlanningRouter } from "./routes/planning.js";
-import { serverMode } from "./config.js";
-import { loadData } from "./data/index.js";
-import "dotenv/config";
 import { createJourneyRouter } from "./journeys/routes.js";
 import { createPlacesRouter } from "./geo/routes.js";
 import fs from "node:fs";
@@ -13,19 +8,18 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import express from "express";
 import compression from "compression";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const distPath = path.resolve(__dirname, "../dist");
-
 export function createApp(options = {}) {
   const app = express();
   const { planLimiter, lookupLimiter, otherApiLimiter, jsonBody, noQuery } =
     createMiddleware();
-  const mockMode = options.mockMode ?? process.env.MOCK?.toLowerCase();
-  const mockStage = options.mockStage ?? process.env.MOCK_STAGE;
-  const geminiModel = process.env.GEMINI_MODEL || "gemini-flash-lite-latest";
-
+  const {
+    plan,
+    places: placeDependencies,
+    getJourneys,
+    mode,
+  } = options.dependencies ?? composeApp(options);
   app.disable("x-powered-by");
   app.use(
     compression({
@@ -40,45 +34,24 @@ export function createApp(options = {}) {
       .sendFile(path.resolve(__dirname, "../docs/DATA_SOURCES.md"));
   });
 
-  const places = createPlacesRouter({
-    provider: options.geoProvider,
-    mockMode,
-  });
   app.use("/api/geo", lookupLimiter);
   app.use("/api/hubs", lookupLimiter);
-  app.use("/api", places);
+  app.use("/api", createPlacesRouter(placeDependencies));
   app.use(
     "/api",
     createJourneyRouter({
       limiter: planLimiter,
       jsonBody,
       noQuery,
-      mockMode,
-      apiKey: options.apiKey ?? process.env.GEMINI_API_KEY,
-      model: geminiModel,
-      fetchImpl: options.fetch,
+      getJourneys,
     }),
   );
-
-  const livePlanner = createGeminiPlanner({
-    apiKey: options.apiKey ?? process.env.GEMINI_API_KEY,
-    model: geminiModel,
-    fetchImpl: options.fetch,
-  });
-  const demoPlanner = createDemoPlanner(mockMode, mockStage);
-  const planner = {
-    generate: async (trip, isOptions) =>
-      (await demoPlanner.generate(trip, isOptions)) ??
-      livePlanner.generate(trip, isOptions),
-  };
-  const plan = createPlanningService({ getData: loadData, planner });
   app.use(
     "/api",
     createPlanningRouter({ plan, planLimiter, noQuery, jsonBody }),
   );
-
   app.get("/api/health", otherApiLimiter, noQuery, (_req, res) => {
-    res.json({ ok: true, mode: serverMode(mockMode) });
+    res.json({ ok: true, mode: mode });
   });
 
   // Unknown /api routes return 404 JSON

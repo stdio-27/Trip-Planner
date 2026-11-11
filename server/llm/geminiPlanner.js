@@ -4,12 +4,14 @@ import { buildTripPrompt, buildOptionsPrompt } from "../prompt.js";
 import { parseOptions } from "../../shared/optionsSchema.js";
 import { validateGeneratedPlan } from "../planSchema.js";
 export function createGeminiPlanner({
-  apiKey,
+  apiKey = undefined,
+  getApiKey = () => apiKey,
   model: geminiModel,
   fetchImpl = fetch,
 }) {
   return {
     generate: async function generate(tripDetails, isOptions) {
+      const apiKey = getApiKey();
       const geminiTimeoutMs = 25000;
       let retryAfter;
       if (!apiKey) {

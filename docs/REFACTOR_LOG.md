@@ -1,6 +1,6 @@
 # Refactor log
 
-Status: awaiting the explicit Stage 4 approval. Stages 6a–6d have not been executed.
+Status: full plan approved by the user. The following per-stage measurements are the authoritative before/after results. The first table preserves the initial inventory.
 
 | Metric | Pre-refactor measurement | After |
 | --- | --- | --- |
@@ -15,7 +15,7 @@ Status: awaiting the explicit Stage 4 approval. Stages 6a–6d have not been exe
 
 Evidence is artifacts/master-pack/metrics-before.json, madge-before.json and docs/BASELINE.md. Startup will need a measurement at the actual pre/post-refactor boundary if the plan is approved. Stage 1 timings are a historical comparison, not a claim about the modified code.
 
-Stage 6c's strategy-registry condition is not currently met by the engine's distance-based dispatch. No registry is proposed. Approval is required for the other structural changes in REFACTOR_PLAN.md.
+Stage 6c's strategy-registry condition is not currently met by the engine's distance-based dispatch. No registry is proposed. The other structural changes were explicitly approved in this chat.
 
 ## 6a measured boundary
 
@@ -31,3 +31,18 @@ Stage 6c's strategy-registry condition is not currently met by the engine's dist
 After startup min / median / max was 929.831 / 1018.046 / 1294.292 ms. The original actual pre-refactor median was 1128.084 ms. These repeated process starts retain OS caches.
 
 Evidence: artifacts/master-pack/metrics-stage5-after.json, metrics-6a.json, cycles-6a.json and startup-6a.json.
+
+## 6b measured boundary
+
+| Metric | Before | After |
+| --- | ---: | ---: |
+| Production JS/JSX files | 61 | 63 |
+| Largest file, lines | 305 | 305 |
+| Longest function, lines | 274 | 276 |
+| Total JS/CSS asset bytes | 367442 | 367448 |
+| Total JS/CSS gzip bytes | 115276 | 115244 |
+| Dependency cycles | 0 | 0 |
+
+After startup min / median / max was 929.631 / 985.867 / 1019.632 ms. The original actual pre-refactor median was 1128.084 ms. These repeated process starts retain OS caches.
+
+Evidence: artifacts/master-pack/metrics-6a.json, metrics-6b.json, cycles-6b.json and startup-6b.json.

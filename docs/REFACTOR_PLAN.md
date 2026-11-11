@@ -1,6 +1,6 @@
-# Refactor plan awaiting approval
+# Approved refactor plan
 
-The master pack's Stage 4 explicitly requires approval before Stages 5 and 6. This is the concrete reviewable plan. No production refactor is authorized by this report alone.
+The user explicitly approved the full proposed plan. Stages 5 and 6 implement only the approved items below; their measured outcomes are recorded in REFACTOR_LOG.md.
 
 ## Measurements
 
@@ -40,7 +40,7 @@ The Stage 4 safety net comprises `src/goldenFlow.test.jsx` (actual Node demo ser
 
 For each approved change, run the unchanged golden path and contracts, npm test, npm run typecheck and npm run build. Compare the five sanity-route journey arrays byte-for-byte. Record file/function counts, circular dependencies, bundle bytes and repeated startup measurements in REFACTOR_LOG.md. Revert a refactor that regresses existing expectations.
 
-Approval is pending. The production changes in Stages 5 and 6 must wait for the user's decision. Documentation that describes the current code can proceed independently.
+Approval received in this chat: ‘Approve the full proposed plan’. Y1/Y2 are committed; S1/S2/S4 were extracted in 6a and S3 is completed in 6b. I1 follows in 6d.
 
 ## Measured safety-net coverage
 

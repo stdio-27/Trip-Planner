@@ -1,10 +1,8 @@
+import { composePlaces } from "../composition.js";
 import { distanceKm } from "../../shared/distance.js";
 export { distanceKm } from "../../shared/distance.js";
 import { Router } from "express";
-import { setTimeout as delay } from "node:timers/promises";
 import { z } from "zod";
-import { loadData } from "../data/index.js";
-import { createOpenMeteoProvider } from "./provider.js";
 
 const query = z
   .string()
@@ -33,12 +31,8 @@ function normalizeState(value) {
   return value.toLowerCase().replace(/[^a-z0-9]/g, "");
 }
 
-export function createPlacesRouter({
-  provider = createOpenMeteoProvider(),
-  mockMode = "",
-  now = Date.now,
-  timeoutMs = 5000,
-} = {}) {
+export function createPlacesRouter(options = {}) {
+  const { provider, getData, now } = composePlaces(options);
   const router = Router();
   const cache = new Map();
 
@@ -60,13 +54,13 @@ export function createPlacesRouter({
 
   router.get("/geo/states", (req, res) => {
     if (!validate(req, res, schemas.states)) return;
-    res.json({ states: loadData().states });
+    res.json({ states: getData().states });
   });
 
   router.get("/geo/districts", (req, res) => {
     const input = validate(req, res, schemas.districts);
     if (!input) return;
-    const data = loadData();
+    const data = getData();
     if (!knownState(res, input.state, data)) return;
     res.json({ districts: data.districts[input.state] });
   });
@@ -74,21 +68,14 @@ export function createPlacesRouter({
   router.get("/geo/search", async (req, res) => {
     const input = validate(req, res, schemas.places);
     if (!input) return;
-    const data = loadData();
+    const data = getData();
     if (input.state && !knownState(res, input.state, data)) return;
     const key = input.q.toLowerCase();
     try {
       let entry = cache.get(key);
       cache.delete(key);
       if (!entry || entry.expires <= now()) {
-        if (mockMode === "geo-down") throw Error("Mock geocoder outage");
-        if (mockMode === "geo-slow") {
-          await delay(timeoutMs + 100, undefined, {
-            signal: AbortSignal.timeout(timeoutMs),
-          });
-        }
-        const rows =
-          mockMode === "geo-empty" ? [] : await provider.search(input.q);
+        const rows = await provider.search(input.q);
         entry = { rows, expires: now() + 86400000 };
       }
       cache.set(key, entry);
@@ -134,7 +121,7 @@ export function createPlacesRouter({
   router.get("/hubs/nearby", (req, res) => {
     const input = validate(req, res, schemas.nearby);
     if (!input) return;
-    const data = loadData();
+    const data = getData();
     const nearby = (rows, radius) =>
       rows
         .map((row) => ({ ...row, distanceKm: distanceKm(input, row) }))
@@ -160,7 +147,7 @@ export function createPlacesRouter({
   router.get("/hubs/search", (req, res) => {
     const input = validate(req, res, schemas.hubs);
     if (!input) return;
-    const data = loadData();
+    const data = getData();
     const rows = input.type === "airport" ? data.airports : data.majorJunctions;
     const term = input.q.toLowerCase();
     const matches = rows.flatMap((row) => {

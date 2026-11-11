@@ -202,3 +202,10 @@ We kept mock responses in a dedicated adapter and preserved their response descr
 We moved pure distance arithmetic out of the Express router dependency.
 We extracted client orchestration and the existing step markup without changing the DOM.
 We kept the golden path, API contracts and cost snapshots as the acceptance boundary.
+
+## Stage 6b — dependency wiring
+One composition root now selects live, demo and fault providers.
+Routes and services receive their dependencies without reading environment settings.
+The public app factory and documented mock modes retain their existing interfaces.
+A common HTTP contract runs against demo and HTTP-mocked live planning, places and fares.
+All 271 tests, the blocking typecheck and production build pass (stage6b-fixed-checks.json).
