@@ -1,0 +1,80 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`characterizes five fixed cost inputs before refactoring 1`] = `
+[
+  {
+    "activities": 0,
+    "contingency": 0,
+    "food": 0,
+    "local": 0,
+    "perDay": 0,
+    "perPerson": 0,
+    "stay": 0,
+    "total": 0,
+    "travel": 0,
+    "travelLegs": [],
+  },
+  {
+    "activities": 0,
+    "contingency": 0,
+    "food": 270,
+    "local": 90,
+    "perDay": 386.6666666666667,
+    "perPerson": 386.6666666666667,
+    "stay": 800,
+    "total": 1160,
+    "travel": 0,
+    "travelLegs": [],
+  },
+  {
+    "activities": 0,
+    "contingency": 4,
+    "food": 30,
+    "local": 10,
+    "perDay": 44,
+    "perPerson": 44,
+    "stay": 0,
+    "total": 44,
+    "travel": 0,
+    "travelLegs": [],
+  },
+  {
+    "activities": 0,
+    "contingency": 0,
+    "food": 0,
+    "local": 0,
+    "perDay": 0,
+    "perPerson": 80,
+    "stay": 0,
+    "total": 400,
+    "travel": 400,
+    "travelLegs": [
+      {
+        "amount": 400,
+        "id": "cab",
+        "label": "A → B",
+        "missing": false,
+      },
+    ],
+  },
+  {
+    "activities": 0,
+    "contingency": 0,
+    "food": 0,
+    "local": 0,
+    "perDay": 0,
+    "perPerson": 30,
+    "stay": 0,
+    "total": 150,
+    "travel": 150,
+    "travelLegs": [
+      {
+        "amount": 150,
+        "id": "cab",
+        "label": "A → B",
+        "missing": false,
+      },
+    ],
+  },
+]
+`;

@@ -146,3 +146,10 @@ We moved step-change focus to a heading and strengthened visible keyboard focus.
 We kept reduced-motion rules and enlarged interactive targets where needed.
 We added source credits and a working data-source document link in both serving modes.
 We resolved the UI diagnostics and included production UI files in the blocking type check.
+
+## Stage 4 — safety net and refactor plan
+We tagged the production state before adding refactor safety tests.
+We exercised the full demo flow against a real Node HTTP server.
+We captured API response contracts and five fixed cost snapshots.
+We measured coverage, source sizes, dependency cycles and static-analysis findings.
+We wrote a concrete refactor plan and requested the approval required by the prompt pack.
