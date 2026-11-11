@@ -4,7 +4,7 @@ import { normalizeFares } from "./journeys/fares.js";
 import { validateTripInput } from "../shared/tripInput.js";
 import { validateGeneratedPlan } from "./planSchema.js";
 
-it.fails("QA-H1 rejects finite fares that can overflow group totals", () => {
+it("QA-H1 rejects finite fares that can overflow group totals", () => {
   expect(() => normalizeFares({ fares: { rail: {
     basic: 1e308, standard: 1e308, premium: 1e308, pricing: "perPerson",
   } } }, ["rail"])).toThrow();

@@ -20,7 +20,7 @@ Audited from `v2-feature-complete` plus Stage 1 hygiene, on 11 November 2026 IST
 
 | ID | Severity | Repro and actual behavior | Expected and suggested fix | Evidence / status |
 | --- | --- | --- | --- | --- |
-| H1 | High | Feed a finite fare of 1e308 to normalizeFares. It passes and multiplying by a traveling group can overflow totals. | Apply the existing UI's 1e9 fare limit to server/model fare validation. | server/qaAudit.test.js “QA-H1 rejects finite fares that can overflow group totals”, initially it.fails; shared/journeys.js fareSchema. OPEN |
+| H1 | High | Feed a finite fare of 1e308 to normalizeFares. It passes and multiplying by a traveling group can overflow totals. | Apply the existing UI's 1e9 fare limit to server/model fare validation. | server/qaAudit.test.js “QA-H1 rejects finite fares that can overflow group totals”, initially it.fails; shared/journeys.js fareSchema. FIXED in Stage 3a |
 | M1 | Medium | Revisit a place query. useDebouncedSearch requests it again. A 429 exposes no countdown. | Ten-minute normalized session cache and Retry-After countdown. | src/hooks/useDebouncedSearch.js; useGenerate.js HTTP-error branch. OPEN, Stage 3b |
 | M2 | Medium | Upstream Gemini 429 maps to HTTP 429 without explicitly setting Retry-After. | Supply a safe retry delay header for every 429 path. | server/app.js provider error mapping. OPEN, Stage 3b |
 | M3 | Medium | Demo and live health return the same status-only object, with no visible demo badge. | Expose safe mode metadata and show Demo data. | server/app.js /api/health; src/App.jsx header. OPEN, Stage 3d |

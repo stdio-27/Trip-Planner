@@ -104,3 +104,10 @@ We reproduced an extreme-fare validation gap with an expected-failure regression
 We recorded request retry, demo labeling and accessibility gaps without changing product code.
 We saved five representative route outputs with their complete legs and illustrative fares.
 We marked physical-device, geographic and live-service judgments that still need verification.
+
+## Stage 3a — audit fixes
+We reproduced the high-severity fare overflow before editing the fare schema.
+We capped provider fares at the same maximum already used by editable estimates.
+We changed the expected-failure regression into a normal passing test.
+We preserved tier normalization and the existing partial-failure recovery path.
+We recorded the fix against its original QA finding.

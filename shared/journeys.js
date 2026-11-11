@@ -3,9 +3,9 @@ import { z } from "zod";
 export const fareTiers = { basic: "Budget", standard: "Standard", premium: "Comfort" };
 export const modes = z.enum(["train", "flight", "bus", "cab"]);
 export const fareSchema = z.object({
-  basic: z.number().finite().positive(),
-  standard: z.number().finite().positive(),
-  premium: z.number().finite().positive(),
+  basic: z.number().finite().positive().max(1e9),
+  standard: z.number().finite().positive().max(1e9),
+  premium: z.number().finite().positive().max(1e9),
   pricing: z.enum(["perPerson", "perVehicle"]),
 });
 const point = z.object({ id: z.string(), name: z.string(), kind: z.string() });
