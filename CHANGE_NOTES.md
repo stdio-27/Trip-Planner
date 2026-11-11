@@ -195,3 +195,10 @@ We removed only the CSS selectors rendered by that obsolete component.
 We removed two travel-choice exports that had no remaining references.
 We kept provider seams, declaration packages and uncertain CSS with their documented reasons.
 We preserved the golden demo path, API contracts and fixed cost snapshots.
+
+## Stage 6a — responsibility boundaries
+We moved planning transport and provider logic out of the HTTP application factory.
+We kept mock responses in a dedicated adapter and preserved their response descriptors.
+We moved pure distance arithmetic out of the Express router dependency.
+We extracted client orchestration and the existing step markup without changing the DOM.
+We kept the golden path, API contracts and cost snapshots as the acceptance boundary.

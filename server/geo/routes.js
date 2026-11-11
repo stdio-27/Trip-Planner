@@ -1,3 +1,5 @@
+import { distanceKm } from "../../shared/distance.js";
+export { distanceKm } from "../../shared/distance.js";
 import { Router } from "express";
 import { setTimeout as delay } from "node:timers/promises";
 import { z } from "zod";
@@ -26,16 +28,6 @@ const schemas = {
   nearby: z.strictObject({ lat: coordinate(6, 38), lon: coordinate(68, 98) }),
   hubs: z.strictObject({ type: z.enum(["airport", "station"]), q: query }),
 };
-
-export function distanceKm(a, b) {
-  const rad = (n) => (n * Math.PI) / 180;
-  const h =
-    Math.sin(rad(b.lat - a.lat) / 2) ** 2 +
-    Math.cos(rad(a.lat)) *
-      Math.cos(rad(b.lat)) *
-      Math.sin(rad(b.lon - a.lon) / 2) ** 2;
-  return 12742 * Math.asin(Math.min(1, Math.sqrt(h)));
-}
 
 function normalizeState(value) {
   return value.toLowerCase().replace(/[^a-z0-9]/g, "");

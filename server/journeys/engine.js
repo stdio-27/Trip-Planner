@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { distanceKm } from "../geo/routes.js";
+import { distanceKm } from "../../shared/distance.js";
 import { snapshotAvailability } from "../availability/provider.js";
 import { buffers, flightHubs, roadFactor, speeds } from "./constants.js";
 

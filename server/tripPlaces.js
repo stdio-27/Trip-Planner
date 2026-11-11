@@ -1,8 +1,8 @@
 import { loadData } from "./data/index.js";
 
-export function resolveTripPlaces(trip) {
+export function resolveTripPlaces(trip, data) {
   if (!trip.origin) return { data: trip };
-  const data = loadData();
+  data ??= loadData();
   if (!data.districts[trip.origin.stateCode]?.includes(trip.origin.district)) {
     return { errors: { origin: "Choose a district in the selected state." } };
   }

@@ -14,10 +14,9 @@ import {
   uniqueLegs,
 } from "./fares.js";
 
-export const demoFareModes = new Set([
-  "demo", "jitter", "slow", "bad-json", "bad-shape", "empty", "fail",
-  "wrong-days", "options-bad-shape", "options-empty", "geo-down", "geo-slow", "geo-empty",
-]);
+export { demoFareModes } from "../config.js";
+import { demoFareModes } from "../config.js";
+
 
 const requestSchema = z.strictObject({
   origin: originSchema,
