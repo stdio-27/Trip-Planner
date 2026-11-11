@@ -160,3 +160,10 @@ We documented the actual request flow, scripts and six environment variables.
 We listed every fault mode and explained what the traveler can retry.
 We linked source licenses, current limits and the code-reading order.
 We left the user's authorship confirmation and real time spent as explicit placeholders.
+
+## Stage 8b — architecture and interview preparation
+We mapped the actual modules and request paths to source references.
+We explained validation, stale responses, cost arithmetic and historical route evidence.
+We separated measured behavior from the still-pending refactor proposals.
+We wrote module questions, bug-spotting exercises and feature practice drills.
+We kept cleanup and refactor logs explicit about the outstanding approval gate.
