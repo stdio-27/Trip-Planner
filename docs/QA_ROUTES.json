@@ -1,0 +1,871 @@
+[
+  {
+    "name": "Guwahati to Kolkata",
+    "coordinateBasis": "Selected airport snapshot coordinates, not city centers",
+    "origin": {
+      "stateCode": "18",
+      "district": "Kamrup Metro",
+      "lat": 26.106654,
+      "lon": 91.585226,
+      "airportId": "GAU",
+      "stationCode": "GHY"
+    },
+    "destination": {
+      "stateCode": "19",
+      "placeName": "Kolkata",
+      "lat": 22.654012,
+      "lon": 88.44765,
+      "airportId": "CCU",
+      "stationCode": "HWH"
+    },
+    "journeys": [
+      {
+        "id": "1140844c1e2dc85abe907dfb",
+        "label": "Flight",
+        "legs": [
+          {
+            "id": "50a685b4b2ef274907b65431",
+            "mode": "flight",
+            "from": {
+              "kind": "airport",
+              "id": "GAU",
+              "name": "Lokpriya Gopinath Bordoloi International Airport",
+              "lat": 26.106654,
+              "lon": 91.585226
+            },
+            "to": {
+              "kind": "airport",
+              "id": "CCU",
+              "name": "Netaji Subhash Chandra Bose International Airport",
+              "lat": 22.654012,
+              "lon": 88.44765
+            },
+            "distanceKm": 498.31,
+            "durationMin": 163,
+            "bufferMin": 120,
+            "evidence": "route-hint",
+            "serviceCount": null,
+            "note": "Historical route hint. Verify current flights before booking.",
+            "availability": {
+              "level": "route-hint",
+              "source": "OpenFlights",
+              "dataYear": 2014,
+              "checkUrl": "https://www.google.com/travel/flights"
+            }
+          }
+        ],
+        "totalDurationMin": 163,
+        "changes": 0,
+        "modes": [
+          "flight"
+        ]
+      },
+      {
+        "id": "57e2868658707d416fc2e6c4",
+        "label": "Cab + Train + Bus",
+        "legs": [
+          {
+            "id": "811080a829d3922bf3a6f87a",
+            "mode": "cab",
+            "from": {
+              "kind": "place",
+              "id": "origin:26.106654,91.585226",
+              "name": "Kamrup Metro",
+              "lat": 26.106654,
+              "lon": 91.585226
+            },
+            "to": {
+              "kind": "station",
+              "id": "GHY",
+              "name": "GUWAHATI",
+              "lat": 26.182635,
+              "lon": 91.751851
+            },
+            "distanceKm": 24.25,
+            "durationMin": 25,
+            "bufferMin": 0,
+            "evidence": "estimate",
+            "serviceCount": null,
+            "note": "Road distance and driving time are approximate.",
+            "availability": {
+              "level": "unverified",
+              "source": null,
+              "dataYear": null,
+              "checkUrl": null
+            }
+          },
+          {
+            "id": "97179d7790f841d7042f2cf7",
+            "mode": "train",
+            "from": {
+              "kind": "station",
+              "id": "GHY",
+              "name": "GUWAHATI",
+              "lat": 26.182635,
+              "lon": 91.751851
+            },
+            "to": {
+              "kind": "station",
+              "id": "HWH",
+              "name": "HOWRAH JN",
+              "lat": 22.584077999999998,
+              "lon": 88.34099900000001
+            },
+            "distanceKm": 528.56,
+            "durationMin": 1125,
+            "bufferMin": 30,
+            "evidence": "scheduled",
+            "serviceCount": 7,
+            "note": "Historical timetable match. Distance is straight-line.",
+            "availability": {
+              "level": "scheduled",
+              "source": "datameet/railways",
+              "dataYear": 2016,
+              "checkUrl": "https://www.irctc.co.in/nget/train-search"
+            }
+          },
+          {
+            "id": "bea65a2061c86fe53235ae65",
+            "mode": "bus",
+            "from": {
+              "kind": "station",
+              "id": "HWH",
+              "name": "HOWRAH JN",
+              "lat": 22.584077999999998,
+              "lon": 88.34099900000001
+            },
+            "to": {
+              "kind": "place",
+              "id": "destination:22.654012,88.44765",
+              "name": "Kolkata",
+              "lat": 22.654012,
+              "lon": 88.44765
+            },
+            "distanceKm": 17.46,
+            "durationMin": 24,
+            "bufferMin": 0,
+            "evidence": "estimate",
+            "serviceCount": null,
+            "note": "Road distance and driving time are approximate.",
+            "availability": {
+              "level": "unverified",
+              "source": null,
+              "dataYear": null,
+              "checkUrl": null
+            }
+          }
+        ],
+        "totalDurationMin": 1174,
+        "changes": 2,
+        "modes": [
+          "cab",
+          "train",
+          "bus"
+        ]
+      },
+      {
+        "id": "06e82592a49b36b8d93521f5",
+        "label": "Cab",
+        "legs": [
+          {
+            "id": "162201f75dc4e78ec46dc7c7",
+            "mode": "cab",
+            "from": {
+              "kind": "place",
+              "id": "origin:26.106654,91.585226",
+              "name": "Kamrup Metro",
+              "lat": 26.106654,
+              "lon": 91.585226
+            },
+            "to": {
+              "kind": "place",
+              "id": "destination:22.654012,88.44765",
+              "name": "Kolkata",
+              "lat": 22.654012,
+              "lon": 88.44765
+            },
+            "distanceKm": 647.81,
+            "durationMin": 648,
+            "bufferMin": 0,
+            "evidence": "estimate",
+            "serviceCount": null,
+            "note": "Road distance and driving time are approximate.",
+            "availability": {
+              "level": "unverified",
+              "source": null,
+              "dataYear": null,
+              "checkUrl": null
+            }
+          }
+        ],
+        "totalDurationMin": 648,
+        "changes": 0,
+        "modes": [
+          "cab"
+        ]
+      },
+      {
+        "id": "ad96936ec0240e2c516bc373",
+        "label": "Bus",
+        "legs": [
+          {
+            "id": "229ca1598ed5f8bf2fc71fa7",
+            "mode": "bus",
+            "from": {
+              "kind": "place",
+              "id": "origin:26.106654,91.585226",
+              "name": "Kamrup Metro",
+              "lat": 26.106654,
+              "lon": 91.585226
+            },
+            "to": {
+              "kind": "place",
+              "id": "destination:22.654012,88.44765",
+              "name": "Kolkata",
+              "lat": 22.654012,
+              "lon": 88.44765
+            },
+            "distanceKm": 647.81,
+            "durationMin": 864,
+            "bufferMin": 0,
+            "evidence": "estimate",
+            "serviceCount": null,
+            "note": "Road distance and driving time are approximate.",
+            "availability": {
+              "level": "unverified",
+              "source": null,
+              "dataYear": null,
+              "checkUrl": null
+            }
+          }
+        ],
+        "totalDurationMin": 864,
+        "changes": 0,
+        "modes": [
+          "bus"
+        ]
+      },
+      {
+        "id": "5f0a9edb2d1d19a756ecfa27",
+        "label": "Cab + Flight",
+        "legs": [
+          {
+            "id": "46259e6bb988565a6aae6d48",
+            "mode": "cab",
+            "from": {
+              "kind": "place",
+              "id": "origin:26.106654,91.585226",
+              "name": "Kamrup Metro",
+              "lat": 26.106654,
+              "lon": 91.585226
+            },
+            "to": {
+              "kind": "airport",
+              "id": "SHL",
+              "name": "Shillong Airport",
+              "lat": 25.70359992980957,
+              "lon": 91.97869873046875
+            },
+            "distanceKm": 77.54,
+            "durationMin": 78,
+            "bufferMin": 0,
+            "evidence": "estimate",
+            "serviceCount": null,
+            "note": "Road distance and driving time are approximate.",
+            "availability": {
+              "level": "unverified",
+              "source": null,
+              "dataYear": null,
+              "checkUrl": null
+            }
+          },
+          {
+            "id": "ec79153d72d4abecf8ea3886",
+            "mode": "flight",
+            "from": {
+              "kind": "airport",
+              "id": "SHL",
+              "name": "Shillong Airport",
+              "lat": 25.70359992980957,
+              "lon": 91.97869873046875
+            },
+            "to": {
+              "kind": "airport",
+              "id": "CCU",
+              "name": "Netaji Subhash Chandra Bose International Airport",
+              "lat": 22.654012,
+              "lon": 88.44765
+            },
+            "distanceKm": 493.19,
+            "durationMin": 163,
+            "bufferMin": 120,
+            "evidence": "route-hint",
+            "serviceCount": null,
+            "note": "Historical route hint. Verify current flights before booking.",
+            "availability": {
+              "level": "route-hint",
+              "source": "OpenFlights",
+              "dataYear": 2014,
+              "checkUrl": "https://www.google.com/travel/flights"
+            }
+          }
+        ],
+        "totalDurationMin": 241,
+        "changes": 1,
+        "modes": [
+          "cab",
+          "flight"
+        ]
+      }
+    ],
+    "fares": {
+      "50a685b4b2ef274907b65431": {
+        "basic": 2492,
+        "standard": 3489,
+        "premium": 4984,
+        "pricing": "perPerson"
+      },
+      "811080a829d3922bf3a6f87a": {
+        "basic": 267,
+        "standard": 374,
+        "premium": 534,
+        "pricing": "perVehicle"
+      },
+      "97179d7790f841d7042f2cf7": {
+        "basic": 793,
+        "standard": 1111,
+        "premium": 1586,
+        "pricing": "perPerson"
+      },
+      "bea65a2061c86fe53235ae65": {
+        "basic": 35,
+        "standard": 49,
+        "premium": 70,
+        "pricing": "perPerson"
+      },
+      "162201f75dc4e78ec46dc7c7": {
+        "basic": 7126,
+        "standard": 9977,
+        "premium": 14252,
+        "pricing": "perVehicle"
+      },
+      "229ca1598ed5f8bf2fc71fa7": {
+        "basic": 1296,
+        "standard": 1815,
+        "premium": 2592,
+        "pricing": "perPerson"
+      },
+      "46259e6bb988565a6aae6d48": {
+        "basic": 853,
+        "standard": 1195,
+        "premium": 1706,
+        "pricing": "perVehicle"
+      },
+      "ec79153d72d4abecf8ea3886": {
+        "basic": 2466,
+        "standard": 3453,
+        "premium": 4932,
+        "pricing": "perPerson"
+      }
+    }
+  },
+  {
+    "name": "Delhi to Mumbai",
+    "coordinateBasis": "Selected airport snapshot coordinates, not city centers",
+    "origin": {
+      "stateCode": "7",
+      "district": "New Delhi",
+      "lat": 28.55563,
+      "lon": 77.09519,
+      "airportId": "DEL",
+      "stationCode": "NDLS"
+    },
+    "destination": {
+      "stateCode": "27",
+      "placeName": "Mumbai",
+      "lat": 19.088699,
+      "lon": 72.867897,
+      "airportId": "BOM",
+      "stationCode": null
+    },
+    "journeys": [
+      {
+        "id": "54e105a41d3ca3bcdc39bfd0",
+        "label": "Flight",
+        "legs": [
+          {
+            "id": "dd9365fa3a1185b1484f9986",
+            "mode": "flight",
+            "from": {
+              "kind": "airport",
+              "id": "DEL",
+              "name": "Indira Gandhi International Airport",
+              "lat": 28.55563,
+              "lon": 77.09519
+            },
+            "to": {
+              "kind": "airport",
+              "id": "BOM",
+              "name": "Chhatrapati Shivaji Maharaj International Airport",
+              "lat": 19.088699,
+              "lon": 72.867897
+            },
+            "distanceKm": 1136.82,
+            "durationMin": 218,
+            "bufferMin": 120,
+            "evidence": "route-hint",
+            "serviceCount": null,
+            "note": "Historical route hint. Verify current flights before booking.",
+            "availability": {
+              "level": "route-hint",
+              "source": "OpenFlights",
+              "dataYear": 2014,
+              "checkUrl": "https://www.google.com/travel/flights"
+            }
+          }
+        ],
+        "totalDurationMin": 218,
+        "changes": 0,
+        "modes": [
+          "flight"
+        ]
+      }
+    ],
+    "fares": {
+      "dd9365fa3a1185b1484f9986": {
+        "basic": 5685,
+        "standard": 7959,
+        "premium": 11370,
+        "pricing": "perPerson"
+      }
+    }
+  },
+  {
+    "name": "Jaipur to Ajmer",
+    "coordinateBasis": "Selected airport snapshot coordinates, not city centers",
+    "origin": {
+      "stateCode": "8",
+      "district": "Jaipur",
+      "lat": 26.8242,
+      "lon": 75.812202,
+      "airportId": "JAI",
+      "stationCode": "JP"
+    },
+    "destination": {
+      "stateCode": "8",
+      "placeName": "Ajmer",
+      "lat": 26.591007,
+      "lon": 74.812956,
+      "airportId": "KQH",
+      "stationCode": "AII"
+    },
+    "journeys": [
+      {
+        "id": "9661df044c095a80045fcbbb",
+        "label": "Cab",
+        "legs": [
+          {
+            "id": "e648fafa845cccac4da8d2d2",
+            "mode": "cab",
+            "from": {
+              "kind": "place",
+              "id": "origin:26.8242,75.812202",
+              "name": "Jaipur",
+              "lat": 26.8242,
+              "lon": 75.812202
+            },
+            "to": {
+              "kind": "place",
+              "id": "destination:26.591007,74.812956",
+              "name": "Ajmer",
+              "lat": 26.591007,
+              "lon": 74.812956
+            },
+            "distanceKm": 133.36,
+            "durationMin": 134,
+            "bufferMin": 0,
+            "evidence": "estimate",
+            "serviceCount": null,
+            "note": "Road distance and driving time are approximate.",
+            "availability": {
+              "level": "unverified",
+              "source": null,
+              "dataYear": null,
+              "checkUrl": null
+            }
+          }
+        ],
+        "totalDurationMin": 134,
+        "changes": 0,
+        "modes": [
+          "cab"
+        ]
+      },
+      {
+        "id": "c78bfec8fb789cd9a27721a8",
+        "label": "Bus",
+        "legs": [
+          {
+            "id": "9d05544b88545d22f280c14b",
+            "mode": "bus",
+            "from": {
+              "kind": "place",
+              "id": "origin:26.8242,75.812202",
+              "name": "Jaipur",
+              "lat": 26.8242,
+              "lon": 75.812202
+            },
+            "to": {
+              "kind": "place",
+              "id": "destination:26.591007,74.812956",
+              "name": "Ajmer",
+              "lat": 26.591007,
+              "lon": 74.812956
+            },
+            "distanceKm": 133.36,
+            "durationMin": 178,
+            "bufferMin": 0,
+            "evidence": "estimate",
+            "serviceCount": null,
+            "note": "Road distance and driving time are approximate.",
+            "availability": {
+              "level": "unverified",
+              "source": null,
+              "dataYear": null,
+              "checkUrl": null
+            }
+          }
+        ],
+        "totalDurationMin": 178,
+        "changes": 0,
+        "modes": [
+          "bus"
+        ]
+      },
+      {
+        "id": "f03bfecd0d558f7711ec63ba",
+        "label": "Cab + Train + Bus",
+        "legs": [
+          {
+            "id": "bc0d25b362ff50e955f6f595",
+            "mode": "cab",
+            "from": {
+              "kind": "place",
+              "id": "origin:26.8242,75.812202",
+              "name": "Jaipur",
+              "lat": 26.8242,
+              "lon": 75.812202
+            },
+            "to": {
+              "kind": "station",
+              "id": "JP",
+              "name": "JAIPUR",
+              "lat": 26.920203,
+              "lon": 75.786923
+            },
+            "distanceKm": 14.26,
+            "durationMin": 15,
+            "bufferMin": 0,
+            "evidence": "estimate",
+            "serviceCount": null,
+            "note": "Road distance and driving time are approximate.",
+            "availability": {
+              "level": "unverified",
+              "source": null,
+              "dataYear": null,
+              "checkUrl": null
+            }
+          },
+          {
+            "id": "4bf8c1c41537071939bc4b15",
+            "mode": "train",
+            "from": {
+              "kind": "station",
+              "id": "JP",
+              "name": "JAIPUR",
+              "lat": 26.920203,
+              "lon": 75.786923
+            },
+            "to": {
+              "kind": "station",
+              "id": "AII",
+              "name": "AJMER JN",
+              "lat": 26.456612,
+              "lon": 74.63746400000001
+            },
+            "distanceKm": 125.29,
+            "durationMin": 160,
+            "bufferMin": 30,
+            "evidence": "scheduled",
+            "serviceCount": 30,
+            "note": "Historical timetable match. Distance is straight-line.",
+            "availability": {
+              "level": "scheduled",
+              "source": "datameet/railways",
+              "dataYear": 2016,
+              "checkUrl": "https://www.irctc.co.in/nget/train-search"
+            }
+          },
+          {
+            "id": "0de03ff7071f4b06d872de2f",
+            "mode": "bus",
+            "from": {
+              "kind": "station",
+              "id": "AII",
+              "name": "AJMER JN",
+              "lat": 26.456612,
+              "lon": 74.63746400000001
+            },
+            "to": {
+              "kind": "place",
+              "id": "destination:26.591007,74.812956",
+              "name": "Ajmer",
+              "lat": 26.591007,
+              "lon": 74.812956
+            },
+            "distanceKm": 29.88,
+            "durationMin": 40,
+            "bufferMin": 0,
+            "evidence": "estimate",
+            "serviceCount": null,
+            "note": "Road distance and driving time are approximate.",
+            "availability": {
+              "level": "unverified",
+              "source": null,
+              "dataYear": null,
+              "checkUrl": null
+            }
+          }
+        ],
+        "totalDurationMin": 215,
+        "changes": 2,
+        "modes": [
+          "cab",
+          "train",
+          "bus"
+        ]
+      }
+    ],
+    "fares": {
+      "e648fafa845cccac4da8d2d2": {
+        "basic": 1467,
+        "standard": 2054,
+        "premium": 2934,
+        "pricing": "perVehicle"
+      },
+      "9d05544b88545d22f280c14b": {
+        "basic": 267,
+        "standard": 374,
+        "premium": 534,
+        "pricing": "perPerson"
+      },
+      "bc0d25b362ff50e955f6f595": {
+        "basic": 157,
+        "standard": 220,
+        "premium": 314,
+        "pricing": "perVehicle"
+      },
+      "4bf8c1c41537071939bc4b15": {
+        "basic": 188,
+        "standard": 264,
+        "premium": 376,
+        "pricing": "perPerson"
+      },
+      "0de03ff7071f4b06d872de2f": {
+        "basic": 60,
+        "standard": 84,
+        "premium": 120,
+        "pricing": "perPerson"
+      }
+    }
+  },
+  {
+    "name": "Port Blair to Delhi",
+    "coordinateBasis": "Selected airport snapshot coordinates, not city centers",
+    "origin": {
+      "stateCode": "35",
+      "district": "Nicobars",
+      "lat": 11.640194,
+      "lon": 92.72902,
+      "airportId": "IXZ",
+      "stationCode": null
+    },
+    "destination": {
+      "stateCode": "7",
+      "placeName": "New Delhi",
+      "lat": 28.55563,
+      "lon": 77.09519,
+      "airportId": "DEL",
+      "stationCode": "NDLS"
+    },
+    "journeys": [
+      {
+        "id": "5e74671dd870a1df844bfb1c",
+        "label": "Flight",
+        "legs": [
+          {
+            "id": "e82f218efc366b6a7c88cb77",
+            "mode": "flight",
+            "from": {
+              "kind": "airport",
+              "id": "IXZ",
+              "name": "Veer Savarkar International Airport / INS Utkrosh",
+              "lat": 11.640194,
+              "lon": 92.72902
+            },
+            "to": {
+              "kind": "airport",
+              "id": "DEL",
+              "name": "Indira Gandhi International Airport",
+              "lat": 28.55563,
+              "lon": 77.09519
+            },
+            "distanceKm": 2484.71,
+            "durationMin": 333,
+            "bufferMin": 120,
+            "evidence": "route-hint",
+            "serviceCount": null,
+            "note": "Historical route hint. Verify current flights before booking.",
+            "availability": {
+              "level": "route-hint",
+              "source": "OpenFlights",
+              "dataYear": 2014,
+              "checkUrl": "https://www.google.com/travel/flights"
+            }
+          }
+        ],
+        "totalDurationMin": 333,
+        "changes": 0,
+        "modes": [
+          "flight"
+        ]
+      }
+    ],
+    "fares": {
+      "e82f218efc366b6a7c88cb77": {
+        "basic": 12424,
+        "standard": 17394,
+        "premium": 24848,
+        "pricing": "perPerson"
+      }
+    }
+  },
+  {
+    "name": "Guwahati local",
+    "coordinateBasis": "Selected airport snapshot coordinates, not city centers",
+    "origin": {
+      "stateCode": "18",
+      "district": "Kamrup Metro",
+      "lat": 26.106654,
+      "lon": 91.585226,
+      "airportId": "GAU",
+      "stationCode": "GHY"
+    },
+    "destination": {
+      "stateCode": "18",
+      "placeName": "Guwahati",
+      "lat": 26.106654,
+      "lon": 91.585226,
+      "airportId": "GAU",
+      "stationCode": "GHY"
+    },
+    "journeys": [
+      {
+        "id": "e8c9bf67cb33f7778882fac7",
+        "label": "Bus",
+        "legs": [
+          {
+            "id": "a6381c3599dbf2f8eb2c1e32",
+            "mode": "bus",
+            "from": {
+              "kind": "place",
+              "id": "origin:26.106654,91.585226",
+              "name": "Kamrup Metro",
+              "lat": 26.106654,
+              "lon": 91.585226
+            },
+            "to": {
+              "kind": "place",
+              "id": "destination:26.106654,91.585226",
+              "name": "Guwahati",
+              "lat": 26.106654,
+              "lon": 91.585226
+            },
+            "distanceKm": 0,
+            "durationMin": 1,
+            "bufferMin": 0,
+            "evidence": "estimate",
+            "serviceCount": null,
+            "note": "Road distance and driving time are approximate.",
+            "availability": {
+              "level": "unverified",
+              "source": null,
+              "dataYear": null,
+              "checkUrl": null
+            }
+          }
+        ],
+        "totalDurationMin": 1,
+        "changes": 0,
+        "modes": [
+          "bus"
+        ]
+      },
+      {
+        "id": "4e5f66635b7b57ac91dae27e",
+        "label": "Cab",
+        "legs": [
+          {
+            "id": "2dd4218ff20a9093127e1ba9",
+            "mode": "cab",
+            "from": {
+              "kind": "place",
+              "id": "origin:26.106654,91.585226",
+              "name": "Kamrup Metro",
+              "lat": 26.106654,
+              "lon": 91.585226
+            },
+            "to": {
+              "kind": "place",
+              "id": "destination:26.106654,91.585226",
+              "name": "Guwahati",
+              "lat": 26.106654,
+              "lon": 91.585226
+            },
+            "distanceKm": 0,
+            "durationMin": 1,
+            "bufferMin": 0,
+            "evidence": "estimate",
+            "serviceCount": null,
+            "note": "Road distance and driving time are approximate.",
+            "availability": {
+              "level": "unverified",
+              "source": null,
+              "dataYear": null,
+              "checkUrl": null
+            }
+          }
+        ],
+        "totalDurationMin": 1,
+        "changes": 0,
+        "modes": [
+          "cab"
+        ]
+      }
+    ],
+    "fares": {
+      "a6381c3599dbf2f8eb2c1e32": {
+        "basic": 20,
+        "standard": 28,
+        "premium": 40,
+        "pricing": "perPerson"
+      },
+      "2dd4218ff20a9093127e1ba9": {
+        "basic": 20,
+        "standard": 28,
+        "premium": 40,
+        "pricing": "perVehicle"
+      }
+    }
+  }
+]

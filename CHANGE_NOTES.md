@@ -97,3 +97,10 @@ We measured five server starts with one command and recorded the results and the
 We checked tracked data, local files, environment settings and secret patterns without exposing values.
 We added temporary-file ignore rules, clarified environment comments and archived two historical documents.
 We verified a keyless fresh clone through the full demo flow and recorded the evidence in the baseline report.
+
+## Stage 2 — independent QA audit
+We checked the existing requirements and linked each judgment to code or test evidence.
+We reproduced an extreme-fare validation gap with an expected-failure regression.
+We recorded request retry, demo labeling and accessibility gaps without changing product code.
+We saved five representative route outputs with their complete legs and illustrative fares.
+We marked physical-device, geographic and live-service judgments that still need verification.
