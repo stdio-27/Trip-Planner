@@ -47,6 +47,7 @@ Vite defaults to port 5173 and proxies API requests to Express on 8787. Change P
 flowchart TD
   UI[React setup and planner] --> H[Request and lookup hooks]
   H --> API[Express validation and rate limits]
+  ROOT[Composition root selects providers] -.-> API
   API --> GEO[Open-Meteo place search]
   API --> DATA[Cached LGD and transport snapshots]
   DATA --> ENGINE[Journey engine and buffers]
@@ -59,7 +60,7 @@ flowchart TD
   VALIDATE --> EDIT[Itinerary reducer and cost panel]
 ```
 
-The server calculates route structure and verifies journey IDs and hubs. Gemini receives computed leg facts for fares and verified trip context for itinerary generation. The browser's request IDs prevent stale results from replacing newer ones. [Architecture notes](docs/ARCHITECTURE.md)
+server/composition.js selects live/demo/fault adapters and dataset access. Routes parse requests and call services; the server calculates route structure and verifies journey IDs and hubs. Gemini receives computed leg facts for fares and verified trip context for itinerary generation. The browser's request IDs prevent stale results from replacing newer ones. [Architecture notes](docs/ARCHITECTURE.md)
 
 ## Scripts
 
@@ -138,16 +139,18 @@ Attribution covers Open-Meteo / GeoNames, OurAirports, datameet railways, OpenFl
 
 ## Where to start reading the code
 
-1. [App.jsx](src/App.jsx) for the three-step orchestration.
-2. [TripForm.jsx](src/components/TripForm.jsx) for setup and validation.
+1. [App.jsx](src/App.jsx) for step state and screen composition; follow its useTripPlanner hook for lifecycle.
+2. [TripForm.jsx](src/features/setup/TripForm.jsx) for setup and validation.
 3. [useGenerate.js](src/hooks/useGenerate.js) for request lifecycle protections.
 4. [shared/schemas.js](shared/schemas.js) for request contracts.
-5. [server/app.js](server/app.js) for HTTP behavior and provider handling.
+5. [server/app.js](server/app.js) for HTTP mounting; follow server/composition.js for provider selection.
 6. [journeys/engine.js](server/journeys/engine.js) for route construction.
-7. [costs.js](src/costs.js) for cost arithmetic.
+7. [costs.js](src/lib/costs.js) for cost arithmetic.
 8. [itineraryReducer.js](src/itineraryReducer.js) for editing and undo.
 
 ## Verification and interview preparation
+
+Final-structure checks passed 271 tests in 28 files on three consecutive clean-install runs, with passing typecheck/build and zero audit vulnerabilities. All 16 mock modes were checked in the browser and all six live cases eventually passed after provider retries. The full refactor adds 0.35% raw asset bytes, and startup timings vary; those acceptance limits are recorded rather than hidden.
 
 [Baseline](docs/BASELINE.md) · [QA](docs/QA_REPORT.md) · [Refactor plan](docs/REFACTOR_PLAN.md) · [Interview guide](docs/INTERVIEW_GUIDE.md) · [Demo script](docs/DEMO_SCRIPT.md)
 

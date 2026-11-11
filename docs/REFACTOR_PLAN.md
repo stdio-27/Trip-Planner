@@ -40,7 +40,7 @@ The Stage 4 safety net comprises `src/goldenFlow.test.jsx` (actual Node demo ser
 
 For each approved change, run the unchanged golden path and contracts, npm test, npm run typecheck and npm run build. Compare the five sanity-route journey arrays byte-for-byte. Record file/function counts, circular dependencies, bundle bytes and repeated startup measurements in REFACTOR_LOG.md. Revert a refactor that regresses existing expectations.
 
-Approval received in this chat: ‘Approve the full proposed plan’. Y1/Y2 are committed; S1/S2/S4 were extracted in 6a and S3 is completed in 6b. I1 follows in 6d.
+Approval received in this chat: ‘Approve the full proposed plan’. Y1/Y2 are committed; S1/S2/S4 were extracted in 6a and S3 is completed in 6b. I1 is completed in 6d. The final API, browser and metric evidence is in REFACTOR_LOG.md.
 
 ## Measured safety-net coverage
 

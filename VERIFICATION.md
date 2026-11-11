@@ -1,5 +1,7 @@
 # Verification record — v2 Phase 8
 
+Historical Phase 8 record. For the later master-pack polish and final structure, use [BASELINE.md](docs/BASELINE.md), [QA_REPORT.md](docs/QA_REPORT.md) and [REFACTOR_LOG.md](docs/REFACTOR_LOG.md). The counts below describe that earlier checkpoint.
+
 ## Completed checks
 - **Full Test Suite:** 233 tests across 20 test files passing with 0 failures (`npm test`).
 - **Static Type Checking:** Core schemas, cost module, and server modules pass type checks without errors (`npm run typecheck` via `tsc -p jsconfig.json`).

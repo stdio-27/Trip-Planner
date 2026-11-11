@@ -1,20 +1,23 @@
 # Architecture
 
-This document describes the current polished code at the Stage 4 checkpoint. The structural plan awaits approval. Stage 5/6 changes must not be inferred from this document.
+This document describes the approved final structure after Stage 6. The public API and three visible planning steps are preserved; acceptance measurements and the bundle-size caveat are in REFACTOR_LOG.md.
 
 ## Module map
 
 | Responsibility | Entry points |
 | --- | --- |
-| Step orchestration and rendered screens | src/App.jsx:38 |
-| Form validation and place selection | src/components/TripForm.jsx, TripPlaceFields.jsx, Combobox.jsx |
+| Step state and screens | src/App.jsx:7; src/features/{setup,options,itinerary}/ |
+| Trip lifecycle and private request refs | src/hooks/useTripPlanner.js:32 |
+| Dependency selection | server/composition.js:76 |
+| Planning and journey services | server/services/planning.js:4; server/services/journeys.js:4 |
+| Form validation and place selection | src/features/setup/TripForm.jsx:25; src/features/places/TripPlaceFields.jsx:1; src/features/places/Combobox.jsx:4 |
 | Request lifecycle | src/hooks/useGenerate.js:13, useCooldown.js |
 | Lookup cache and request budget | src/hooks/useDebouncedSearch.js:16 |
-| HTTP factory and configuration | server/app.js:29, server/config.js, server/index.js |
+| HTTP factory and configuration | server/app.js:13, server/composition.js:76, server/config.js, server/index.js |
 | Place search and hub lists | server/geo/routes.js, provider.js |
 | Journey engine and fares | server/journeys/engine.js, routes.js, fares.js, fareChecks.js |
 | Schema contracts | shared/schemas.js, places.js, journeys.js, planSchema.js |
-| Editing and costs | src/itineraryReducer.js, src/costs.js:9 |
+| Editing and costs | src/itineraryReducer.js, src/lib/costs.js:9 |
 | Snapshot building and loading | scripts/build-data/, server/data/index.js:138 |
 
 ## Request flow
@@ -26,7 +29,7 @@ This document describes the current polished code at the Stage 4 checkpoint. The
 5. The server computes arrival and leave-by timing, builds the prompt and validates the model's currency and day count. The browser normalizes accepted output and adds IDs.
 6. A usable new plan resets edit history and packing state. Failed replacement requests retain the previous usable plan.
 
-Evidence is App.jsx, server/app.js:187, shared/journeyTiming.js:21 and src/hooks/useItinerary.js.
+Evidence is App.jsx, server/services/planning.js:4, shared/journeyTiming.js:21 and src/hooks/useItinerary.js.
 
 ## Validation layers
 
@@ -48,7 +51,7 @@ For each leg, multiply the selected-tier one-way fare by travelers for per-perso
 
 Stay is room price × rooms × max(days-1,0). Default rooms are ceil(adults/2). Local transport is daily rate × days, multiplied by travelers for per-person pricing. Food is daily meals × days × travelers. Activity estimates are per-person stop costs multiplied by travelers. Contingency is 10% of the subtotal when enabled. Intl.NumberFormat formats the requested currency without conversion.
 
-Missing leg estimates are excluded with an explicit notice. Display rounding can differ from summing already-rounded display strings. Evidence is src/costs.js:9 and src/costs.js:71, with fixed characterization snapshots in src/__snapshots__/costSnapshots.test.js.snap.
+Missing leg estimates are excluded with an explicit notice. Display rounding can differ from summing already-rounded display strings. Evidence is src/lib/costs.js:9 and src/lib/costs.js:71, with fixed characterization snapshots in src/__snapshots__/costSnapshots.test.js.snap.
 
 ## Journey engine and evidence
 
@@ -74,4 +77,4 @@ Mocks preserve successful endpoint contracts where success is intended. Delibera
 
 The current code already uses a createApp factory, pure cost arithmetic, reusable validation and provider injection seams. Stage 3 separated countdown state into one hook shared by requests and lookups. Before that change, failed requests exposed no countdown and identical lookups fetched repeatedly. After it, useCooldown and the lookup cache implement those responsibilities with focused tests.
 
-The proposed structural changes, rejected abstractions and measurements are in REFACTOR_PLAN.md. CLEANUP_LOG.md and REFACTOR_LOG.md explicitly record the approval gate. No before/after structural improvement is claimed while that gate is pending.
+The approved YAGNI cleanup removed an uncalled BudgetSummary and two unused choice exports. createApp shrank from 475 to 82 lines; provider selection now lives in composition.js and services receive dependencies. App owns step state while useTripPlanner owns trip/request lifecycle. ItineraryView receives days/currency and named actions instead of plan/dispatch. No strategy registry, context, memo or plugin system was justified. The largest file fell from 475 to 323 lines and the longest function from 446 to 276; dependency cycles remain zero. The full refactor adds 1,296 raw asset bytes (0.35%), so the strict no-growth target is not met. See CLEANUP_LOG.md, REFACTOR_PLAN.md and the per-stage measurements in REFACTOR_LOG.md.

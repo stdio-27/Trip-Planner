@@ -230,3 +230,10 @@ All sixteen browser mock modes and the fresh-clone demo flow were checked.
 All six live scenarios passed after bounded retries for provider 503 errors.
 Five startup samples, bundle growth and remote-clone limits are recorded honestly.
 Physical-device checks, remote release verification and human fare judgment remain unverified.
+
+## Stage 8 — final documentation alignment
+README and architecture notes now describe the approved composition root and feature folders.
+The interview guide points to the final planner hook, services and cost module.
+The existing timed demo script remains applicable to the verified browser flow.
+Historical verification is labelled clearly, and real authorship/time fields remain for the user.
+All 32 local Markdown links resolve; unavailable public source links are recorded as unverified.
