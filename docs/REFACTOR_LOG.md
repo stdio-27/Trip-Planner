@@ -46,3 +46,20 @@ Evidence: artifacts/master-pack/metrics-stage5-after.json, metrics-6a.json, cycl
 After startup min / median / max was 929.631 / 985.867 / 1019.632 ms. The original actual pre-refactor median was 1128.084 ms. These repeated process starts retain OS caches.
 
 Evidence: artifacts/master-pack/metrics-6a.json, metrics-6b.json, cycles-6b.json and startup-6b.json.
+
+## 6c measured boundary
+
+| Metric | Before | After |
+| --- | ---: | ---: |
+| Production JS/JSX files | 63 | 63 |
+| Largest file, lines | 305 | 305 |
+| Longest function, lines | 276 | 276 |
+| Total JS/CSS asset bytes | 367448 | 367448 |
+| Total JS/CSS gzip bytes | 115244 | 115244 |
+| Dependency cycles | 0 | 0 |
+
+After startup min / median / max was 1090.033 / 1124.264 / 1214.101 ms. The original actual pre-refactor median was 1128.084 ms. These repeated process starts retain OS caches.
+
+Evidence: artifacts/master-pack/metrics-6b.json, metrics-6c.json, cycles-6c.json and startup-6c.json.
+
+Stage 6c retains the existing engine: `server/journeys/engine.js` selects by distance and calls cohesive helpers, without a three-way branch by mode. A registry would add indirection without meeting the approved rule of three. `node artifacts/master-pack/compare-routes.mjs` confirmed byte-identical journey arrays for Guwahati–Kolkata (5), Delhi–Mumbai (1), Jaipur–Ajmer (3), Port Blair–Delhi (1), and Guwahati local (2). The engine tests and five cost snapshots were unchanged.

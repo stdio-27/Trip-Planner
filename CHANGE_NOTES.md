@@ -209,3 +209,10 @@ Routes and services receive their dependencies without reading environment setti
 The public app factory and documented mock modes retain their existing interfaces.
 A common HTTP contract runs against demo and HTTP-mocked live planning, places and fares.
 All 271 tests, the blocking typecheck and production build pass (stage6b-fixed-checks.json).
+
+## Stage 6c — guarded open/closed review
+The engine does not meet the plan's condition for adding a strategy registry.
+Keeping its existing helpers avoids an unnecessary abstraction.
+All five saved route arrays match the original JSON byte for byte.
+The existing engine tests and cost snapshots remain unchanged.
+All 271 tests, typecheck and build pass; metrics are in REFACTOR_LOG.md.
